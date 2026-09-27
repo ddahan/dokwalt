@@ -1,0 +1,23 @@
+services:
+  web:
+    build:
+      context: .
+      args:
+        APP_VERSION: ${APP_VERSION:-v1}
+    ports: ["8000:8000"]
+    environment:
+      GREETING: ${GREETING}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      cache:
+        condition: service_started
+  migrate:
+    build: .
+    command: ["python", "-c", "print('running migrations… done')"]
+  cache:
+    image: redis:7-alpine
+    volumes:
+      - cachedata:/data
+volumes:
+  cachedata:

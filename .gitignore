@@ -1,0 +1,5 @@
+/bin/
+/dist/
+/test/e2e/work/
+/test/e2e/id_test
+/test/e2e/id_test.pub

@@ -1,0 +1,20 @@
+# A throwaway "server" for end-to-end tests: Debian + systemd + sshd + Docker.
+FROM debian:bookworm
+ENV container=docker DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      systemd systemd-sysv dbus openssh-server sudo curl ca-certificates gnupg iproute2 procps \
+    && rm -rf /var/lib/apt/lists/*
+# Docker is preinstalled to keep test runs fast (bootstrap installs it on real servers).
+RUN install -m 0755 -d /etc/apt/keyrings \
+    && curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable" > /etc/apt/sources.list.d/docker.list \
+    && apt-get update && apt-get install -y --no-install-recommends docker-ce docker-ce-cli containerd.io docker-compose-plugin \
+    && rm -rf /var/lib/apt/lists/*
+RUN useradd -m -s /bin/bash deploy \
+    && echo 'deploy ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/deploy \
+    && mkdir -p /home/deploy/.ssh && chmod 700 /home/deploy/.ssh
+COPY id_test.pub /home/deploy/.ssh/authorized_keys
+RUN chown -R deploy:deploy /home/deploy/.ssh && chmod 600 /home/deploy/.ssh/authorized_keys \
+    && systemctl enable ssh docker
+STOPSIGNAL SIGRTMIN+3
+CMD ["/lib/systemd/systemd"]
