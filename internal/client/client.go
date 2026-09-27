@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dokwalt/dokwalt/internal/api"
-	"github.com/dokwalt/dokwalt/internal/sshx"
+	"github.com/ddahan/dokwalt/internal/api"
+	"github.com/ddahan/dokwalt/internal/sshx"
 )
 
 const DefaultRemoteBin = "/usr/local/bin/dokwalt"

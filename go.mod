@@ -1,4 +1,4 @@
-module github.com/dokwalt/dokwalt
+module github.com/ddahan/dokwalt
 
 go 1.27.1
 

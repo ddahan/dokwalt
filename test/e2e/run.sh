@@ -24,6 +24,8 @@ cleanup() {
   [[ -n "${KEEP:-}" ]] && { echo "Server kept: docker exec -it $SERVER bash"; return; }
   docker rm -f $SERVER >/dev/null 2>&1 || true
   docker volume rm $SERVER-docker $SERVER-containerd >/dev/null 2>&1 || true
+  # Images built on this machine by the test deploys.
+  docker images --format '{{.Repository}}:{{.Tag}}' | grep '^dokwalt/shop-' | xargs docker rmi >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 

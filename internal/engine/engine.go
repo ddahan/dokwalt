@@ -18,11 +18,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dokwalt/dokwalt/internal/api"
-	"github.com/dokwalt/dokwalt/internal/compose"
-	"github.com/dokwalt/dokwalt/internal/docker"
-	"github.com/dokwalt/dokwalt/internal/proxy"
-	"github.com/dokwalt/dokwalt/internal/store"
+	"github.com/ddahan/dokwalt/internal/api"
+	"github.com/ddahan/dokwalt/internal/compose"
+	"github.com/ddahan/dokwalt/internal/docker"
+	"github.com/ddahan/dokwalt/internal/proxy"
+	"github.com/ddahan/dokwalt/internal/store"
 )
 
 type Emit func(api.Event)

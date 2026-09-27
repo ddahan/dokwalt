@@ -4,7 +4,7 @@
 |---|---|
 | Status | Implemented (v0.1) |
 | Audience | Maintainers and contributors |
-| Module | `github.com/dokwalt/dokwalt` |
+| Module | `github.com/ddahan/dokwalt` |
 | Companion docs | `internal/docs/topics/*.md` (end-user docs, embedded in the binary, rendered by `dokwalt docs`) |
 
 This document describes DokWalt as implemented. The product brief is `docs/PROMPT.md`. When this spec and the code disagree, the code is the reference and this document gets fixed. Terminal output in this document is illustrative: layouts and wording may differ slightly from the real output.
@@ -1241,7 +1241,7 @@ Written by the bootstrap to `/etc/systemd/system/dokwalt.service`:
 ```ini
 [Unit]
 Description=DokWalt — Docker Compose apps with zero-downtime deploys
-Documentation=https://github.com/dokwalt/dokwalt
+Documentation=https://github.com/ddahan/dokwalt
 After=docker.service network-online.target
 Wants=network-online.target
 Requires=docker.service

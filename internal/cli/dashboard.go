@@ -14,9 +14,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/dokwalt/dokwalt/internal/api"
-	"github.com/dokwalt/dokwalt/internal/client"
-	"github.com/dokwalt/dokwalt/internal/ui"
+	"github.com/ddahan/dokwalt/internal/api"
+	"github.com/ddahan/dokwalt/internal/client"
+	"github.com/ddahan/dokwalt/internal/ui"
 )
 
 // runDashboard opens the interactive full-screen dashboard.

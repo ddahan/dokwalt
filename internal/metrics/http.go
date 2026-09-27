@@ -8,8 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/dokwalt/dokwalt/internal/api"
-	"github.com/dokwalt/dokwalt/internal/store"
+	"github.com/ddahan/dokwalt/internal/api"
+	"github.com/ddahan/dokwalt/internal/store"
 )
 
 // Latency histogram bucket upper bounds in milliseconds.

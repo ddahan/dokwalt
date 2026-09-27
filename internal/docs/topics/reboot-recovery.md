@@ -26,7 +26,7 @@ After a `sudo reboot`, a kernel update at 04:00 or a power cut, every site must 
 ```ini
 [Unit]
 Description=DokWalt — Docker Compose apps with zero-downtime deploys
-Documentation=https://github.com/dokwalt/dokwalt
+Documentation=https://github.com/ddahan/dokwalt
 After=docker.service network-online.target
 Wants=network-online.target
 Requires=docker.service

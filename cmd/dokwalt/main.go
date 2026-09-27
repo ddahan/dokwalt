@@ -4,7 +4,7 @@ package main
 import (
 	"os"
 
-	"github.com/dokwalt/dokwalt/internal/cli"
+	"github.com/ddahan/dokwalt/internal/cli"
 )
 
 func main() {

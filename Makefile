@@ -1,5 +1,5 @@
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
-LDFLAGS := -s -w -X github.com/dokwalt/dokwalt/internal/cli.Build=$(VERSION)
+LDFLAGS := -s -w -X github.com/ddahan/dokwalt/internal/cli.Build=$(VERSION)
 GO      := CGO_ENABLED=0 go
 
 .PHONY: build dist test e2e lint clean

@@ -9,7 +9,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/dokwalt/dokwalt/internal/api"
+	"github.com/ddahan/dokwalt/internal/api"
 )
 
 // Operation runs fn, rendering its events live: completed steps scroll up in

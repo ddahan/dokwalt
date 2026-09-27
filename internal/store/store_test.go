@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dokwalt/dokwalt/internal/api"
-	"github.com/dokwalt/dokwalt/internal/secrets"
+	"github.com/ddahan/dokwalt/internal/api"
+	"github.com/ddahan/dokwalt/internal/secrets"
 )
 
 func open(t *testing.T) *Store {

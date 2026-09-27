@@ -10,8 +10,8 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 
-	"github.com/dokwalt/dokwalt/internal/docs"
-	"github.com/dokwalt/dokwalt/internal/ui"
+	"github.com/ddahan/dokwalt/internal/docs"
+	"github.com/ddahan/dokwalt/internal/ui"
 )
 
 func docsCmd() *cobra.Command {

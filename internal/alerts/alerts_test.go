@@ -11,8 +11,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/dokwalt/dokwalt/internal/secrets"
-	"github.com/dokwalt/dokwalt/internal/store"
+	"github.com/ddahan/dokwalt/internal/secrets"
+	"github.com/ddahan/dokwalt/internal/store"
 )
 
 func TestFireRateLimitsAndResolves(t *testing.T) {

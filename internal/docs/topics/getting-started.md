@@ -31,7 +31,7 @@ Docker does not need to be installed on the server: `server init` does it.
 Build it from source (needs Go):
 
 ```bash
-git clone https://github.com/dokwalt/dokwalt && cd dokwalt
+git clone https://github.com/ddahan/dokwalt && cd dokwalt
 make build
 sudo cp bin/dokwalt* /usr/local/bin/
 dokwalt version
@@ -40,7 +40,7 @@ dokwalt version
 `make build` produces the Mac CLI plus `dokwalt_linux_amd64` and
 `dokwalt_linux_arm64`. Keep them next to the CLI: `server init` uploads
 the one matching the server. Alternatively, download the `darwin` binary
-from https://github.com/dokwalt/dokwalt/releases and put it in your
+from https://github.com/ddahan/dokwalt/releases and put it in your
 `PATH` as `dokwalt`; a release build downloads the server binary for its
 own version and checks it against `checksums.txt`. An install script and
 a Homebrew tap are planned, not shipped.

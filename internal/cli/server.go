@@ -18,13 +18,13 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/dokwalt/dokwalt/internal/api"
-	"github.com/dokwalt/dokwalt/internal/bootstrap"
-	"github.com/dokwalt/dokwalt/internal/sshx"
-	"github.com/dokwalt/dokwalt/internal/ui"
+	"github.com/ddahan/dokwalt/internal/api"
+	"github.com/ddahan/dokwalt/internal/bootstrap"
+	"github.com/ddahan/dokwalt/internal/sshx"
+	"github.com/ddahan/dokwalt/internal/ui"
 )
 
-const releaseURL = "https://github.com/dokwalt/dokwalt/releases/download"
+const releaseURL = "https://github.com/ddahan/dokwalt/releases/download"
 
 func serverCommands() []*cobra.Command {
 	server := &cobra.Command{Use: "server", Short: "Install, connect and manage servers"}

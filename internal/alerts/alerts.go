@@ -17,8 +17,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dokwalt/dokwalt/internal/api"
-	"github.com/dokwalt/dokwalt/internal/store"
+	"github.com/ddahan/dokwalt/internal/api"
+	"github.com/ddahan/dokwalt/internal/store"
 )
 
 const Cooldown = 30 * time.Minute

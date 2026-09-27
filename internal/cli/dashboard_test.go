@@ -8,7 +8,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/dokwalt/dokwalt/internal/api"
+	"github.com/ddahan/dokwalt/internal/api"
 )
 
 // Smoke test: the dashboard renders every tab with realistic data and

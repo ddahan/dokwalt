@@ -9,7 +9,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/dokwalt/dokwalt/internal/api"
+	"github.com/ddahan/dokwalt/internal/api"
 )
 
 // hostCPU holds the previous /proc/stat totals to compute utilization.

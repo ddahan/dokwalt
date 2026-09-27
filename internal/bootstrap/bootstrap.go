@@ -19,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dokwalt/dokwalt/internal/ui"
+	"github.com/ddahan/dokwalt/internal/ui"
 )
 
 const (
@@ -35,7 +35,7 @@ type Options struct {
 
 const unit = `[Unit]
 Description=DokWalt — Docker Compose apps with zero-downtime deploys
-Documentation=https://github.com/dokwalt/dokwalt
+Documentation=https://github.com/ddahan/dokwalt
 After=docker.service network-online.target
 Wants=network-online.target
 Requires=docker.service
