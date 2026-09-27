@@ -28,22 +28,18 @@ Docker does not need to be installed on the server: `server init` does it.
 
 ## 1. Install the CLI
 
-Build it from source (needs Go):
+On macOS or Linux (on Windows, inside WSL):
 
 ```bash
-git clone https://github.com/ddahan/dokwalt && cd dokwalt
-make build
-sudo cp bin/dokwalt* /usr/local/bin/
+curl -fsSL https://raw.githubusercontent.com/ddahan/dokwalt/main/install.sh | sh
 dokwalt version
 ```
 
-`make build` produces the Mac CLI plus `dokwalt_linux_amd64` and
-`dokwalt_linux_arm64`. Keep them next to the CLI: `server init` uploads
-the one matching the server. Alternatively, download the `darwin` binary
-from https://github.com/ddahan/dokwalt/releases and put it in your
-`PATH` as `dokwalt`; a release build downloads the server binary for its
-own version and checks it against `checksums.txt`. An install script and
-a Homebrew tap are planned, not shipped.
+The script detects your system and CPU, downloads the matching binary from
+the latest GitHub release, verifies it against `checksums.txt` and installs
+it in a folder on your `PATH` (using sudo only if it has to). Run it again
+to upgrade. `server init` later downloads the Linux binary for the server,
+for the same version, and verifies it the same way.
 
 ## 2. Set up the server
 

@@ -1711,7 +1711,7 @@ LICENSE                 MIT
 
 - `make build`: CLI for this machine plus `bin/dokwalt_linux_amd64` and `bin/dokwalt_linux_arm64` next to it (so `server init` finds them in development).
 - `make dist`: release binaries for linux/amd64, linux/arm64, darwin/arm64 and darwin/amd64, plus `checksums.txt`, published on GitHub Releases. The version is embedded with `-ldflags -X …cli.Build=<git describe>`.
-- Install: `make build && sudo cp bin/dokwalt* /usr/local/bin/` (README), or the darwin binary from GitHub Releases; an install script and a Homebrew tap are planned. The server daemon is installed and updated only by `server init` / `server upgrade`, which upload the CLI's own version.
+- Install: `curl -fsSL https://raw.githubusercontent.com/ddahan/dokwalt/main/install.sh | sh` (macOS/Linux/WSL; detects platform, verifies the checksum, picks a writable directory on `PATH`, sudo only if needed; re-run to upgrade). From source: `make build`. A Homebrew tap is planned. The server daemon is installed and updated only by `server init` / `server upgrade`, which upload the CLI's own version.
 - `make test`: `go test ./...` (unit tests). `make lint`: `go vet` + `gofmt`.
 - `make e2e` → `test/e2e/run.sh`: builds the binaries, starts a **privileged Debian bookworm container running systemd, Docker and sshd** as a throwaway server (`KEEP=1` keeps it), then drives the real CLI over SSH. It checks: install, deploy, zero downtime under load (0 failed requests out of ~4,000 during a deploy), config release, rollback, pipeline/promote, a failed deploy keeping the old version, the db tunnel, reboot recovery (`docker restart`) and power-cut recovery (`docker kill`). Everything runs locally; no paid service.
 - Docs: `internal/docs/topics/*.md` is the single source for end-user docs (embedded with `go:embed`, readable on GitHub). This spec is contributor-facing.
@@ -1835,7 +1835,7 @@ Recommendation: **Raspberry Pi OS Lite (64-bit)**: first-party hardware support 
 8. **Certificate expiry alert.** v0.1 alerts on issuance errors reported by Caddy; there's no alert based on the served certificate's expiry date.
 9. **Rollback/promote confirmation in the CLI.** The dashboard asks; the CLI commands run immediately. Confirm that this is wanted.
 10. **CLI/daemon compatibility policy.** `doctor` warns on version mismatch; there's no hard API-version gate yet. *Proposal:* refuse on a major API mismatch.
-11. **Install script / Homebrew tap.** Planned, not shipped.
+11. **Install script / Homebrew tap.** *Install script resolved in v0.1* (`install.sh`); a Homebrew tap is still planned.
 12. **`alerts:set … = 0`.** *Resolved in v0.1:* `0` disables any threshold rule.
 13. **One-shot job logs on failure.** *Resolved in v0.1:* when `docker compose up` fails, the engine prints the last log lines of every one-shot job that exited non-zero, so a failing migration shows its own error.
 14. **Out-of-memory alert resolution.** The `oom:` alert never sends "resolved"; it re-fires at most every 30 minutes.

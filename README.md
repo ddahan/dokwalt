@@ -72,31 +72,16 @@ listens on 80/443.
 
 ## 📦 Install
 
-**1. Get the CLI** on your computer — pick your platform:
+**1. Install the CLI** on your computer (macOS or Linux; on Windows, inside [WSL](https://learn.microsoft.com/windows/wsl/install)):
 
 ```bash
-# macOS, Apple Silicon
-curl -fsSLo dokwalt https://github.com/ddahan/dokwalt/releases/latest/download/dokwalt_darwin_arm64
-
-# macOS, Intel
-curl -fsSLo dokwalt https://github.com/ddahan/dokwalt/releases/latest/download/dokwalt_darwin_amd64
-
-# Linux (x86_64 / arm64)
-curl -fsSLo dokwalt https://github.com/ddahan/dokwalt/releases/latest/download/dokwalt_linux_amd64
-curl -fsSLo dokwalt https://github.com/ddahan/dokwalt/releases/latest/download/dokwalt_linux_arm64
+curl -fsSL https://raw.githubusercontent.com/ddahan/dokwalt/main/install.sh | sh
 ```
 
-```bash
-chmod +x dokwalt && sudo mv dokwalt /usr/local/bin/
-dokwalt version
-```
-
-> 🍎 **macOS says the app "can't be opened"?** The binary isn't notarized yet. Run
-> `xattr -d com.apple.quarantine /usr/local/bin/dokwalt`, or allow it in
-> System Settings → Privacy & Security.
-
-Checksums for every file are in `checksums.txt` on the
-[release page](https://github.com/ddahan/dokwalt/releases/latest).
+The script picks the right binary for your system, verifies its checksum,
+installs it where your shell will find it, and tells you if anything is missing
+(like Docker). Run the same command again later to upgrade. Prefer to read it
+first? [`install.sh`](install.sh) is short.
 
 **2. Install DokWalt on your server** (you'll be asked for your sudo password there):
 
@@ -154,7 +139,7 @@ Every command has examples in `dokwalt <command> --help`.
 
 ## ⬆️ Upgrading
 
-Download the new CLI (same command as the install step), then:
+Run the install command again, then:
 
 ```bash
 dokwalt server upgrade    # your apps keep running during the upgrade
@@ -221,7 +206,7 @@ deploys, the DB tunnel, reboot and power-cut recovery, and the daemon's memory b
 **v0.1** — the core workflow is implemented and tested end to end.
 
 Planned: GitHub push-to-deploy · review apps per pull request · layer-aware image
-transfer · DNS-01 certificates · install script & Homebrew tap. See the
+transfer · DNS-01 certificates · Homebrew tap. See the
 implementation status in [`docs/SPEC.md`](docs/SPEC.md).
 
 MIT licensed · no telemetry.
