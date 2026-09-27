@@ -340,7 +340,8 @@ func uploadImages(ctx context.Context, s *session, platform string, images map[s
 		}
 		return err
 	}
-	emit(api.Event{Step: "upload", Status: "done", Message: fmt.Sprintf("Uploaded %s in %s", ui.Bytes(uint64(sent.Load())), ui.Duration(time.Since(start)))})
+	rate := float64(sent.Load()) / time.Since(start).Seconds()
+	emit(api.Event{Step: "upload", Status: "done", Message: fmt.Sprintf("Uploaded %s (%s/s)", ui.Bytes(uint64(sent.Load())), ui.Bytes(uint64(rate)))})
 	return nil
 }
 

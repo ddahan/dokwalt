@@ -69,7 +69,7 @@ dokwalt deploy -s staging -m "new checkout flow"
 ◆ Deploying blog (staging)  to pi (linux/arm64)
 ✓ Built migrate, web, worker
 ✓ Uploaded 12.8 MiB in 1.9s
-✓ Services — db: stateful (named volume pgdata), migrate: one-shot job, web: stateless, worker: stateless
+✓ Services — db: keeps its data (named volume pgdata), migrate: runs once per deploy, web: zero-downtime swap, worker: zero-downtime swap
 ✓ Created release v14
 ✓ Stateful services ready
 ✓ Containers running
@@ -92,7 +92,7 @@ dokwalt promote
 ```text
 ◆ Promoting blog  staging → production
 ✓ Promoting staging v14 to production (same images, production config)
-✓ Services — db: stateful (named volume pgdata), migrate: one-shot job, web: stateless, worker: stateless
+✓ Services — db: keeps its data (named volume pgdata), migrate: runs once per deploy, web: zero-downtime swap, worker: zero-downtime swap
 ✓ Created release v31
 ✓ Stateful services ready
 ✓ Containers running

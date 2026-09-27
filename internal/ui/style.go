@@ -166,18 +166,20 @@ func Sparkline(vals []float64, width int) string {
 	if len(vals) > width {
 		vals = vals[len(vals)-width:]
 	}
-	maxV := 0.0
+	// Scale between the series' own min and max so variation shows even
+	// when load is steady; a flat series sits at mid height.
+	lo, hi := math.Inf(1), math.Inf(-1)
 	for _, v := range vals {
-		maxV = math.Max(maxV, v)
+		lo, hi = math.Min(lo, v), math.Max(hi, v)
 	}
 	var b strings.Builder
 	for i := 0; i < width-len(vals); i++ {
 		b.WriteRune(' ')
 	}
 	for _, v := range vals {
-		i := 0
-		if maxV > 0 {
-			i = int(v / maxV * float64(len(sparks)-1))
+		i := 2
+		if hi-lo > 1e-9 {
+			i = 1 + int(math.Round((v-lo)/(hi-lo)*float64(len(sparks)-2)))
 		}
 		b.WriteRune(sparks[i])
 	}

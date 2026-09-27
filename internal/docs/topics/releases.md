@@ -91,10 +91,10 @@ confirmation** (the dashboard's `r` key asks with `y`).
 ```text
 $ dokwalt rollback v12
 ◆ Rolling back blog
-✓ Services — db: stateful (named volume pgdata), web: stateless
+✓ Services — db: keeps its data (named volume pgdata), web: zero-downtime swap
 ✓ Created release v17
 ✓ Stateful services unchanged
-✓ Starting v17 (blue) · containers running
+✓ Starting v17 next to the current version · containers running
 ✓ web is healthy
 ✓ v17 is live
 ✓ Previous version stops in 10s (in-flight requests finish)
@@ -159,7 +159,7 @@ $ dokwalt promote
 ◆ Promoting blog  staging → production
 ✓ Promoting staging v8 to production (same images, production config)
 ✓ Created release v21
-✓ Starting v21 (green) · containers running
+✓ Starting v21 next to the current version · containers running
 ✓ web is healthy
 ✓ v21 is live
 ✓ Promoted — production is now v21

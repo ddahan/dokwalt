@@ -51,10 +51,10 @@ Check or fix detection:
 
 ```text
 $ dokwalt services
-SERVICE  DEPLOY MODE                                     WHY                                    HEALTH CHECK
-db       stateful (updated in place, never duplicated)   named volume pgdata                    default
-web      blue/green (zero downtime)                      no named volume, not a database image  default
-  Override: dokwalt services:set <service> --stateful=false
+SERVICE   ON EACH DEPLOY                                                                WHY                                     HEALTH CHECK
+db        keeps its data (never duplicated; restarted only if its definition changes)   named volume pgdata                     default
+web       zero-downtime swap (a new copy starts, then replaces the old one)             no named volume, not a database image   default
+Override: dokwalt services:set <service> --stateful=false
 
 $ dokwalt services:set cache --stateful=false   # e.g. a throwaway redis
 ```

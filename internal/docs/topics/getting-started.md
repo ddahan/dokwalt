@@ -139,7 +139,7 @@ dokwalt deploy -m "first deploy"
 ✓ Built migrate, web, worker
 ✓ Uploaded 41.3 MiB in 7.2s
 ! web: published ports removed — traffic reaches services only through the proxy (use `dokwalt domains:add` or `dokwalt db:connect`)
-✓ Services — db: stateful (named volume pgdata), migrate: one-shot job, web: stateless, worker: stateless
+✓ Services — db: keeps its data (named volume pgdata), migrate: runs once per deploy, web: zero-downtime swap, worker: zero-downtime swap
 ✓ Created release v1
 ✓ Stateful services ready
 ✓ Containers running

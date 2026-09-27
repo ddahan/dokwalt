@@ -803,10 +803,10 @@ $ dokwalt deploy -m "New pricing page"
 ✓ Built migrate, web, worker for linux/arm64                             38.4s
 ✓ Uploaded 16.6 MiB in 0.6s
 ⚠ web: `ports` ignored — only the proxy is public (domains:add, db:connect)
-✓ Services — db: stateful (named volume pgdata), migrate: one-shot job, web: stateless, worker: stateless
+✓ Services — db: keeps its data (named volume pgdata), migrate: runs once per deploy, web: zero-downtime swap, worker: zero-downtime swap
 ✓ Created release v8
 ✓ Stateful services ready
-✓ Starting v8 (green) · migrate exited 0 · containers running
+✓ Starting v8 next to the current version · migrate exited 0 · containers running
 ✓ web is healthy                 GET / on port 3000
 ✓ v8 is live
 ✓ Previous version stops in 10s (in-flight requests finish)
@@ -818,7 +818,7 @@ Failure: the new color is removed and the old one keeps serving.
 ```text
 ✓ Created release v9
 ✓ Stateful services ready
-● Starting v9 (blue)
+● Starting v9 next to the current version
 → Stopping the new version; the current version keeps serving
 ✗ docker compose up failed: exit status 1
   service "migrate" didn't complete successfully: exit 1
@@ -922,11 +922,11 @@ By default a public service passes the HTTP check with any answer below 500 on `
 
 ```text
 $ dokwalt services
-  SERVICE   DEPLOY MODE                                     WHY                                    HEALTH CHECK
-  db        stateful (updated in place, never duplicated)   named volume pgdata                    default
-  migrate   blue/green (zero downtime)                      no named volume, not a database image  default
-  web       blue/green (zero downtime)                      no named volume, not a database image  /healthz
-  worker    blue/green (zero downtime)                      no named volume, not a database image  default
+  SERVICE   ON EACH DEPLOY                                                                WHY                                     HEALTH CHECK
+  db        keeps its data (never duplicated; restarted only if its definition changes)   named volume pgdata                     default
+  migrate   zero-downtime swap (a new copy starts, then replaces the old one)             no named volume, not a database image   default
+  web       zero-downtime swap (a new copy starts, then replaces the old one)             no named volume, not a database image   /healthz
+  worker    zero-downtime swap (a new copy starts, then replaces the old one)             no named volume, not a database image   default
   Override: dokwalt services:set <service> --stateful=false
 ```
 
@@ -972,7 +972,7 @@ $ dokwalt db:connect --tunnel-only --port 5433
 $ dokwalt promote
 ✓ Promoting staging v14 to production (same images, production config)
 ✓ Created release v9
-✓ Starting v9 (blue) · containers running · web is healthy
+✓ Starting v9 next to the current version · containers running · web is healthy
 ✓ v9 is live
 ```
 

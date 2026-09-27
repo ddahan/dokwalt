@@ -77,7 +77,7 @@ func newRoot() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !ui.IsTTY() {
+			if !ui.IsTTY() && os.Getenv("DOKWALT_SNAPSHOT") == "" {
 				return cmd.Help()
 			}
 			return runDashboard(cmd.Context())

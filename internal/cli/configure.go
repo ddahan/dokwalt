@@ -440,7 +440,7 @@ func healthcheckUnsetCmd() *cobra.Command {
 
 func servicesCmd() *cobra.Command {
 	return &cobra.Command{
-		Use: "services", Short: "Show how each service is handled (stateful or blue/green)",
+		Use: "services", Short: "Show how each service is deployed (zero-downtime swap, or kept running with its data)",
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s, app, stage, err := appStage(cmd.Context())
@@ -461,9 +461,9 @@ func servicesCmd() *cobra.Command {
 			}
 			var rows [][]string
 			for _, sv := range svcs {
-				mode := ui.GreenS.Render("blue/green") + ui.MutedS.Render(" (zero downtime)")
+				mode := ui.GreenS.Render("zero-downtime swap") + ui.MutedS.Render(" (a new copy starts, then replaces the old one)")
 				if sv.Stateful {
-					mode = ui.AccentS.Render("stateful") + ui.MutedS.Render(" (updated in place, never duplicated)")
+					mode = ui.AccentS.Render("keeps its data") + ui.MutedS.Render(" (never duplicated; restarted only if its definition changes)")
 				}
 				why := sv.Detected
 				if sv.Overridden {
@@ -475,7 +475,7 @@ func servicesCmd() *cobra.Command {
 				}
 				rows = append(rows, []string{ui.ServiceColor(sv.Name).Render(sv.Name), mode, ui.MutedS.Render(why), hc})
 			}
-			fmt.Println(ui.Table([]string{"SERVICE", "DEPLOY MODE", "WHY", "HEALTH CHECK"}, rows))
+			fmt.Println(ui.Table([]string{"SERVICE", "ON EACH DEPLOY", "WHY", "HEALTH CHECK"}, rows))
 			ui.Hint("Override: %s", ui.Code("dokwalt services:set <service> --stateful=false"))
 			return nil
 		},
@@ -503,6 +503,6 @@ func servicesSetCmd() *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().BoolVar(&stateful, "stateful", false, "treat as stateful (never duplicated)")
+	cmd.Flags().BoolVar(&stateful, "stateful", false, "keep it running with its data: never duplicated during deploys")
 	return cmd
 }

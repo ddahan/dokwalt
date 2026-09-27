@@ -87,7 +87,11 @@ func (r *renderer) emit(e api.Event) {
 		}
 		r.active = e.Message
 	case "done":
-		r.pending = append(r.pending, OkIcon+" "+e.Message+" "+FaintS.Render(Duration(time.Since(r.stepAt))))
+		line := OkIcon + " " + e.Message
+		if d := time.Since(r.stepAt); d >= 100*time.Millisecond {
+			line += " " + FaintS.Render(Duration(d)) // instant steps don't need a timer
+		}
+		r.pending = append(r.pending, line)
 		r.active, r.logs, r.stepAt = "", nil, time.Now()
 	case "warn":
 		r.pending = append(r.pending, WarnIcon+" "+YellowS.Render(e.Message))

@@ -11,20 +11,13 @@ DokWalt is a single small binary. On your laptop it's a polished CLI (plus a liv
 full-screen dashboard); on your server it's a ~27 MB daemon next to the Caddy
 proxy. Your `docker-compose.yml` stays exactly as it is.
 
-```text
-$ dokwalt deploy
-◆ Deploying shop  to prod (linux/arm64)
-✓ Built migrate, web 12.4s
-✓ Uploaded 16.6 MiB in 0.6s
-✓ Services — cache: stateful (named volume cachedata), migrate: one-shot job, web: stateless
-✓ Created release v42
-✓ Stateful services unchanged 0.8s
-✓ Containers running 4.1s
-✓ web is healthy 1.2s
-✓ v42 is live
+<p align="center">
+  <img src="docs/assets/dashboard.png" alt="The DokWalt dashboard: apps, services, live traffic and CPU" width="900">
+</p>
 
-✓ shop is live at https://shop.example.com
-```
+<p align="center">
+  <img src="docs/assets/deploy.png" alt="dokwalt deploy: build, upload, health check and zero-downtime switch" width="900">
+</p>
 
 ## ✨ Features
 
@@ -52,7 +45,11 @@ check that your DNS and ports are right.
 repo. Changing one rolls out a new release with zero downtime.
 
 📊 **Logs & monitoring** — merged live logs, `top`, 7-day metrics, request rates,
-latency and errors per domain, Discord/Slack alerts.
+latency and errors per domain.
+
+🔔 **Discord & Slack alerts** — get a message when a site goes down, a deploy fails,
+a container crash-loops, a certificate can't be issued, or the disk, memory or CPU
+temperature crosses your threshold — and another one when it's resolved.
 
 🖥️ **Gorgeous CLI & dashboard** — live progress, colors, and a full-screen dashboard
 (just type `dokwalt`). Built-in docs with `dokwalt docs`.
@@ -177,8 +174,11 @@ dokwalt server upgrade    # your apps keep running during the upgrade
 
 - 🏗️ Builds happen on your machine for the server's CPU (amd64 or arm64). Images
   are content-addressed, so unchanged images are never uploaded twice.
-- 🧩 The daemon splits your compose project into a **data** project (stateful
-  services, never duplicated) and a **blue/green** project (everything else).
+- 🧩 The daemon splits your compose project in two: services that **keep data**
+  (databases, caches, anything with a named volume) keep running and are never
+  duplicated, while **everything else is swapped**: two copies (internally
+  called blue and green) take turns, so the new version starts next to the old
+  one and replaces it with zero downtime.
 - 🔐 Config values only live in the daemon's encrypted store and in the
   environment of the `docker compose` process — never in files, never in git.
 - 🛡️ Caddy is the only public listener, and each app gets its own private network.

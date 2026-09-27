@@ -64,7 +64,7 @@ make one release, described `Set K1, K2` or `Unset K`.
 ```text
 $ dokwalt config:set LOG_LEVEL=debug SMTP_HOST=smtp.example.com
 ✓ Config updated: Set LOG_LEVEL, SMTP_HOST
-✓ Services — db: stateful (named volume pgdata), web: stateless, worker: stateless
+✓ Services — db: keeps its data (named volume pgdata), web: zero-downtime swap, worker: zero-downtime swap
 ✓ Created release v9
 ✓ Stateful services ready
 ✓ Containers running

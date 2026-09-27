@@ -70,7 +70,7 @@ $ dokwalt deploy -m "new homepage"
 ✓ Built migrate, web, worker 23.4s
 ✓ Uploaded 12.8 MiB in 1.9s
 ! web: published ports removed — traffic reaches services only through the proxy (use `dokwalt domains:add` or `dokwalt db:connect`)
-✓ Services — db: stateful (named volume pgdata), migrate: one-shot job, web: stateless, worker: stateless
+✓ Services — db: keeps its data (named volume pgdata), migrate: runs once per deploy, web: zero-downtime swap, worker: zero-downtime swap
 ✓ Created release v8
 ✓ Stateful services ready 3.1s
 ✓ Containers running 9.8s
@@ -123,7 +123,7 @@ container are shown:
 ```text
 ✓ Created release v9
 ✓ Stateful services ready
-• Starting v9 (blue)
+• Starting v9 next to the current version
 ! Last log lines of web:
   | web Error: connect ECONNREFUSED 10.0.3.4:6379
 • Stopping the new version; the current version keeps serving

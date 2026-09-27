@@ -182,12 +182,12 @@ func (e *Engine) deployLocked(ctx context.Context, st store.Stage, spec DeploySp
 	}
 	var roles []string
 	for _, s := range plan.Services {
-		kind := "stateless"
+		kind := "zero-downtime swap"
 		if s.Stateful {
-			kind = "stateful (" + s.Reason + ")"
+			kind = "keeps its data (" + s.Reason + ")"
 		}
 		if s.OneShot {
-			kind = "one-shot job"
+			kind = "runs once per deploy"
 		}
 		roles = append(roles, s.Name+": "+kind)
 	}
@@ -289,7 +289,11 @@ func (e *Engine) rollout(ctx context.Context, st store.Stage, rel *store.Release
 		if cs, _ := e.projectContainers(ctx, newProject); len(cs) > 0 {
 			_ = e.compose(ctx, newProject, "", nil, nil, "down", "--remove-orphans", "--timeout", "10")
 		}
-		emit(ev("start", "start", fmt.Sprintf("Starting v%d (%s)", rel.Version, rel.Color)))
+		msg := fmt.Sprintf("Starting v%d next to the current version", rel.Version)
+		if st.ActiveColor == "" {
+			msg = fmt.Sprintf("Starting v%d", rel.Version)
+		}
+		emit(ev("start", "start", msg))
 		fail := func(err error) error {
 			emit(ev("rollback", "start", "Stopping the new version; the current version keeps serving"))
 			_ = e.compose(context.Background(), newProject, "", nil, nil, "down", "--remove-orphans", "--timeout", "5")

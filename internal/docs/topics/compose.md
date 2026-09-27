@@ -75,12 +75,12 @@ name (`db:5432`) on the stage network.
 
 ```text
 $ dokwalt services
-SERVICE   DEPLOY MODE                                     WHY                                     HEALTH CHECK
-db        stateful (updated in place, never duplicated)   named volume pgdata                     default
-migrate   blue/green (zero downtime)                      no named volume, not a database image   default
-web       blue/green (zero downtime)                      no named volume, not a database image   default
-worker    blue/green (zero downtime)                      no named volume, not a database image   default
-  Override: dokwalt services:set <service> --stateful=false
+SERVICE   ON EACH DEPLOY                                                                WHY                                     HEALTH CHECK
+db        keeps its data (never duplicated; restarted only if its definition changes)   named volume pgdata                     default
+migrate   zero-downtime swap (a new copy starts, then replaces the old one)             no named volume, not a database image   default
+web       zero-downtime swap (a new copy starts, then replaces the old one)             no named volume, not a database image   default
+worker    zero-downtime swap (a new copy starts, then replaces the old one)             no named volume, not a database image   default
+Override: dokwalt services:set <service> --stateful=false
 ```
 
 ## One-shot jobs: migrations and release tasks

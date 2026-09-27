@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"os"
 	"os/exec"
 	"runtime"
 	"sort"
@@ -13,6 +14,7 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/termenv"
 
 	"github.com/ddahan/dokwalt/internal/api"
 	"github.com/ddahan/dokwalt/internal/client"
@@ -22,18 +24,28 @@ import (
 // runDashboard opens the interactive full-screen dashboard.
 func runDashboard(ctx context.Context) error {
 	var s *session
-	if err := ui.Spin("Connecting", func() error {
+	connectFn := func() error {
 		var err error
 		s, err = connect(ctx)
 		return err
-	}); err != nil {
+	}
+	var err error
+	if os.Getenv("DOKWALT_SNAPSHOT") != "" {
+		err = connectFn()
+	} else {
+		err = ui.Spin("Connecting", connectFn)
+	}
+	if err != nil {
 		return err
 	}
 	defer s.Close()
 	m := newDash(ctx, s)
+	if size := os.Getenv("DOKWALT_SNAPSHOT"); size != "" {
+		return m.snapshot(size)
+	}
 	p := tea.NewProgram(m, tea.WithAltScreen(), tea.WithContext(ctx))
 	m.send = p.Send
-	_, err := p.Run()
+	_, err = p.Run()
 	m.stopLogs()
 	if err == nil {
 		err = m.fatal
@@ -113,6 +125,37 @@ func newDash(ctx context.Context, s *session) *dash {
 	sp.Spinner = spinner.MiniDot
 	sp.Style = ui.AccentS
 	return &dash{ctx: ctx, s: s, spin: sp}
+}
+
+// snapshot prints one fully loaded frame with colors, for docs and
+// screenshots: DOKWALT_SNAPSHOT=120x32 dokwalt [-a app]
+func (m *dash) snapshot(size string) error {
+	var w, h int
+	if _, err := fmt.Sscanf(size, "%dx%d", &w, &h); err != nil {
+		return fmt.Errorf("DOKWALT_SNAPSHOT must look like 120x32")
+	}
+	lipgloss.SetColorProfile(termenv.TrueColor)
+	lipgloss.SetHasDarkBackground(true)
+	m.Update(tea.WindowSizeMsg{Width: w, Height: h})
+	for _, load := range []tea.Cmd{m.loadApps(), m.loadTop()} {
+		if msg := load(); msg != nil {
+			if e, ok := msg.(errMsg); ok {
+				return e.err
+			}
+			m.Update(msg)
+		}
+	}
+	for i, r := range m.rows {
+		if r.app == gf.app && (gf.stage == "" || r.stage == gf.stage) {
+			m.sel = i
+			break
+		}
+	}
+	if cmd := m.loadDetail(); cmd != nil {
+		m.Update(cmd())
+	}
+	fmt.Println(m.View())
+	return nil
 }
 
 func (m *dash) cur() (row, bool) {
@@ -503,17 +546,22 @@ func (m *dash) appList(w, h int) string {
 		if r.pipeline {
 			name += ui.MutedS.Render(" " + r.stage)
 		}
-		spark := ui.Sparkline(m.top.History[r.app+"/"+r.stage], 8)
-		rel := ""
+		right := ""
 		if r.st.CurrentRelease > 0 {
-			rel = ui.MutedS.Render(fmt.Sprintf("v%d", r.st.CurrentRelease))
+			cpu := 0.0
+			for _, sv := range m.top.Services {
+				if sv.App == r.app && sv.Stage == r.stage {
+					cpu += sv.Metrics.CPUPct
+				}
+			}
+			right = ui.MutedS.Render(fmt.Sprintf("v%d", r.st.CurrentRelease)) + " " + fmt.Sprintf("%5.1f%%", cpu)
 		}
 		line := fmt.Sprintf("%s %s", dot, name)
-		pad := w - lipgloss.Width(line) - lipgloss.Width(rel) - 10
+		pad := w - lipgloss.Width(line) - lipgloss.Width(right)
 		if pad < 1 {
 			pad = 1
 		}
-		line += strings.Repeat(" ", pad) + rel + " " + spark
+		line += strings.Repeat(" ", pad) + right
 		if i == m.sel {
 			line = lipgloss.NewStyle().Background(ui.Surface).Bold(true).Width(w).Render(line)
 		}
@@ -587,29 +635,38 @@ func (m *dash) overview(r row, w int) string {
 	}
 	var rows [][]string
 	for _, sv := range m.svcs {
-		running := 0
+		running, completed := 0, 0
 		for _, c := range sv.Containers {
-			if c.State == "running" {
+			switch {
+			case c.State == "running":
 				running++
+			case c.State == "exited" && strings.HasPrefix(c.Status, "Exited (0)"):
+				completed++ // one-shot job (e.g. migrations) that finished
 			}
 		}
 		state := fmt.Sprintf("%d/%d", running, len(sv.Containers))
-		if running == len(sv.Containers) && running > 0 {
+		switch {
+		case completed > 0 && completed == len(sv.Containers):
+			state = ui.MutedS.Render("✓ done")
+		case running == len(sv.Containers) && running > 0:
 			state = ui.GreenS.Render(state)
-		} else {
+		default:
 			state = ui.YellowS.Render(state)
 		}
 		cpu, mem := "—", "—"
 		if sv.Metrics != nil {
 			cpu, mem = fmt.Sprintf("%.1f%%", sv.Metrics.CPUPct), ui.Bytes(sv.Metrics.MemBytes)
 		}
-		kind := ui.MutedS.Render("blue/green")
-		if sv.Stateful {
-			kind = ui.AccentS.Render("stateful")
+		kind := ui.MutedS.Render("zero-downtime")
+		switch {
+		case sv.Stateful:
+			kind = ui.AccentS.Render("keeps data")
+		case completed > 0 && completed == len(sv.Containers):
+			kind = ui.MutedS.Render("runs once")
 		}
 		rows = append(rows, []string{ui.ServiceColor(sv.Name).Render(sv.Name), state, cpu, mem, kind})
 	}
-	b.WriteString(ui.Table([]string{"SERVICE", "UP", "CPU", "MEM", "MODE"}, rows) + "\n")
+	b.WriteString(ui.Table([]string{"SERVICE", "UP", "CPU", "MEM", "ON DEPLOY"}, rows) + "\n")
 	hosts := map[string]bool{}
 	for _, d := range m.doms {
 		hosts[d.Hostname] = true

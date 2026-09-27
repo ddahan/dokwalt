@@ -137,10 +137,7 @@ func appsInfoCmd() *cobra.Command {
 				}
 				rel := "—"
 				if st.CurrentRelease > 0 {
-					rel = fmt.Sprintf("v%d (%s)", st.CurrentRelease, st.ActiveColor)
-					if st.ActiveColor == "" {
-						rel = fmt.Sprintf("v%d", st.CurrentRelease)
-					}
+					rel = fmt.Sprintf("v%d", st.CurrentRelease)
 				}
 				doms := strings.Join(st.Domains, ", ")
 				if doms == "" {
@@ -161,9 +158,9 @@ func appsInfoCmd() *cobra.Command {
 func printServices(svcs []api.Service) {
 	var rows [][]string
 	for _, sv := range svcs {
-		kind := "stateless"
+		kind := ui.GreenS.Render("zero-downtime")
 		if sv.Stateful {
-			kind = ui.AccentS.Render("stateful")
+			kind = ui.AccentS.Render("keeps data")
 		}
 		state := ui.MutedS.Render("—")
 		if len(sv.Containers) > 0 {
@@ -194,7 +191,7 @@ func printServices(svcs []api.Service) {
 		}
 		rows = append(rows, []string{ui.ServiceColor(sv.Name).Render(sv.Name), state, kind, cpu, mem, ui.MutedS.Render(sv.Image)})
 	}
-	fmt.Println(ui.Table([]string{"SERVICE", "STATE", "KIND", "CPU", "MEM", "IMAGE"}, rows))
+	fmt.Println(ui.Table([]string{"SERVICE", "STATE", "ON DEPLOY", "CPU", "MEM", "IMAGE"}, rows))
 }
 
 func appsDestroyCmd() *cobra.Command {

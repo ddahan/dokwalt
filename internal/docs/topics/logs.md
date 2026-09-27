@@ -93,10 +93,10 @@ $ dokwalt deploy -m "fix feed"
 ◆ Deploying blog  to pi (linux/arm64)
 ✓ Built migrate, web for linux/arm64
 ✓ Uploaded 16.6 MiB in 0.6s
-✓ Services — db: stateful (named volume pgdata), migrate: one-shot job, web: stateless
+✓ Services — db: keeps its data (named volume pgdata), migrate: runs once per deploy, web: zero-downtime swap
 ✓ Created release v14
 ✓ Stateful services unchanged
-✓ Starting v14 (green) · containers running
+✓ Starting v14 next to the current version · containers running
 ✓ web is healthy
 ✓ v14 is live
 ✓ Previous version stops in 10s (in-flight requests finish)
