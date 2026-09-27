@@ -147,14 +147,42 @@ dokwalt server upgrade    # your apps keep running during the upgrade
 
 ## ⚙️ How it works
 
-```text
- Your computer                     Server (systemd)
- ─────────────────                 ──────────────────────────────────────────────
- dokwalt CLI  ──SSH── dial-stdio ─▶ dokwalt daemon (Unix socket, SQLite)
-   │ docker compose build            │  docker compose ─▶ dw-shop-production-data   (db, cache)
-   │ docker save | zstd ─────────────▶│                   dw-shop-production-blue   (web, worker)
-                                     │                   dw-shop-production-green  (next release)
-                                     └─ Caddy (80/443, Let's Encrypt) ─▶ active color
+```mermaid
+flowchart TB
+    subgraph laptop["💻 Your computer"]
+        direction LR
+        cli["dokwalt CLI"] --> build["Docker build<br/>for the server's CPU"]
+    end
+    visitors(["🌍 Visitors"])
+
+    subgraph server["🖥️ Your server"]
+        direction LR
+        daemon["dokwalt daemon<br/>systemd · SQLite"]
+        caddy["Caddy<br/>HTTPS · Let's Encrypt"]
+        subgraph app["📦 Each app, on its own private network"]
+            direction TB
+            live["Current version<br/>web · workers"]
+            next["New version<br/>starts next to it"]
+            data[("Data services<br/>database · cache<br/>never duplicated")]
+        end
+    end
+
+    cli -- "SSH only · no open port" --> daemon
+    build -- "changed images only" --> daemon
+    visitors -- "HTTPS · 80 / 443" --> caddy
+    daemon -- "docker compose" --> app
+    daemon -- "routes" --> caddy
+    caddy --> live
+    caddy -. "switches after health check" .-> next
+    live --> data
+    next --> data
+
+    classDef accent fill:#a78bfa22,stroke:#a78bfa,stroke-width:2px
+    classDef public fill:#34d39922,stroke:#34d399,stroke-width:2px
+    classDef store fill:#60a5fa22,stroke:#60a5fa,stroke-width:2px
+    class cli,daemon accent
+    class caddy,visitors public
+    class data store
 ```
 
 - 🏗️ Builds happen on your machine for the server's CPU (amd64 or arm64). Images
@@ -201,12 +229,6 @@ The e2e suite installs DokWalt on a privileged Debian container and checks deplo
 under load (0 failed requests), config releases, rollback, pipelines, failed
 deploys, the DB tunnel, reboot and power-cut recovery, and the daemon's memory budget.
 
-## 🗺️ Status & roadmap
-
-**v0.1** — the core workflow is implemented and tested end to end.
-
-Planned: GitHub push-to-deploy · review apps per pull request · layer-aware image
-transfer · DNS-01 certificates · Homebrew tap. See the
-implementation status in [`docs/SPEC.md`](docs/SPEC.md).
+---
 
 MIT licensed · no telemetry.
