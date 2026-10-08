@@ -1,0 +1,9 @@
+services:
+  web:
+    build: .
+    expose: ["8080"]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

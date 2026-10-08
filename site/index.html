@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DokWalt — Deploy Docker Compose apps to your own server</title>
+  <meta name="description" content="Twelve-factor deploys on any hardware — a cheap VPS or your own machine: zero-downtime deploys, instant rollbacks, automatic HTTPS and sites that survive reboots. One small binary, no web UI, no Swarm.">
+  <meta name="theme-color" content="#07070c">
+  <meta property="og:title" content="DokWalt — 12-factor deploys on any hardware">
+  <meta property="og:description" content="Deploy Docker Compose apps to your own server with zero-downtime releases, instant rollbacks and automatic HTTPS. One small binary.">
+  <meta property="og:image" content="https://dokwalt.w3lt.org/assets/dashboard.png">
+  <meta property="og:url" content="https://dokwalt.w3lt.org/">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+
+  <!-- ───────────────────────── Nav ───────────────────────── -->
+  <header class="nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="#top" aria-label="DokWalt home">
+        <svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg>
+        <span>DokWalt</span>
+      </a>
+      <nav class="nav-links" aria-label="Sections">
+        <a href="#dashboard">Dashboard</a>
+        <a href="#deploys">Deploys</a>
+        <a href="#features">Features</a>
+        <a href="#start">Get started</a>
+      </nav>
+      <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- ───────────────────────── Hero ───────────────────────── -->
+    <section class="hero">
+      <div class="aurora" aria-hidden="true">
+        <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+      </div>
+      <div class="grid-floor" aria-hidden="true"></div>
+
+      <div class="wrap hero-inner">
+        <div class="hero-copy">
+          <a class="pill reveal" href="https://github.com/ddahan/dokwalt/releases/latest" rel="noopener">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            <span class="mono">v0.1.1</span>
+            <span class="pill-sep" aria-hidden="true"></span>
+            <span>Open source · MIT · one binary</span>
+          </a>
+
+          <h1 class="hero-title" aria-label="12-factor deploys. Any hardware. None of the bloat.">
+            <span class="line"><span class="word">12-factor</span> <span class="word">deploys.</span></span>
+            <span class="line"><span class="word">Any</span> <span class="word">hardware.</span></span>
+            <span class="line"><span class="word gradient-text">None</span> <span class="word gradient-text">of</span> <span class="word gradient-text">the</span> <span class="word gradient-text">bloat.</span></span>
+          </h1>
+
+          <p class="hero-sub reveal" style="--d:.55s">
+            Deploy Docker Compose apps to a cheap VPS or a box at home, the twelve-factor way: config lives on the
+            server, every release is immutable, deploys have zero downtime and HTTPS is automatic.
+            Your <code>docker-compose.yml</code> stays exactly as it is.
+          </p>
+
+          <div class="install reveal" style="--d:.7s">
+            <div class="install-box">
+              <span class="prompt" aria-hidden="true">$</span>
+              <code id="install-cmd">curl -fsSL https://raw.githubusercontent.com/ddahan/dokwalt/main/install.sh | sh</code>
+              <button class="copy" data-copy="#install-cmd" aria-label="Copy install command">
+                <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                <svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+              </button>
+            </div>
+            <p class="install-note">macOS &amp; Linux (Windows via WSL). Servers: any 64-bit Debian or Ubuntu machine — amd64 or arm64.</p>
+          </div>
+
+          <div class="hero-ctas reveal" style="--d:.85s">
+            <a class="btn btn-primary" href="#start">Get started <span aria-hidden="true">→</span></a>
+            <a class="btn btn-ghost" href="#deploys">Watch a deploy</a>
+          </div>
+        </div>
+
+        <div class="hero-visual reveal" style="--d:.4s">
+          <div class="tilt" id="hero-tilt">
+            <div class="term term-hero">
+              <div class="term-bar">
+                <span class="dots"><i></i><i></i><i></i></span>
+                <span class="term-title">~/code/shop — zsh</span>
+              </div>
+              <pre class="term-body" id="hero-term" aria-label="Animated dokwalt deploy output"></pre>
+            </div>
+            <div class="float-card fc-1" aria-hidden="true">
+              <span class="dot dot-green"></span>
+              <div><b>v3 is live</b><small>zero downtime · 0 errors</small></div>
+            </div>
+            <div class="float-card fc-2" aria-hidden="true">
+              <span class="lock" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2.2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg></span>
+              <div><b>shop.example.test</b><small>Let's Encrypt · auto-renew</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="marquee" aria-label="Built on">
+        <div class="marquee-track">
+          <span>Docker Compose</span><span>◆</span><span>Caddy</span><span>◆</span><span>Let's Encrypt</span><span>◆</span><span>SQLite</span><span>◆</span><span>systemd</span><span>◆</span><span>SSH</span><span>◆</span><span>amd64 &amp; arm64</span><span>◆</span><span>Debian</span><span>◆</span><span>Ubuntu</span><span>◆</span><span>Go</span><span>◆</span>
+          <span aria-hidden="true">Docker Compose</span><span aria-hidden="true">◆</span><span aria-hidden="true">Caddy</span><span aria-hidden="true">◆</span><span aria-hidden="true">Let's Encrypt</span><span aria-hidden="true">◆</span><span aria-hidden="true">SQLite</span><span aria-hidden="true">◆</span><span aria-hidden="true">systemd</span><span aria-hidden="true">◆</span><span aria-hidden="true">SSH</span><span aria-hidden="true">◆</span><span aria-hidden="true">amd64 &amp; arm64</span><span aria-hidden="true">◆</span><span aria-hidden="true">Debian</span><span aria-hidden="true">◆</span><span aria-hidden="true">Ubuntu</span><span aria-hidden="true">◆</span><span aria-hidden="true">Go</span><span aria-hidden="true">◆</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── Stats ───────────────────────── -->
+    <section class="stats wrap" aria-label="At a glance">
+      <div class="stat reveal">
+        <div class="stat-num"><span class="count" data-to="27">0</span><small>MB</small></div>
+        <p>RAM for the server daemon, next to Caddy</p>
+      </div>
+      <div class="stat reveal" style="--d:.08s">
+        <div class="stat-num"><span class="count" data-to="1">0</span><small>binary</small></div>
+        <p>CLI on your laptop, daemon on your server</p>
+      </div>
+      <div class="stat reveal" style="--d:.16s">
+        <div class="stat-num"><span class="count" data-to="0" data-from="9">9</span><small>open ports</small></div>
+        <p>for the control plane — you talk to it over SSH</p>
+      </div>
+      <div class="stat reveal" style="--d:.24s">
+        <div class="stat-num"><span class="count" data-to="0" data-from="7">7</span><small>files to add</small></div>
+        <p>to your repo — config lives on the server</p>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── Dashboard ───────────────────────── -->
+    <section class="section section-dark" id="dashboard">
+      <div class="wrap">
+        <div class="center-head">
+          <p class="eyebrow reveal"><span>◆</span> CLI-only, and gorgeous</p>
+          <h2 class="reveal">Type <code class="h-code">dokwalt</code>. That's the dashboard.</h2>
+          <p class="lead reveal">A live, full-screen view of every app, service and request — right in your terminal. Click an app.</p>
+        </div>
+
+        <div class="tui-wrap reveal">
+          <div class="term tui">
+            <div class="term-bar"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">dokwalt</span></div>
+            <div class="tui-body mono">
+              <div class="tui-top">
+                <span><span class="c-acc">◆ DokWalt</span> <span class="c-mute">prod</span></span>
+                <span class="gauges">
+                  <span>cpu <i class="gauge"><b id="g-cpu"></b></i> <em id="g-cpu-v">6%</em></span>
+                  <span>mem <i class="gauge"><b id="g-mem"></b></i> <em id="g-mem-v">13%</em></span>
+                  <span class="hide-sm">disk <i class="gauge"><b id="g-disk" style="width:69%"></b></i> <em>69%</em></span>
+                </span>
+              </div>
+              <div class="tui-cols">
+                <div class="tui-apps">
+                  <div class="c-mute">APPS</div>
+                  <button class="app-row active" data-app="shop" data-stage="production" type="button"><span class="dot dot-green"></span>shop <span class="c-mute">production</span><span class="r">v2</span></button>
+                  <button class="app-row" data-app="shop" data-stage="staging" type="button"><span class="dot dot-green"></span>shop <span class="c-mute">staging</span><span class="r">v1</span></button>
+                  <button class="app-row" data-app="blog" data-stage="" type="button"><span class="dot dot-green"></span>blog<span class="r">v3</span></button>
+                  <button class="app-row" data-app="wiki" data-stage="" type="button"><span class="dot dot-yellow"></span>wiki<span class="r">v9</span></button>
+                </div>
+                <div class="tui-detail" id="tui-detail"></div>
+              </div>
+              <div class="tui-help c-mute">↑↓ select · 1/2/3 tabs · r rollback · p promote · R restart · o open · ? help · q quit</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── Zero-downtime deploys ───────────────────────── -->
+    <section class="section" id="deploys">
+      <div class="wrap split">
+        <div class="split-copy">
+          <p class="eyebrow reveal"><span>◆</span> Zero-downtime deploys</p>
+          <h2 class="reveal">The new version starts <em>next to</em> the old one.</h2>
+          <p class="lead reveal">
+            Traffic only switches once it passes its health checks. If it fails, the current
+            version keeps serving and you see your app's own error logs. Databases are never
+            duplicated — they keep running untouched.
+          </p>
+
+          <ol class="steps" id="deploy-steps">
+            <li data-step="0"><span class="step-dot"></span><div><b>Build on your machine</b><small>docker buildx, for the server's CPU</small></div></li>
+            <li data-step="1"><span class="step-dot"></span><div><b>Upload changed layers only</b><small>content-addressed, never sent twice</small></div></li>
+            <li data-step="2"><span class="step-dot"></span><div><b>Start the new color</b><small>blue and green take turns</small></div></li>
+            <li data-step="3"><span class="step-dot"></span><div><b>Health check</b><small>your compose <code>healthcheck:</code>, then HTTP</small></div></li>
+            <li data-step="4"><span class="step-dot"></span><div><b>Switch traffic</b><small>Caddy routes atomically</small></div></li>
+            <li data-step="5"><span class="step-dot"></span><div><b>Drain the old version</b><small>in-flight requests finish first</small></div></li>
+          </ol>
+        </div>
+
+        <div class="flow-card reveal">
+          <div class="flow-head">
+            <span class="mono flow-status" id="flow-status">● serving v2</span>
+            <button class="btn btn-ghost btn-xs" id="flow-replay" type="button">↻ Deploy again</button>
+          </div>
+          <svg class="flow" id="flow" viewBox="0 40 640 320" role="img" aria-label="Diagram: visitors reach Caddy, which routes to the blue or green version of the app; both share the same database.">
+            <defs>
+              <linearGradient id="g-line" x1="0" x2="1">
+                <stop offset="0" stop-color="#A78BFA" stop-opacity=".15"/>
+                <stop offset="1" stop-color="#A78BFA" stop-opacity=".45"/>
+              </linearGradient>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="4" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+
+            <!-- links -->
+            <path id="p-in"  class="link" d="M92 200 H186"/>
+            <path id="p-b"   class="link" d="M254 200 C 300 200, 300 110, 350 110"/>
+            <path id="p-g"   class="link" d="M254 200 C 300 200, 300 290, 350 290"/>
+            <path id="p-bdb" class="link" d="M462 110 C 510 110, 510 200, 548 200"/>
+            <path id="p-gdb" class="link" d="M462 290 C 510 290, 510 200, 548 200"/>
+
+            <g id="packets" filter="url(#glow)"></g>
+
+            <!-- visitors -->
+            <g class="node" transform="translate(52 200)">
+              <circle r="38" class="node-bg"/>
+              <g class="node-svg" transform="translate(-13 -13) scale(1.08)"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/></g>
+              <text class="node-label" y="60">visitors</text>
+            </g>
+            <!-- caddy -->
+            <g class="node" transform="translate(220 200)">
+              <rect x="-34" y="-34" width="68" height="68" rx="16" class="node-bg node-caddy"/>
+              <g class="node-svg node-svg-green" transform="translate(-13 -13) scale(1.08)"><rect x="4" y="11" width="16" height="10" rx="2.2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></g>
+              <text class="node-label" y="58">Caddy</text>
+            </g>
+            <!-- blue slot -->
+            <g class="slot" id="slot-blue" transform="translate(406 110)">
+              <circle class="hc-ring" r="58"/>
+              <rect x="-56" y="-34" width="112" height="68" rx="14" class="slot-bg"/>
+              <text class="slot-ver" y="-4">v2</text>
+              <text class="slot-tag" y="18">blue · web</text>
+            </g>
+            <!-- green slot -->
+            <g class="slot" id="slot-green" transform="translate(406 290)">
+              <circle class="hc-ring" r="58"/>
+              <rect x="-56" y="-34" width="112" height="68" rx="14" class="slot-bg"/>
+              <text class="slot-ver" y="-4">v3</text>
+              <text class="slot-tag" y="18">green · web</text>
+            </g>
+            <!-- database -->
+            <g class="node" transform="translate(584 200)">
+              <path class="node-bg node-db" d="M-32 -26 a32 10 0 0 0 64 0 a32 10 0 0 0 -64 0 v52 a32 10 0 0 0 64 0 v-52"/>
+              <path class="db-rim" d="M-32 -26 a32 10 0 0 0 64 0"/>
+                            <text class="node-label" y="58">postgres</text>
+              <text class="node-sub" y="76">never duplicated</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── Features (bento) ───────────────────────── -->
+    <section class="section section-dark" id="features">
+      <div class="wrap">
+        <div class="center-head">
+          <p class="eyebrow reveal"><span>◆</span> Twelve-factor, by design</p>
+          <h2 class="reveal">Apps, releases, config, pipelines.<br><span class="muted-h">On any hardware.</span></h2>
+        </div>
+
+        <div class="bento">
+          <!-- Reboots -->
+          <article class="card c-wide c-reboot reveal spot">
+            <div class="card-copy">
+              <h3><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v8"/><path d="M6.4 6.4a8 8 0 1 0 11.2 0"/></svg></span>Survives reboots and power cuts</h3>
+              <p>After a kernel update at 04:00 or a power cut, every site serves HTTPS again — with nothing to type. A native systemd service, a proxy that boots from its last-known-good config, and certificates that persist.</p>
+              <button class="plug-btn" id="plug-btn" type="button">
+                <span class="plug-icon" aria-hidden="true">⏻</span>
+                <span class="plug-text">Pull the plug</span>
+              </button>
+            </div>
+            <div class="server" id="server">
+              <div class="server-top">
+                <span class="server-name mono">◆ prod <span class="c-faint">· simulation</span></span>
+                <span class="server-power" id="power-led" title="Power"></span>
+              </div>
+              <div class="server-screen">
+                <ul class="sites" id="sites">
+                  <li><span class="dot"></span><span class="mono">blog.example.com</span><span class="site-state">200 OK</span></li>
+                  <li><span class="dot"></span><span class="mono">shop.example.com</span><span class="site-state">200 OK</span></li>
+                  <li><span class="dot"></span><span class="mono">wiki.example.com</span><span class="site-state">200 OK</span></li>
+                </ul>
+                <pre class="boot-log mono" id="boot-log" aria-live="polite"></pre>
+                <div class="crt-off" aria-hidden="true"></div>
+              </div>
+            </div>
+          </article>
+          <!-- Releases -->
+          <article class="card c-wide reveal spot">
+            <div class="card-copy">
+              <h3><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M11 19 2 12l9-7v14z"/><path d="M22 19l-9-7 9-7v14z"/></svg></span>Releases &amp; instant rollbacks</h3>
+              <p>Every deploy and config change is a numbered, immutable release. Rolling back is instant: the images are already on the server.</p>
+            </div>
+            <div class="mini-term mono" id="releases-demo" aria-hidden="true">
+              <div class="rel-head"><span>RELEASE</span><span>STATUS</span><span>DESCRIPTION</span></div>
+              <div class="rel-rows" id="rel-rows"></div>
+            </div>
+          </article>
+
+          <!-- Pipelines -->
+          <article class="card reveal spot" style="--d:.06s">
+            <div class="card-copy">
+              <h3><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="6" cy="5" r="2.2"/><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="7" r="2.2"/><path d="M6 7.2v9.6M18 9.2c0 5-8 4-11.2 8"/></svg></span>Optional pipelines</h3>
+              <p><code>dokwalt promote</code> ships staging's <em>exact</em> images to production. No rebuild, no upload.</p>
+            </div>
+            <div class="pipeline" aria-hidden="true">
+              <div class="stage"><small>staging</small><b class="mono">v8</b></div>
+              <div class="rail"><span class="chip mono">sha:4e1c…</span></div>
+              <div class="stage stage-prod"><small>production</small><b class="mono" id="prod-ver">v6</b></div>
+            </div>
+          </article>
+
+          <!-- Compose -->
+          <article class="card c-tall reveal spot" style="--d:.1s">
+            <div class="card-copy">
+              <h3><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="m2 12.5 10 5 10-5"/><path d="m2 17 10 5 10-5"/></svg></span>Native Docker Compose</h3>
+              <p>No DokWalt file in your repo. Stateful services are detected and never duplicated; one-shot jobs run your migrations first.</p>
+            </div>
+            <pre class="yaml mono" aria-hidden="true"><span class="y-line" data-tag="keeps its data"><span class="k">db</span>:
+  image: postgres:17-alpine
+  volumes: [pgdata:/var/lib/postgresql]</span>
+<span class="y-line" data-tag="runs once per deploy"><span class="k">migrate</span>:
+  build: .
+  command: ./manage.py migrate</span>
+<span class="y-line" data-tag="zero-downtime swap"><span class="k">web</span>:
+  build: .
+  expose: ["8000"]
+  depends_on:
+    migrate:
+      condition: service_completed_successfully</span></pre>
+          </article>
+
+          <!-- HTTPS -->
+          <article class="card reveal spot">
+            <div class="card-copy">
+              <h3><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2.2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg></span>Automatic HTTPS</h3>
+              <p>Let's Encrypt via Caddy, with a real check that your DNS and ports are right — before burning rate limits.</p>
+            </div>
+            <div class="https mono" aria-hidden="true">
+              <div class="url-bar"><span class="lock-i" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2.2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg></span><span id="https-host"></span><span class="caret"></span></div>
+              <div class="https-steps">
+                <span data-s="0">DNS → 203.0.113.7</span>
+                <span data-s="1">port 80 reachable</span>
+                <span data-s="2">certificate issued</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Config -->
+          <article class="card reveal spot" style="--d:.06s">
+            <div class="card-copy">
+              <h3><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3 20 3M16.5 6.5l3 3M14 9l2 2"/></svg></span>12-factor config</h3>
+              <p>Config vars live on the server, encrypted — never in git. Changing one rolls out a new release with zero downtime.</p>
+            </div>
+            <div class="mini-term mono cfg" aria-hidden="true">
+              <div><span class="c-mute">$</span> dokwalt config:set SMTP_HOST=… SECRET_KEY=…</div>
+              <div class="c-ok">✓ Config updated — shop restarted as v7 with zero downtime</div>
+              <div class="cfg-vars"><span>SECRET_KEY</span><span class="masked">••••••••••••••••</span></div>
+            </div>
+          </article>
+
+          <!-- Monitoring -->
+          <article class="card c-wide reveal spot">
+            <div class="card-copy">
+              <h3><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span>Logs &amp; monitoring</h3>
+              <p>Merged live logs, <code>top</code>, 7-day metrics, request rates, latency and errors per domain.</p>
+            </div>
+            <div class="monitor" aria-hidden="true">
+              <div class="m-row"><span class="m-k">req/s</span><b class="mono" id="m-rps">12.3</b><span class="m-k">p95</span><b class="mono" id="m-p95">10 ms</b><span class="m-k">5xx/min</span><b class="mono c-ok">0</b></div>
+              <div class="bars" id="bars"></div>
+              <pre class="logs mono" id="logs"></pre>
+            </div>
+          </article>
+
+          <!-- Alerts -->
+          <article class="card reveal spot" style="--d:.06s">
+            <div class="card-copy">
+              <h3><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4l2-2z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></span>Discord &amp; Slack alerts</h3>
+              <p>Site down, failed deploy, crash loop, certificate, disk, memory, CPU temperature — and when it's resolved.</p>
+            </div>
+            <div class="alerts" id="alerts" aria-hidden="true"></div>
+          </article>
+
+          <!-- Your hardware -->
+          <article class="card c-full c-hw reveal spot" style="--d:.1s">
+            <div class="card-copy">
+              <h3><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx=".6"/><path d="M9 2.5v3M15 2.5v3M9 18.5v3M15 18.5v3M2.5 9h3M2.5 15h3M18.5 9h3M18.5 15h3"/></svg></span>Runs on any hardware</h3>
+              <p>A $5 VPS, a mini PC, an old laptop, a box on your shelf — any 64-bit Debian or Ubuntu machine. Images are built on your laptop for the server's CPU.</p>
+            </div>
+            <div class="arch mono" aria-hidden="true"><span>your laptop</span><span class="arrow">→</span><span class="hl">linux · amd64 / arm64</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── Not in the box ───────────────────────── -->
+    <section class="section" id="small">
+      <div class="wrap split split-rev">
+        <div class="split-copy">
+          <p class="eyebrow reveal"><span>◆</span> Small &amp; private</p>
+          <h2 class="reveal">What's <em>not</em> in the box.</h2>
+          <p class="lead reveal">
+            Many sites share one small machine, so the platform's own overhead has to be tiny.
+            Every component earns its place — or it isn't there.
+          </p>
+          <div class="ram reveal">
+            <p class="ram-cap mono">On a 1 GB server</p>
+            <div class="ram-row"><span class="mono">dokwalt</span><span class="ram-bar"><i style="--w:2.7%"></i></span><b class="mono">~27 MB</b></div>
+            <div class="ram-row"><span class="mono">caddy</span><span class="ram-bar"><i style="--w:4.5%"></i></span><b class="mono">~45 MB</b></div>
+            <div class="ram-row"><span class="mono">your apps</span><span class="ram-bar"><i class="apps" style="--w:88%"></i></span><b class="mono">the rest</b></div>
+          </div>
+        </div>
+        <ul class="nope" id="nope">
+          <li>Web UI <small>the CLI and TUI are the interface</small></li>
+          <li>Docker Swarm <small>one server, done well</small></li>
+          <li>Kubernetes <small>not even a little</small></li>
+          <li>Redis <small>nothing to cache</small></li>
+          <li>Postgres for its own state <small>SQLite in WAL mode</small></li>
+          <li>CI, GitHub Actions, paid services <small>builds run on your laptop</small></li>
+          <li>A public control port <small>SSH only; just Caddy on 80/443</small></li>
+          <li>DokWalt files in your repo <small>strict 12-factor</small></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── Command tour ───────────────────────── -->
+    <section class="section section-dark" id="commands">
+      <div class="wrap">
+        <div class="center-head">
+          <p class="eyebrow reveal"><span>◆</span> Everyday commands</p>
+          <h2 class="reveal">Everything from your terminal.</h2>
+        </div>
+        <div class="tour reveal">
+          <div class="tour-tabs" role="tablist" aria-label="Commands" id="tour-tabs"></div>
+          <div class="term tour-term">
+            <div class="term-bar"><span class="dots"><i></i><i></i><i></i></span><span class="term-title" id="tour-title">dokwalt</span></div>
+            <pre class="term-body" id="tour-body" role="tabpanel" aria-live="polite"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── Get started ───────────────────────── -->
+    <section class="section" id="start">
+      <div class="wrap">
+        <div class="center-head">
+          <p class="eyebrow reveal"><span>◆</span> Get started</p>
+          <h2 class="reveal">From zero to HTTPS in three commands.</h2>
+        </div>
+        <div class="start">
+          <div class="start-step reveal">
+            <span class="num">1</span>
+            <h3>Install the CLI</h3>
+            <p>On your Mac or Linux machine. Run it again later to upgrade.</p>
+            <div class="code"><code id="s1">curl -fsSL https://raw.githubusercontent.com/ddahan/dokwalt/main/install.sh | sh</code><button class="copy" data-copy="#s1" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>
+          </div>
+          <div class="start-step reveal" style="--d:.1s">
+            <span class="num">2</span>
+            <h3>Set up your server</h3>
+            <p>Installs Docker if needed, the systemd service and Caddy. Any SSH-reachable Debian or Ubuntu machine.</p>
+            <div class="code"><code id="s2">dokwalt server init you@your-server --email you@example.com</code><button class="copy" data-copy="#s2" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>
+          </div>
+          <div class="start-step reveal" style="--d:.2s">
+            <span class="num">3</span>
+            <h3>Deploy</h3>
+            <p>In any folder with a <code>compose.yaml</code>. Point DNS at your server and add a domain.</p>
+            <div class="code code-multi"><code id="s3">dokwalt apps:create myapp
+dokwalt deploy
+dokwalt domains:add myapp.example.com --service web</code><button class="copy" data-copy="#s3" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>
+          </div>
+        </div>
+        <p class="reqs reveal">Needs Docker on your computer (Docker Desktop or OrbStack) and SSH key access with <code>sudo</code> on a 64-bit server with ports 80 and 443 open. 1 GB of RAM is enough for a few small sites.</p>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── Final CTA ───────────────────────── -->
+    <section class="final">
+      <div class="aurora aurora-final" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span></div>
+      <div class="wrap final-inner">
+        <div class="final-mark reveal" aria-hidden="true">
+          <svg class="logo logo-live" viewBox="0 0 120 120"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="56,22 56,98 18,60"/><polygon class="lg" points="64,22 102,60 64,98"/><rect class="ls" x="58" y="16" width="4" height="88" rx="2"/></svg>
+        </div>
+        <h2 class="reveal">Your server. Your sites.<br><span class="gradient-text">Back up on their own.</span></h2>
+        <div class="hero-ctas reveal">
+          <a class="btn btn-primary" href="https://github.com/ddahan/dokwalt" rel="noopener">Star on GitHub <span aria-hidden="true">→</span></a>
+          <a class="btn btn-ghost" href="https://github.com/ddahan/dokwalt#readme" rel="noopener">Read the docs</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">MIT licensed · Built with Go, Caddy and SQLite</span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
