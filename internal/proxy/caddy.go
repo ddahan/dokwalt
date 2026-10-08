@@ -120,8 +120,9 @@ func IsLocalName(h string) bool {
 func (m *Manager) Config(routes []Route) map[string]any {
 	sort.Slice(routes, func(i, j int) bool { return strings.Join(routes[i].Hosts, ",") < strings.Join(routes[j].Hosts, ",") })
 	var httpsRoutes []any
-	var local []string
+	var hosts, local []string
 	for _, r := range routes {
+		hosts = append(hosts, r.Hosts...)
 		for _, h := range r.Hosts {
 			if IsLocalName(h) {
 				local = append(local, h)
@@ -161,8 +162,15 @@ func (m *Manager) Config(routes []Route) map[string]any {
 		httpsRoutes = append(httpsRoutes, map[string]any{"match": match, "handle": handle, "terminal": true})
 	}
 
+	// Caddy inserts its HTTP→HTTPS redirects after the last route with a host
+	// matcher, so the check route needs one to stay ahead of them.
+	checkMatch := map[string]any{"path": []string{CheckPrefix + "*"}}
+	if len(hosts) > 0 {
+		sort.Strings(hosts)
+		checkMatch["host"] = hosts
+	}
 	checkRoute := map[string]any{
-		"match": []any{map[string]any{"path": []string{CheckPrefix + "*"}}},
+		"match": []any{checkMatch},
 		"handle": []any{map[string]any{
 			"handler": "static_response", "status_code": 200, "body": m.CheckToken,
 		}},

@@ -26,6 +26,7 @@ func TestConfig(t *testing.T) {
 		`"module":"internal"`,
 		`"email":"me@example.com"`,
 		`"body":"tok"`,
+		`"host":["down.example.com","shop.example.com","shop.localhost","wiki.example.com","www.shop.example.com"],"path":["/.well-known/dokwalt-check/*"]`,
 		`"listen":"unix//run/caddy/admin.sock"`,
 	} {
 		if !strings.Contains(s, want) {
