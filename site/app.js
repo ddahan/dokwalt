@@ -669,6 +669,18 @@ async function stepLine(term, text, ms, dur = "", token) {
       },
     },
     {
+      cmd: "dokwalt backup:now", desc: "every database, off-site",
+      run: async (t, k) => {
+        await stepLine(t, "DokWalt state (dokwalt.db) 412.0 KiB", 500, "", k);
+        await stepLine(t, "Roles of postgres-production-db", 400, "", k);
+        await stepLine(t, "Database blog (postgres-production-db) 9.8 MiB", 900, "", k);
+        await stepLine(t, "Database shop (postgres-production-db) 8.1 MiB", 800, "", k);
+        await stepLine(t, "Removed 1 old backup(s)", 500, "", k);
+        line(t, `${ok} Backup <b>20261010T143012Z</b> uploaded`);
+        line(t, muted("  See it: dokwalt backups 20261010T143012Z"));
+      },
+    },
+    {
       cmd: "dokwalt doctor", desc: "server, apps, DNS, your machine",
       run: async (t) => {
         line(t, title("Doctor") + "\n");

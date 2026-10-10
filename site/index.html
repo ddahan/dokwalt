@@ -391,13 +391,30 @@
             <div class="alerts" id="alerts" aria-hidden="true"></div>
           </article>
 
+          <!-- Backups -->
+          <article class="card c-wide reveal spot">
+            <div class="card-copy">
+              <h3><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5a4 4 0 0 1-.5 7.97"/><path d="M12 12v8M9 17l3 3 3-3"/></svg></span>Nightly off-site backups</h3>
+              <p>Every night, each Postgres database and DokWalt's own state go to Cloudflare R2 or any S3 storage — checksummed, pruned to 7 daily and 4 weekly, restored in one command. Run one Postgres for all your apps, still isolated from each other.</p>
+            </div>
+            <div class="mini-term mono" aria-hidden="true">
+              <div><span class="c-mute">$</span> dokwalt backups</div>
+              <div class="bk-row c-mute"><span>ID</span><span>STARTED</span><span>SIZE</span><span>STATUS</span></div>
+              <div class="bk-row"><span>20261011T010000Z</span><span>Sun 03:00</span><span>18.2 MiB</span><span class="c-ok">complete</span></div>
+              <div class="bk-row"><span>20261010T010000Z</span><span>Sat 03:00</span><span>18.1 MiB</span><span class="c-ok">complete</span></div>
+              <div class="bk-row"><span>20261009T010000Z</span><span>Fri 03:00</span><span>17.9 MiB</span><span class="c-ok">complete</span></div>
+              <div><span class="c-mute">$</span> dokwalt backup:restore latest <span style="white-space:nowrap">--database shop</span></div>
+              <div class="c-ok">✓ Restored database shop from backup 20261011T010000Z</div>
+            </div>
+          </article>
+
           <!-- Your hardware -->
-          <article class="card c-full c-hw reveal spot" style="--d:.1s">
+          <article class="card c-hw reveal spot" style="--d:.06s">
             <div class="card-copy">
               <h3><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx=".6"/><path d="M9 2.5v3M15 2.5v3M9 18.5v3M15 18.5v3M2.5 9h3M2.5 15h3M18.5 9h3M18.5 15h3"/></svg></span>Runs on any hardware</h3>
               <p>A $5 VPS, a mini PC, an old laptop, a box on your shelf — any 64-bit Debian or Ubuntu machine. Images are built on your laptop for the server's CPU.</p>
             </div>
-            <div class="arch mono" aria-hidden="true"><span>your laptop</span><span class="arrow">→</span><span class="hl">linux · amd64 / arm64</span></div>
+            <div class="arch mono" aria-hidden="true"><span>your laptop</span><span class="arrow">↓</span><span class="hl">linux · amd64 / arm64</span></div>
           </article>
         </div>
       </div>
