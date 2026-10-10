@@ -6,6 +6,15 @@
   <title>DokWalt — Deploy Docker Compose apps to your own server</title>
   <meta name="description" content="Twelve-factor deploys on any hardware — a cheap VPS or your own machine: zero-downtime deploys, instant rollbacks, automatic HTTPS and sites that survive reboots. One small binary, no web UI, no Swarm.">
   <meta name="theme-color" content="#07070c">
+  <script>
+    // Theme before first paint: the saved choice, else the system setting.
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
   <meta property="og:title" content="DokWalt — 12-factor deploys on any hardware">
   <meta property="og:description" content="Deploy Docker Compose apps to your own server with zero-downtime releases, instant rollbacks and automatic HTTPS. One small binary.">
   <meta property="og:image" content="https://dokwalt.w3lt.org/assets/dashboard.png">
@@ -29,14 +38,19 @@
       </a>
       <nav class="nav-links" aria-label="Sections">
         <a href="#dashboard">Dashboard</a>
-        <a href="#deploys">Deploys</a>
         <a href="#features">Features</a>
         <a href="#start">Get started</a>
       </nav>
+      <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+        <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+      </button>
       <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
         <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
         <span>GitHub</span>
       </a>
+      </div>
     </div>
   </header>
 
@@ -52,7 +66,7 @@
         <div class="hero-copy">
           <a class="pill reveal" href="https://github.com/ddahan/dokwalt/releases/latest" rel="noopener">
             <span class="pulse-dot" aria-hidden="true"></span>
-            <span class="mono">v0.1.1</span>
+            <span class="mono">v0.3.0</span>
             <span class="pill-sep" aria-hidden="true"></span>
             <span>Open source · MIT · one binary</span>
           </a>
@@ -174,92 +188,6 @@
       </div>
     </section>
 
-    <!-- ───────────────────────── Zero-downtime deploys ───────────────────────── -->
-    <section class="section" id="deploys">
-      <div class="wrap split">
-        <div class="split-copy">
-          <p class="eyebrow reveal"><span>◆</span> Zero-downtime deploys</p>
-          <h2 class="reveal">The new version starts <em>next to</em> the old one.</h2>
-          <p class="lead reveal">
-            Traffic only switches once it passes its health checks. If it fails, the current
-            version keeps serving and you see your app's own error logs. Databases are never
-            duplicated — they keep running untouched.
-          </p>
-
-          <ol class="steps" id="deploy-steps">
-            <li data-step="0"><span class="step-dot"></span><div><b>Build on your machine</b><small>docker buildx, for the server's CPU</small></div></li>
-            <li data-step="1"><span class="step-dot"></span><div><b>Upload changed layers only</b><small>content-addressed, never sent twice</small></div></li>
-            <li data-step="2"><span class="step-dot"></span><div><b>Start the new color</b><small>blue and green take turns</small></div></li>
-            <li data-step="3"><span class="step-dot"></span><div><b>Health check</b><small>your compose <code>healthcheck:</code>, then HTTP</small></div></li>
-            <li data-step="4"><span class="step-dot"></span><div><b>Switch traffic</b><small>Caddy routes atomically</small></div></li>
-            <li data-step="5"><span class="step-dot"></span><div><b>Drain the old version</b><small>in-flight requests finish first</small></div></li>
-          </ol>
-        </div>
-
-        <div class="flow-card reveal">
-          <div class="flow-head">
-            <span class="mono flow-status" id="flow-status">● serving v2</span>
-            <button class="btn btn-ghost btn-xs" id="flow-replay" type="button">↻ Deploy again</button>
-          </div>
-          <svg class="flow" id="flow" viewBox="0 40 640 320" role="img" aria-label="Diagram: visitors reach Caddy, which routes to the blue or green version of the app; both share the same database.">
-            <defs>
-              <linearGradient id="g-line" x1="0" x2="1">
-                <stop offset="0" stop-color="#A78BFA" stop-opacity=".15"/>
-                <stop offset="1" stop-color="#A78BFA" stop-opacity=".45"/>
-              </linearGradient>
-              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="4" result="b"/>
-                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-            </defs>
-
-            <!-- links -->
-            <path id="p-in"  class="link" d="M92 200 H186"/>
-            <path id="p-b"   class="link" d="M254 200 C 300 200, 300 110, 350 110"/>
-            <path id="p-g"   class="link" d="M254 200 C 300 200, 300 290, 350 290"/>
-            <path id="p-bdb" class="link" d="M462 110 C 510 110, 510 200, 548 200"/>
-            <path id="p-gdb" class="link" d="M462 290 C 510 290, 510 200, 548 200"/>
-
-            <g id="packets" filter="url(#glow)"></g>
-
-            <!-- visitors -->
-            <g class="node" transform="translate(52 200)">
-              <circle r="38" class="node-bg"/>
-              <g class="node-svg" transform="translate(-13 -13) scale(1.08)"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/></g>
-              <text class="node-label" y="60">visitors</text>
-            </g>
-            <!-- caddy -->
-            <g class="node" transform="translate(220 200)">
-              <rect x="-34" y="-34" width="68" height="68" rx="16" class="node-bg node-caddy"/>
-              <g class="node-svg node-svg-green" transform="translate(-13 -13) scale(1.08)"><rect x="4" y="11" width="16" height="10" rx="2.2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></g>
-              <text class="node-label" y="58">Caddy</text>
-            </g>
-            <!-- blue slot -->
-            <g class="slot" id="slot-blue" transform="translate(406 110)">
-              <circle class="hc-ring" r="58"/>
-              <rect x="-56" y="-34" width="112" height="68" rx="14" class="slot-bg"/>
-              <text class="slot-ver" y="-4">v2</text>
-              <text class="slot-tag" y="18">blue · web</text>
-            </g>
-            <!-- green slot -->
-            <g class="slot" id="slot-green" transform="translate(406 290)">
-              <circle class="hc-ring" r="58"/>
-              <rect x="-56" y="-34" width="112" height="68" rx="14" class="slot-bg"/>
-              <text class="slot-ver" y="-4">v3</text>
-              <text class="slot-tag" y="18">green · web</text>
-            </g>
-            <!-- database -->
-            <g class="node" transform="translate(584 200)">
-              <path class="node-bg node-db" d="M-32 -26 a32 10 0 0 0 64 0 a32 10 0 0 0 -64 0 v52 a32 10 0 0 0 64 0 v-52"/>
-              <path class="db-rim" d="M-32 -26 a32 10 0 0 0 64 0"/>
-                            <text class="node-label" y="58">postgres</text>
-              <text class="node-sub" y="76">never duplicated</text>
-            </g>
-          </svg>
-        </div>
-      </div>
-    </section>
-
     <!-- ───────────────────────── Features (bento) ───────────────────────── -->
     <section class="section section-dark" id="features">
       <div class="wrap">
@@ -269,32 +197,75 @@
         </div>
 
         <div class="bento">
-          <!-- Reboots -->
-          <article class="card c-wide c-reboot reveal spot">
+          <!-- Zero-downtime deploys -->
+          <article class="card c-full c-deploy reveal spot" id="deploys">
             <div class="card-copy">
-              <h3><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v8"/><path d="M6.4 6.4a8 8 0 1 0 11.2 0"/></svg></span>Survives reboots and power cuts</h3>
-              <p>After a kernel update at 04:00 or a power cut, every site serves HTTPS again — with nothing to type. A native systemd service, a proxy that boots from its last-known-good config, and certificates that persist.</p>
-              <button class="plug-btn" id="plug-btn" type="button">
-                <span class="plug-icon" aria-hidden="true">⏻</span>
-                <span class="plug-text">Pull the plug</span>
-              </button>
+              <h3><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h11M4 7l3-3M4 7l3 3"/><path d="M20 17H9m11 0-3-3m3 3-3 3"/></svg></span>Zero-downtime deploys</h3>
+              <p>The new version starts <em>next to</em> the old one, and traffic switches only once it passes its health checks. If it fails, the current version keeps serving and you see your app's own error logs. Databases are never duplicated.</p>
             </div>
-            <div class="server" id="server">
-              <div class="server-top">
-                <span class="server-name mono">◆ prod <span class="c-faint">· simulation</span></span>
-                <span class="server-power" id="power-led" title="Power"></span>
-              </div>
-              <div class="server-screen">
-                <ul class="sites" id="sites">
-                  <li><span class="dot"></span><span class="mono">blog.example.com</span><span class="site-state">200 OK</span></li>
-                  <li><span class="dot"></span><span class="mono">shop.example.com</span><span class="site-state">200 OK</span></li>
-                  <li><span class="dot"></span><span class="mono">wiki.example.com</span><span class="site-state">200 OK</span></li>
-                </ul>
-                <pre class="boot-log mono" id="boot-log" aria-live="polite"></pre>
-                <div class="crt-off" aria-hidden="true"></div>
-              </div>
+          <div class="flow-card">
+            <div class="flow-head">
+              <span class="mono flow-status" id="flow-status">● serving v2</span>
+              <button class="btn btn-ghost btn-xs" id="flow-replay" type="button">↻ Deploy again</button>
             </div>
+            <svg class="flow" id="flow" viewBox="0 40 640 320" role="img" aria-label="Diagram: visitors reach Caddy, which routes to the blue or green version of the app; both share the same database.">
+              <defs>
+                <linearGradient id="g-line" x1="0" x2="1">
+                  <stop offset="0" stop-color="#A78BFA" stop-opacity=".15"/>
+                  <stop offset="1" stop-color="#A78BFA" stop-opacity=".45"/>
+                </linearGradient>
+                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="4" result="b"/>
+                  <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+
+              <!-- links -->
+              <path id="p-in"  class="link" d="M92 200 H186"/>
+              <path id="p-b"   class="link" d="M254 200 C 300 200, 300 110, 350 110"/>
+              <path id="p-g"   class="link" d="M254 200 C 300 200, 300 290, 350 290"/>
+              <path id="p-bdb" class="link" d="M462 110 C 510 110, 510 200, 548 200"/>
+              <path id="p-gdb" class="link" d="M462 290 C 510 290, 510 200, 548 200"/>
+
+              <g id="packets" filter="url(#glow)"></g>
+
+              <!-- visitors -->
+              <g class="node" transform="translate(52 200)">
+                <circle r="38" class="node-bg"/>
+                <g class="node-svg" transform="translate(-13 -13) scale(1.08)"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/></g>
+                <text class="node-label" y="60">visitors</text>
+              </g>
+              <!-- caddy -->
+              <g class="node" transform="translate(220 200)">
+                <rect x="-34" y="-34" width="68" height="68" rx="16" class="node-bg node-caddy"/>
+                <g class="node-svg node-svg-green" transform="translate(-13 -13) scale(1.08)"><rect x="4" y="11" width="16" height="10" rx="2.2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></g>
+                <text class="node-label" y="58">Caddy</text>
+              </g>
+              <!-- blue slot -->
+              <g class="slot" id="slot-blue" transform="translate(406 110)">
+                <circle class="hc-ring" r="58"/>
+                <rect x="-56" y="-34" width="112" height="68" rx="14" class="slot-bg"/>
+                <text class="slot-ver" y="-4">v2</text>
+                <text class="slot-tag" y="18">blue · web</text>
+              </g>
+              <!-- green slot -->
+              <g class="slot" id="slot-green" transform="translate(406 290)">
+                <circle class="hc-ring" r="58"/>
+                <rect x="-56" y="-34" width="112" height="68" rx="14" class="slot-bg"/>
+                <text class="slot-ver" y="-4">v3</text>
+                <text class="slot-tag" y="18">green · web</text>
+              </g>
+              <!-- database -->
+              <g class="node" transform="translate(584 200)">
+                <path class="node-bg node-db" d="M-32 -26 a32 10 0 0 0 64 0 a32 10 0 0 0 -64 0 v52 a32 10 0 0 0 64 0 v-52"/>
+                <path class="db-rim" d="M-32 -26 a32 10 0 0 0 64 0"/>
+                              <text class="node-label" y="58">postgres</text>
+                <text class="node-sub" y="76">never duplicated</text>
+              </g>
+            </svg>
+          </div>
           </article>
+
           <!-- Releases -->
           <article class="card c-wide reveal spot">
             <div class="card-copy">
@@ -409,44 +380,14 @@
           </article>
 
           <!-- Your hardware -->
-          <article class="card c-hw reveal spot" style="--d:.06s">
+          <article class="card c-full c-hw reveal spot" style="--d:.1s">
             <div class="card-copy">
               <h3><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx=".6"/><path d="M9 2.5v3M15 2.5v3M9 18.5v3M15 18.5v3M2.5 9h3M2.5 15h3M18.5 9h3M18.5 15h3"/></svg></span>Runs on any hardware</h3>
               <p>A $5 VPS, a mini PC, an old laptop, a box on your shelf — any 64-bit Debian or Ubuntu machine. Images are built on your laptop for the server's CPU.</p>
             </div>
-            <div class="arch mono" aria-hidden="true"><span>your laptop</span><span class="arrow">↓</span><span class="hl">linux · amd64 / arm64</span></div>
+            <div class="arch mono" aria-hidden="true"><span>your laptop</span><span class="arrow">→</span><span class="hl">linux · amd64 / arm64</span></div>
           </article>
         </div>
-      </div>
-    </section>
-
-    <!-- ───────────────────────── Not in the box ───────────────────────── -->
-    <section class="section" id="small">
-      <div class="wrap split split-rev">
-        <div class="split-copy">
-          <p class="eyebrow reveal"><span>◆</span> Small &amp; private</p>
-          <h2 class="reveal">What's <em>not</em> in the box.</h2>
-          <p class="lead reveal">
-            Many sites share one small machine, so the platform's own overhead has to be tiny.
-            Every component earns its place — or it isn't there.
-          </p>
-          <div class="ram reveal">
-            <p class="ram-cap mono">On a 1 GB server</p>
-            <div class="ram-row"><span class="mono">dokwalt</span><span class="ram-bar"><i style="--w:2.7%"></i></span><b class="mono">~27 MB</b></div>
-            <div class="ram-row"><span class="mono">caddy</span><span class="ram-bar"><i style="--w:4.5%"></i></span><b class="mono">~45 MB</b></div>
-            <div class="ram-row"><span class="mono">your apps</span><span class="ram-bar"><i class="apps" style="--w:88%"></i></span><b class="mono">the rest</b></div>
-          </div>
-        </div>
-        <ul class="nope" id="nope">
-          <li>Web UI <small>the CLI and TUI are the interface</small></li>
-          <li>Docker Swarm <small>one server, done well</small></li>
-          <li>Kubernetes <small>not even a little</small></li>
-          <li>Redis <small>nothing to cache</small></li>
-          <li>Postgres for its own state <small>SQLite in WAL mode</small></li>
-          <li>CI, GitHub Actions, paid services <small>builds run on your laptop</small></li>
-          <li>A public control port <small>SSH only; just Caddy on 80/443</small></li>
-          <li>DokWalt files in your repo <small>strict 12-factor</small></li>
-        </ul>
       </div>
     </section>
 

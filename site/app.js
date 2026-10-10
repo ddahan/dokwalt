@@ -28,6 +28,42 @@ function whenVisible(el) {
 // Sleep, then wait until the element is visible again.
 async function pause(el, ms) { await sleep(ms); await whenVisible(el); }
 
+// ───────── Theme switch ─────────
+// The <head> script already applied the saved or system theme. A click saves the choice;
+// without one, the page follows the system setting live.
+(function themeSwitch() {
+  const root = document.documentElement, btn = $("#theme-toggle");
+  const meta = $('meta[name="theme-color"]');
+  const system = matchMedia("(prefers-color-scheme: light)");
+  const saved = () => { try { return localStorage.getItem("theme"); } catch { return null; } };
+
+  function apply(theme) {
+    root.dataset.theme = theme;
+    meta.content = theme === "light" ? "#f7f7fb" : "#07070c";
+    const next = theme === "light" ? "dark" : "light";
+    btn.setAttribute("aria-label", `Switch to ${next} theme`);
+    btn.title = `Switch to ${next} theme`;
+  }
+  apply(root.dataset.theme === "light" ? "light" : "dark");
+
+  btn.addEventListener("click", () => {
+    const theme = root.dataset.theme === "light" ? "dark" : "light";
+    try { localStorage.setItem("theme", theme); } catch {}
+    if (!document.startViewTransition || reduced) return apply(theme);
+    // The new theme grows as a circle from the switch.
+    const r = btn.getBoundingClientRect();
+    const x = r.left + r.width / 2, y = r.top + r.height / 2;
+    const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    document.startViewTransition(() => apply(theme)).ready.then(() => {
+      root.animate(
+        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+        { duration: 700, easing: "cubic-bezier(.22, 1, .36, 1)", pseudoElement: "::view-transition-new(root)" },
+      );
+    }).catch(() => {}); // a quick second click cancels the first animation: the theme still applies
+  });
+  system.addEventListener("change", (e) => { if (!saved()) apply(e.matches ? "light" : "dark"); });
+})();
+
 // ───────── Nav, title words, reveal ─────────
 const nav = $("#nav");
 const onScroll = () => nav.classList.toggle("scrolled", scrollY > 8);
@@ -187,13 +223,12 @@ async function stepLine(term, text, ms, dur = "", token) {
   const layer = $("#packets");
   const statusEl = $("#flow-status");
   const replay = $("#flow-replay");
-  const steps = $$("#deploy-steps li");
   const paths = Object.fromEntries(["p-in", "p-b", "p-g", "p-bdb", "p-gdb"].map((id) => {
     const p = $("#" + id);
     return [id, { p, len: p.getTotalLength() }];
   }));
   const slots = { blue: $("#slot-blue"), green: $("#slot-green") };
-  const color = { blue: "#60A5FA", green: "#34D399" };
+  const color = { blue: "var(--blue)", green: "var(--green)" }; // follow the theme
   const other = (c) => (c === "blue" ? "green" : "blue");
   track(card);
 
@@ -213,18 +248,12 @@ async function stepLine(term, text, ms, dur = "", token) {
     statusEl.textContent = text;
     statusEl.style.color = kind === "ok" ? "var(--green)" : "var(--blue)";
   }
-  function stepTo(i) {
-    steps.forEach((li, j) => {
-      li.classList.toggle("active", j === i);
-      li.classList.toggle("done", j < i);
-    });
-  }
 
   function spawn() {
     const c = state.target;
     const el = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     el.setAttribute("r", "4");
-    el.setAttribute("fill", color[c]);
+    el.style.fill = color[c];
     layer.append(el);
     packets.push({ el, route: ["p-in", "p-" + c[0], "p-" + c[0] + "db"], seg: 0, d: 0, speed: rand(0.16, 0.22) });
   }
@@ -260,7 +289,6 @@ async function stepLine(term, text, ms, dur = "", token) {
 
   setSlot("blue", "live", 2);
   setSlot("green", "idle", 3);
-  stepTo(-1);
 
   (async () => {
     for (;;) {
@@ -272,63 +300,24 @@ async function stepLine(term, text, ms, dur = "", token) {
       await whenVisible(card);
       replay.disabled = true; skip = null;
 
-      stepTo(0); status(`◌ building v${nv} on your laptop`, "busy"); await pause(card, 1700);
-      stepTo(1); status("◌ uploading changed layers", "busy"); await pause(card, 1400);
-      stepTo(2); status(`◌ starting v${nv} next to v${v}`, "busy");
+      status(`◌ building v${nv} on your laptop`, "busy"); await pause(card, 1700);
+      status("◌ uploading changed layers", "busy"); await pause(card, 1400);
+      status(`◌ starting v${nv} next to v${v}`, "busy");
       state.ver[nxt] = nv; setSlot(nxt, "", nv); await pause(card, 1600);
-      stepTo(3); status(`◌ health check on v${nv}`, "busy");
+      status(`◌ health check on v${nv}`, "busy");
       setSlot(nxt, "checking"); await pause(card, 2200);
       setSlot(nxt, "");
-      stepTo(4); status(`● v${nv} is live`);
+      status(`● v${nv} is live`);
       state.target = nxt; state.live = nxt;
       setSlot(nxt, "live"); setSlot(cur, "draining");
       await pause(card, 1600);
-      stepTo(5); status(`◌ v${v} draining — in-flight requests finish`, "busy");
+      status(`◌ v${v} draining — in-flight requests finish`, "busy");
       await pause(card, 2200);
       setSlot(cur, "idle");
-      stepTo(6);
       status(`● v${nv} is live · zero downtime`);
       await pause(card, 2400);
-      stepTo(-1);
     }
   })();
-})();
-
-// ───────── Pull the plug ─────────
-(function plug() {
-  const btn = $("#plug-btn"), server = $("#server"), log = $("#boot-log");
-  const sites = $$("#sites li");
-  const text = $(".plug-text", btn);
-  log.innerHTML = `<span class="ln">${muted(`uptime 182 days · ${sites.length} apps · all healthy`)}</span>`;
-  const stamp = (s) => faint(`[${s.toFixed(1).padStart(4, " ")}s]`);
-
-  btn.addEventListener("click", async () => {
-    btn.disabled = true;
-    log.innerHTML = "";
-    server.classList.add("off");
-    sites.forEach((li) => { li.classList.add("down"); li.classList.remove("up"); $(".site-state", li).textContent = "—"; });
-    await sleep(1600);
-    server.classList.remove("off");
-    server.classList.add("booting");
-    const L = (t, html) => line(log, `${stamp(t)} ${html}`);
-    L(0, "⚡ power restored");
-    await sleep(800);
-    L(2.1, `systemd: ${muted("docker.service")} up`);
-    await sleep(550);
-    L(2.4, `caddy: last-known-good config`);
-    await sleep(550);
-    L(2.9, `<span class="c-acc">dokwalt</span>: reconciling ${sites.length} apps`);
-    for (const li of sites) {
-      await sleep(rand(380, 650));
-      li.classList.remove("down");
-      li.classList.add("up");
-      $(".site-state", li).textContent = "200 OK";
-    }
-    L(4.4, `${ok} all sites answer over HTTPS`);
-    server.classList.remove("booting");
-    text.textContent = "Pull it again";
-    btn.disabled = false;
-  });
 })();
 
 // ───────── Releases & rollback ─────────
@@ -481,28 +470,6 @@ async function stepLine(term, text, ms, dur = "", token) {
       while (box.children.length > 3) box.firstElementChild.remove();
     }
   })();
-})();
-
-// ───────── "Not in the box" strike-through ─────────
-(function nope() {
-  const list = $("#nope");
-  $$("li", list).forEach((li) => {
-    const t = li.firstChild;
-    const span = document.createElement("span");
-    span.textContent = t.textContent;
-    li.replaceChild(span, t);
-    li.style.setProperty("--sw", span.offsetWidth + "px");
-  });
-  const io = new IntersectionObserver(async ([e]) => {
-    if (!e.isIntersecting) return;
-    io.disconnect();
-    for (const li of $$("li", list)) {
-      li.style.setProperty("--sw", $("span", li).offsetWidth + "px");
-      li.classList.add("struck");
-      await sleep(reduced ? 0 : 230);
-    }
-  }, { threshold: 0.4 });
-  io.observe(list);
 })();
 
 // ───────── TUI dashboard ─────────
@@ -686,13 +653,13 @@ async function stepLine(term, text, ms, dur = "", token) {
         line(t, title("Doctor") + "\n");
         const rows = [
           ["Local Docker", "Docker 28.4.0 (builds run here)"],
-          ["Connection", "prod (deploy@203.0.113.7), daemon v0.1.1 on linux/arm64"],
+          ["Connection", "prod (deploy@203.0.113.7), daemon v0.3.0 on linux/arm64"],
           ["Docker", "Docker 29.8.2 (API 1.56), 4 CPUs, 7.9 GiB RAM"],
           ["Docker live-restore", "containers keep running while dockerd restarts or upgrades"],
           ["Start on boot: docker", "docker starts at boot"],
           ["Start on boot: dokwalt", "dokwalt starts at boot"],
           ["Clock", "synchronized with NTP"],
-          ["DokWalt daemon", "build v0.1.1, 27.7 MiB RSS"],
+          ["DokWalt daemon", "build v0.3.0, 27.7 MiB RSS"],
           ["Proxy (Caddy)", "running, 45.1 MiB RSS, config loaded"],
           ["Domain shop.example.com", "ok"],
         ];
