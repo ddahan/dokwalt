@@ -130,6 +130,7 @@ type Plan struct {
 	Data     map[string]any // nil when there are no stateful services
 	App      map[string]any // nil when there are no stateless services; project name set by Render
 	Volumes  []string       // volume names DokWalt must create before `up`
+	Uses     []string       // apps whose stateful services join this stage's network (x-dokwalt.uses)
 	Warnings []string
 	Missing  []string // ${VARS} referenced without default and absent from config
 }
@@ -164,6 +165,25 @@ func Transform(in Input) (Plan, error) {
 	topVolumes, _ := src["volumes"].(map[string]any)
 	netName := Network(in.App, in.Stage)
 	warn := func(f string, a ...any) { plan.Warnings = append(plan.Warnings, fmt.Sprintf(f, a...)) }
+
+	uses, unknown, err := Uses(src)
+	if err != nil {
+		return plan, err
+	}
+	for _, k := range unknown {
+		warn("x-dokwalt.%s ignored (only `uses` is supported)", k)
+	}
+	for _, u := range uses {
+		if u == in.App {
+			return plan, fmt.Errorf("x-dokwalt.uses: an app can't use itself")
+		}
+		// The provider joins this network under its app name, which must not
+		// shadow one of this app's own services.
+		if _, ok := services[u]; ok {
+			return plan, fmt.Errorf("x-dokwalt.uses: %q is also a service of this app — rename the service, it would hide the shared one", u)
+		}
+	}
+	plan.Uses = uses
 
 	// One-shot jobs: something depends on them with service_completed_successfully.
 	oneShot := map[string]bool{}
@@ -417,6 +437,53 @@ func Transform(in Input) (Plan, error) {
 		}
 	}
 	return plan, nil
+}
+
+// Uses reads the top-level `x-dokwalt: {uses: [app, …]}` extension: other
+// apps whose stateful services (e.g. a shared Postgres) this app reaches by
+// their app name. It returns the sorted app names and any unknown keys.
+func Uses(model map[string]any) (uses, unknown []string, err error) {
+	raw, ok := model["x-dokwalt"]
+	if !ok || raw == nil {
+		return nil, nil, nil
+	}
+	ext, ok := raw.(map[string]any)
+	if !ok {
+		return nil, nil, fmt.Errorf("x-dokwalt must be a mapping, e.g. `x-dokwalt: {uses: [postgres]}`")
+	}
+	for k := range ext {
+		if k != "uses" {
+			unknown = append(unknown, k)
+		}
+	}
+	sort.Strings(unknown)
+	list, ok := ext["uses"].([]any)
+	if !ok && ext["uses"] != nil {
+		return nil, unknown, fmt.Errorf("x-dokwalt.uses must be a list of app names, e.g. `uses: [postgres]`")
+	}
+	seen := map[string]bool{}
+	for _, v := range list {
+		name, _ := v.(string)
+		if err := ValidName(name); err != nil {
+			return nil, unknown, fmt.Errorf("x-dokwalt.uses: %w", err)
+		}
+		if !seen[name] {
+			seen[name] = true
+			uses = append(uses, name)
+		}
+	}
+	sort.Strings(uses)
+	return uses, unknown, nil
+}
+
+// SharedAliases are the names a provider's stateful service gets on a
+// consumer's network: always "<app>-<service>", plus "<app>" alone when the
+// provider has a single stateful service (the common case: postgres:5432).
+func SharedAliases(provider, service string, single bool) []string {
+	if single {
+		return []string{provider, provider + "-" + service}
+	}
+	return []string{provider + "-" + service}
 }
 
 // RenderApp returns the color project for a given color.

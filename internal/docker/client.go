@@ -355,9 +355,14 @@ func (c *Client) EnsureNetwork(ctx context.Context, name string, labels map[stri
 	return c.CreateNetwork(ctx, name, labels)
 }
 
-// ConnectNetwork attaches a container to a network; already-connected is not an error.
-func (c *Client) ConnectNetwork(ctx context.Context, network, container string) error {
-	err := c.do(ctx, c.http, "POST", "/networks/"+network+"/connect", nil, map[string]any{"Container": container}, nil)
+// ConnectNetwork attaches a container to a network, optionally under DNS
+// aliases; already-connected is not an error.
+func (c *Client) ConnectNetwork(ctx context.Context, network, container string, aliases ...string) error {
+	body := map[string]any{"Container": container}
+	if len(aliases) > 0 {
+		body["EndpointConfig"] = map[string]any{"Aliases": aliases}
+	}
+	err := c.do(ctx, c.http, "POST", "/networks/"+network+"/connect", nil, body, nil)
 	var ae *apiError
 	if errors.As(err, &ae) && (ae.Status == http.StatusForbidden || strings.Contains(ae.Message, "already exists")) {
 		return nil

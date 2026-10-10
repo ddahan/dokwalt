@@ -386,6 +386,22 @@ func (c *Client) Output(cmd string) (string, error) {
 	return out.String(), nil
 }
 
+// Stream runs a command and copies its stdout to w. There is no PTY, so
+// binary output (e.g. pg_dump) arrives intact. Stderr goes in the error.
+func (c *Client) Stream(cmd string, w io.Writer) error {
+	sess, err := c.NewSession()
+	if err != nil {
+		return err
+	}
+	defer sess.Close()
+	var errb bytes.Buffer
+	sess.Stdout, sess.Stderr = w, &errb
+	if err := sess.Run(cmd); err != nil {
+		return fmt.Errorf("%w: %s", err, strings.TrimSpace(errb.String()))
+	}
+	return nil
+}
+
 // Upload writes a local file to a remote path (via `cat`, no SFTP needed).
 func (c *Client) Upload(local, remote string, mode os.FileMode, progress func(n int64)) error {
 	f, err := os.Open(local)

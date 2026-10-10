@@ -260,14 +260,17 @@ type DoctorCheck struct {
 	Hint    string `json:"hint,omitempty"`
 }
 
-// DBTarget tells the CLI where to tunnel for db:connect.
+// DBTarget tells the CLI where to tunnel for db:connect, and where to run
+// pg_dump for db:backup.
 type DBTarget struct {
-	Service  string `json:"service"`
-	Kind     string `json:"kind"`    // postgres | mysql | mongo | redis | unknown
-	Address  string `json:"address"` // ip:port reachable from the server
-	User     string `json:"user,omitempty"`
-	Password string `json:"password,omitempty"`
-	Database string `json:"database,omitempty"`
+	Service   string `json:"service"`
+	Kind      string `json:"kind"`    // postgres | mysql | mongo | redis | unknown
+	Address   string `json:"address"` // ip:port reachable from the server
+	User      string `json:"user,omitempty"`
+	Password  string `json:"password,omitempty"`
+	Database  string `json:"database,omitempty"`
+	Container string `json:"container,omitempty"` // container running the database
+	Provider  string `json:"provider,omitempty"`  // owning stage when shared (x-dokwalt.uses), e.g. "postgres/production"
 }
 
 type ExecTarget struct {

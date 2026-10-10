@@ -101,6 +101,13 @@ func (e *Engine) Reconcile(ctx context.Context) error {
 		changed = changed || fixed
 	}
 	e.cleanupStale(ctx, stages, all)
+	if changed {
+		// Containers were just (re)started: shared links need their current names.
+		if fresh, err := e.Docker.Containers(ctx, compose.LabelApp); err == nil {
+			all = fresh
+		}
+	}
+	e.syncShared(ctx, stages, all)
 
 	// Caddy must run the config on disk, with fresh upstreams.
 	routes, err := e.Routes(ctx, nil)

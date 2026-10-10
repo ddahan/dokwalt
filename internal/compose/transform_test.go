@@ -162,3 +162,46 @@ func TestValidName(t *testing.T) {
 		}
 	}
 }
+
+func TestUses(t *testing.T) {
+	m := load(t)
+	m["x-dokwalt"] = map[string]any{"uses": []any{"postgres", "search", "postgres"}, "other": true}
+	plan, err := Transform(Input{App: "shop", Stage: "production", Compose: m,
+		Images: map[string]string{"web": "w", "migrate": "w"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(plan.Uses, []string{"postgres", "search"}) {
+		t.Fatalf("uses = %v", plan.Uses)
+	}
+	if !strings.Contains(strings.Join(plan.Warnings, "\n"), "x-dokwalt.other ignored") {
+		t.Fatalf("missing warning for unknown key: %v", plan.Warnings)
+	}
+	// x-dokwalt never reaches the rendered projects.
+	if _, ok := plan.Data["x-dokwalt"]; ok {
+		t.Fatal("x-dokwalt leaked into the data project")
+	}
+
+	for name, uses := range map[string]any{
+		"self":      []any{"shop"},
+		"shadowing": []any{"cache"}, // a service of this app
+		"invalid":   []any{"Bad_Name"},
+		"not list":  "postgres",
+	} {
+		m := load(t)
+		m["x-dokwalt"] = map[string]any{"uses": uses}
+		if _, err := Transform(Input{App: "shop", Stage: "production", Compose: m,
+			Images: map[string]string{"web": "w", "migrate": "w"}}); err == nil {
+			t.Errorf("%s: expected an error", name)
+		}
+	}
+}
+
+func TestSharedAliases(t *testing.T) {
+	if got := SharedAliases("postgres", "db", true); !reflect.DeepEqual(got, []string{"postgres", "postgres-db"}) {
+		t.Fatalf("single: %v", got)
+	}
+	if got := SharedAliases("data", "redis", false); !reflect.DeepEqual(got, []string{"data-redis"}) {
+		t.Fatalf("several: %v", got)
+	}
+}

@@ -190,22 +190,28 @@ command: `dokwalt exec --service web -- ./bin/migrate status`.
 
 DokWalt doesn't back up your databases automatically. Two approaches.
 
-**Logical dump (recommended)** through the tunnel, while the app runs:
+**Logical dump (recommended)** to your Mac, while the app runs:
 
-```bash
-dokwalt db:connect --tunnel-only --port 5433     # terminal 1
-pg_dump -Fc -f blog-$(date +%F).dump \
-  "postgres://blog:s3cr3t@127.0.0.1:5433/blog"   # terminal 2
+```text
+$ dokwalt db:backup
+ℹ Dumping database blog from db (production)…
+✓ Saved blog-production-20261010-153000.dump (2.4 MB in 1.2s)
+  Restore: pg_restore --clean --if-exists --no-owner -d <postgres-url> blog-production-20261010-153000.dump
 ```
 
-Or dump inside the container, then copy the file off the server. `exec`
-allocates a terminal, so never redirect binary output through it:
+- `pg_dump --format=custom` runs **inside** the database container, through
+  its Unix socket, and the dump streams back over SSH. Nothing is exposed, and
+  no Postgres client is needed on the Mac.
+- The file is written as `<file>.part` and renamed only once pg_dump
+  succeeded and the file is a valid archive, so a failed dump never leaves a
+  file that looks good.
+- `-o <file>` picks the file, `--service` the database service, and
+  `--database` another database of the same server.
+- Postgres only. For other kinds, dump through `db:connect --tunnel-only`
+  with the kind's own tool.
 
-```bash
-dokwalt exec --service db -- pg_dump -U blog -Fc -f /tmp/blog.dump blog
-ssh pi.home docker cp dw-blog-production-data-db-1:/tmp/blog.dump .
-scp pi.home:blog.dump .
-```
+`dokwalt exec` allocates a terminal, so never redirect binary output (a dump)
+through it.
 
 **Volume archive** on the server. Stop the stage first for a consistent copy:
 
@@ -218,6 +224,64 @@ dokwalt start
 
 Restore a dump with `pg_restore -d "postgres://…@127.0.0.1:5433/blog"`.
 Full-server backups: `dokwalt docs raspberry-pi`.
+
+## One database server for several apps
+
+Running one Postgres per app costs memory on a small server. Instead, deploy
+the database server as its own app, and let other apps **use** it:
+
+```yaml
+# postgres/compose.yaml: an ordinary app with one stateful service
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql
+volumes:
+  pgdata:
+```
+
+```yaml
+# blog/compose.yaml
+x-dokwalt:
+  uses: [postgres]          # app names
+services:
+  web:
+    build: .
+    environment:
+      DATABASE_URL: postgres://blog:${BLOG_DB_PASSWORD}@postgres:5432/blog
+```
+
+- **Networking.** The provider's stateful containers join the consumer's
+  private network under the provider's **app name** (`postgres`), and also as
+  `<app>-<service>` (`postgres-db`). When the provider has several stateful
+  services, only the `<app>-<service>` names exist. Consumers still share no
+  network with each other: `blog` can't reach another app that uses
+  `postgres`.
+- **Stages.** A consumer stage uses the provider stage with the same name
+  if it exists, otherwise its production.
+- **Order.** Deploy the provider first. A consumer deploy fails early if the
+  provider is missing or not deployed, and attaches the provider **before**
+  the new version starts, so migrations can already reach it.
+- **Self-healing.** When the provider's container is recreated (an image
+  change, a reboot), the reconciler attaches it again within seconds. Removing
+  `uses` and redeploying detaches it.
+- **Safety.** `apps:destroy` refuses to delete a provider that other apps
+  still use.
+- **One role and database per app.** DokWalt doesn't create them; do it once
+  per app with `dokwalt db:connect -a postgres`:
+  `CREATE ROLE blog LOGIN PASSWORD '…'; CREATE DATABASE blog OWNER blog;`
+- **From a consumer**, `db:connect` and `db:backup` find the shared database
+  and use the app's own role and database, read from the connection URL whose
+  host is the provider (config vars first, `DATABASE_URL` preferred, then the
+  compose environment). Without such a URL, they use the provider's superuser
+  on a database named after the app.
+
+The provider stays an ordinary app: it has its own config, releases and
+logs, and nothing about it is managed. Backups are still up to you, and they
+matter more now that one server holds every app's data.
 
 ## Major version upgrades
 

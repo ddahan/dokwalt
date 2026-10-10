@@ -124,11 +124,75 @@ printf 'PING\r\nQUIT\r\n' | nc -w 3 127.0.0.1 16399 | grep -q PONG || fail "redi
 kill $TPID 2>/dev/null || true
 pass "redis answered PONG through SSH"
 
+step "Shared Postgres (x-dokwalt.uses) and db:backup"
+srv() { docker exec $SERVER "$@"; }
+webof() { srv docker ps -q --filter "label=dokwalt.app=$1" --filter label=dokwalt.service=web --filter label=dokwalt.role=app | head -1; }
+mkdir -p "$WORK/pg" "$WORK/blog"
+cat > "$WORK/pg/compose.yaml" <<'EOF'
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes: [pgdata:/var/lib/postgresql]
+    healthcheck: {test: [CMD-SHELL, pg_isready -U postgres], interval: 2s, retries: 30}
+volumes:
+  pgdata:
+EOF
+blog_compose() { # $1: extra top-level YAML
+  cat > "$WORK/blog/compose.yaml" <<EOF
+$1
+services:
+  web:
+    image: alpine:3.20
+    command: [sleep, infinity]
+    environment:
+      DATABASE_URL: postgres://blog:\${BLOG_DB_PASSWORD}@pg:5432/blog
+EOF
+}
+blog_compose "x-dokwalt: {uses: [pg]}"
+(cd "$WORK/blog" && $D apps:create blog >/dev/null && $D config:set BLOG_DB_PASSWORD=blogpw >/dev/null)
+out=$(cd "$WORK/blog" && $D deploy 2>&1) && fail "deploy succeeded before the provider exists"
+grep -q 'app "pg"' <<<"$out" || fail "unclear error without provider: $out"
+(cd "$WORK/pg" && $D apps:create pg >/dev/null && $D config:set POSTGRES_PASSWORD=rootpw >/dev/null && $D deploy >/dev/null)
+# SQL piped through `dokwalt exec` (stdin, no TTY), as infra provisioning scripts do.
+printf "CREATE ROLE blog LOGIN PASSWORD 'blogpw';\nCREATE DATABASE blog OWNER blog;\n" \
+  | (cd "$WORK/pg" && $D exec --service db -- psql -qU postgres -v ON_ERROR_STOP=1) >/dev/null || fail "piped exec (provisioning)"
+printf "CREATE TABLE posts (id int); INSERT INTO posts VALUES (1);\n" \
+  | (cd "$WORK/pg" && $D exec --service db -- psql -qU blog -d blog -v ON_ERROR_STOP=1) >/dev/null || fail "piped exec (blog table)"
+(cd "$WORK/blog" && $D deploy >/dev/null) || fail "consumer deploy failed"
+srv docker exec "$(webof blog)" nc -z -w 3 pg 5432 || fail "consumer can't reach the shared postgres"
+srv docker exec "$(webof blog)" nc -z -w 3 cache 6379 2>/dev/null && fail "consumer reaches another app's service"
+srv docker exec "$(webof shop)" python -c "import socket; socket.create_connection(('pg', 5432), 3)" 2>/dev/null \
+  && fail "non-consumer reaches the shared postgres"
+pass "blog reaches pg:5432; other apps stay isolated"
+
+(cd "$WORK/blog" && $D db:backup -o "$WORK/blog.dump" >/dev/null) || fail "db:backup failed"
+docker run --rm -v "$WORK/blog.dump:/d.dump:ro" postgres:18-alpine pg_restore -l /d.dump | grep -q "TABLE DATA public posts" \
+  || fail "backup doesn't contain the posts table"
+pass "db:backup downloaded the blog database with the app's own role"
+
+sed -i.bak 's/interval: 2s/interval: 3s/' "$WORK/pg/compose.yaml" # recreates the provider container
+(cd "$WORK/pg" && $D deploy >/dev/null)
+srv docker exec "$(webof blog)" nc -z -w 3 pg 5432 || fail "link lost after the provider was recreated"
+out=$($D apps:destroy pg --confirm pg 2>&1) && fail "destroyed a provider still in use"
+grep -q "used by blog/production" <<<"$out" || fail "unclear destroy refusal: $out"
+pass "link survives a provider redeploy; in-use provider can't be destroyed"
+
 step "Reboot"
 docker restart $SERVER >/dev/null
 for i in $(seq 1 120); do get shop.localhost | grep -q greeting && break; sleep 1; done
 get shop.localhost | grep -q "^v3 " || fail "site not back after reboot"
-pass "site back after reboot in ~${i}s, no manual action"
+for _ in $(seq 1 60); do srv docker exec "$(webof blog)" nc -z -w 2 pg 5432 2>/dev/null && break; sleep 1; done
+srv docker exec "$(webof blog)" nc -z -w 3 pg 5432 || fail "shared postgres unreachable after reboot"
+pass "site back after reboot in ~${i}s, no manual action; shared postgres linked"
+
+step "Dropping x-dokwalt.uses unlinks the provider"
+blog_compose ""
+(cd "$WORK/blog" && $D deploy >/dev/null)
+srv docker inspect -f '{{range $k, $v := .NetworkSettings.Networks}}{{$k}} {{end}}' dw-pg-production-data-db-1 | grep -q dw-blog-production \
+  && fail "provider still on the consumer's network"
+pass "pg left blog's network"
 
 step "Power cut"
 docker kill $SERVER >/dev/null && docker start $SERVER >/dev/null

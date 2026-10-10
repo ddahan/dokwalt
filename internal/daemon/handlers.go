@@ -1053,52 +1053,74 @@ func (d *Daemon) dbTarget(w http.ResponseWriter, r *http.Request) error {
 		return badRequest("%s is not deployed", st.Key())
 	}
 	service := r.URL.Query().Get("service")
+	port, _ := strconv.Atoi(r.URL.Query().Get("port"))
+	if service == "" && len(dbCandidates(plan)) == 0 && len(plan.Uses) > 0 {
+		t, err := d.sharedDBTarget(r.Context(), st, plan, port)
+		if err != nil {
+			return err
+		}
+		return writeJSON(w, t)
+	}
+	t, err := d.dbTargetOf(r.Context(), st, plan, service, port)
+	if err != nil {
+		return err
+	}
+	return writeJSON(w, t)
+}
+
+// dbCandidates lists a plan's database services, SQL databases before caches.
+func dbCandidates(plan *compose.Plan) []string {
+	var cands []string
+	for _, s := range plan.Services {
+		if dbKind(s.Image) != "unknown" {
+			cands = append(cands, s.Name)
+		}
+	}
+	sort.SliceStable(cands, func(i, j int) bool {
+		si, _ := plan.Service(cands[i])
+		return dbKind(si.Image) != "redis"
+	})
+	return cands
+}
+
+// dbTargetOf resolves a database service of a stage, with the credentials
+// found in its container's environment.
+func (d *Daemon) dbTargetOf(ctx context.Context, st store.Stage, plan *compose.Plan, service string, port int) (api.DBTarget, error) {
 	if service == "" {
-		var cands []string
-		for _, s := range plan.Services {
-			if dbKind(s.Image) != "unknown" {
-				cands = append(cands, s.Name)
-			}
-		}
+		cands := dbCandidates(plan)
 		if len(cands) == 0 {
-			return badRequest("no database service detected — pass --service")
+			return api.DBTarget{}, badRequest("no database service detected — pass --service")
 		}
-		// Prefer SQL databases over caches.
-		sort.SliceStable(cands, func(i, j int) bool {
-			si, _ := plan.Service(cands[i])
-			return dbKind(si.Image) != "redis"
-		})
 		service = cands[0]
 	}
 	svc, ok := plan.Service(service)
 	if !ok {
-		return badRequest("service %q not found", service)
+		return api.DBTarget{}, badRequest("service %q not found", service)
 	}
-	containers, err := d.engine.StageContainers(r.Context(), st)
+	containers, err := d.engine.StageContainers(ctx, st)
 	if err != nil {
-		return err
+		return api.DBTarget{}, err
 	}
 	cs := containers[service]
 	if len(cs) == 0 || cs[0].State != "running" {
-		return badRequest("service %s is not running", service)
+		return api.DBTarget{}, badRequest("service %s is not running", service)
 	}
-	ci, err := d.docker.Inspect(r.Context(), cs[0].ID)
+	ci, err := d.docker.Inspect(ctx, cs[0].ID)
 	if err != nil {
-		return err
+		return api.DBTarget{}, err
 	}
 	kind := dbKind(svc.Image)
-	port := dbPorts[compose.ImageKind(svc.Image)]
-	if p := r.URL.Query().Get("port"); p != "" {
-		port, _ = strconv.Atoi(p)
+	if port == 0 {
+		port = dbPorts[compose.ImageKind(svc.Image)]
 	}
 	if port == 0 && len(svc.Ports) > 0 {
 		port = svc.Ports[0]
 	}
 	if port == 0 {
-		return badRequest("unknown port for %s — pass --remote-port", service)
+		return api.DBTarget{}, badRequest("unknown port for %s — pass --remote-port", service)
 	}
 	env := ci.EnvMap()
-	t := api.DBTarget{Service: service, Kind: kind, Address: fmt.Sprintf("%s:%d", cs[0].IP, port)}
+	t := api.DBTarget{Service: service, Kind: kind, Address: fmt.Sprintf("%s:%d", cs[0].IP, port), Container: cs[0].Name}
 	switch kind {
 	case "postgres":
 		t.User = firstSet(env["POSTGRES_USER"], "postgres")
@@ -1117,7 +1139,7 @@ func (d *Daemon) dbTarget(w http.ResponseWriter, r *http.Request) error {
 	case "redis":
 		t.Password = firstSet(env["REDIS_PASSWORD"], env["VALKEY_PASSWORD"])
 	}
-	return writeJSON(w, t)
+	return t, nil
 }
 
 func firstSet(v ...string) string {

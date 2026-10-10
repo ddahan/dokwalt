@@ -194,6 +194,16 @@ preferred), `--tunnel-only` (print the URL and wait), `--port` (local port,
 default random), `--remote-port` (container port, default: the database's
 standard port or the first declared port).
 
+```bash
+# Download a Postgres dump (pg_dump -Fc) to this folder
+dokwalt db:backup
+dokwalt db:backup -o ~/Backups/blog.dump
+```
+
+Flags: `-o, --output` (default `<database>-<stage>-<time>.dump`),
+`--service`, `--database`. Both commands also work from an app that uses a
+shared database (`x-dokwalt.uses`): see `dokwalt docs databases`.
+
 ## Pipelines
 
 ```bash

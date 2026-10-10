@@ -120,6 +120,7 @@ and is dropped: the data project is always started and ready first.
 | named volume                         | External volume `dw-<app>-<stage>-<vol>`, created by the daemon |
 | `external: true` volume              | Kept as-is                                                 |
 | `networks:`                          | Replaced by the stage network, service name as alias       |
+| top-level `x-dokwalt: {uses: [app]}` | Those apps' stateful services join the stage network, by app name |
 | `depends_on` across data/color split | Dropped, both directions                                   |
 | `restart:`                           | Default `unless-stopped` (`"no"` for one-shot jobs)        |
 | `logging:`                           | Default `local`, 10m × 3 if unset                          |
@@ -193,6 +194,20 @@ runs, so rendered files never contain values. Stateful services only see
 what you interpolate: `db` above uses `POSTGRES_PASSWORD: ${DB_PASSWORD}`.
 A config change recreates the database only if it changes a variable its
 definition uses. See `dokwalt docs config`.
+
+## Shared services: `x-dokwalt`
+
+The only DokWalt-specific key, at the top level of the compose file. It lets
+an app reach another app's stateful services, typically one Postgres for
+every app on the server:
+
+```yaml
+x-dokwalt:
+  uses: [postgres]   # then connect to postgres:5432
+```
+
+Compose ignores `x-` keys, so the file still works with
+`docker compose up` locally. Details: `dokwalt docs databases`.
 
 ## Checklist: things to fix in your compose
 

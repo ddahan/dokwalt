@@ -16,6 +16,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 
 	"github.com/ddahan/dokwalt/internal/api"
 	"github.com/ddahan/dokwalt/internal/client"
@@ -23,7 +24,7 @@ import (
 )
 
 func observeCommands() []*cobra.Command {
-	return []*cobra.Command{logsCmd(), execCmd(), dbConnectCmd(), topCmd(), metricsCmd(),
+	return []*cobra.Command{logsCmd(), execCmd(), dbConnectCmd(), dbBackupCmd(), topCmd(), metricsCmd(),
 		alertsCmd(), alertsAddCmd(), alertsRemoveCmd(), alertsTestCmd(), alertsSetCmd(), doctorCmd(), docsCmd()}
 }
 
@@ -135,8 +136,11 @@ func execCmd() *cobra.Command {
 			for i, a := range args {
 				quoted[i] = shellQuote(a)
 			}
+			// A terminal only when both ends are one: with piped input
+			// (`cat dump | dokwalt exec -- pg_restore …`), `docker exec -t`
+			// would refuse ("the input device is not a TTY").
 			flags := "-i"
-			if ui.IsTTY() {
+			if ui.IsTTY() && term.IsTerminal(int(os.Stdin.Fd())) {
 				flags = "-it"
 			}
 			remote := fmt.Sprintf("docker exec %s %s %s", flags, t.Container, strings.Join(quoted, " "))
@@ -199,6 +203,9 @@ func dbConnectCmd() *cobra.Command {
 					tunnelOnly = true
 				}
 			}
+			if t.Provider != "" {
+				t.Service += " of " + t.Provider
+			}
 			if tunnelOnly || t.Kind == "unknown" {
 				fmt.Println(ui.TitleS.Render("◆ Tunnel to " + t.Service + " (" + t.Kind + ")"))
 				fmt.Println(ui.KV("Local address", fmt.Sprintf("127.0.0.1:%d", local), "URL", ui.Bold.Render(dbURL)))
@@ -218,6 +225,107 @@ func dbConnectCmd() *cobra.Command {
 	cmd.Flags().IntVar(&port, "port", 0, "local port (default: random free port)")
 	cmd.Flags().IntVar(&remotePort, "remote-port", 0, "database port in the container (default: detected)")
 	return cmd
+}
+
+func dbBackupCmd() *cobra.Command {
+	var service, output, database string
+	cmd := &cobra.Command{
+		Use: "db:backup", Short: "Download a Postgres dump (pg_dump -Fc) to this machine",
+		Long: "Run pg_dump inside the database container and stream the dump over SSH to a local file. " +
+			"Nothing is exposed and no Postgres client is needed on this machine. Works for the app's own " +
+			"Postgres service and for a shared one (x-dokwalt.uses). Restore it with pg_restore.",
+		Example: "  dokwalt db:backup\n  dokwalt db:backup -o ~/Backups/blog.dump\n  dokwalt db:backup -a postgres --database blog",
+		Args:    cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			s, app, stage, err := appStage(cmd.Context())
+			if err != nil {
+				return err
+			}
+			defer s.Close()
+			q := url.Values{}
+			if service != "" {
+				q.Set("service", service)
+			}
+			var t api.DBTarget
+			if err := s.c.Get(cmd.Context(), client.StagePath(app, stage, "/db?"+q.Encode()), &t); err != nil {
+				return err
+			}
+			if t.Kind != "postgres" {
+				return fmt.Errorf("db:backup supports Postgres only (%s is %s) — see `dokwalt docs databases` for other kinds", t.Service, t.Kind)
+			}
+			if t.Container == "" {
+				return fmt.Errorf("the server's DokWalt is too old for db:backup — run `dokwalt server upgrade`")
+			}
+			if database != "" {
+				t.Database = database
+			}
+			if output == "" {
+				output = fmt.Sprintf("%s-%s-%s.dump", t.Database, stage, time.Now().Format("20060102-150405"))
+			}
+			// pg_dump connects through the container's Unix socket, where the
+			// official images trust local users: no password crosses the wire.
+			remote := fmt.Sprintf("docker exec %s pg_dump --format=custom --username=%s --dbname=%s",
+				t.Container, shellQuote(t.User), shellQuote(t.Database))
+
+			part := output + ".part"
+			f, err := os.Create(part)
+			if err != nil {
+				return err
+			}
+			defer os.Remove(part) // no-op once renamed
+			from := t.Service
+			if t.Provider != "" {
+				from += " of " + t.Provider
+			}
+			ui.Info("Dumping database %s from %s (%s)…", ui.Bold.Render(t.Database), from, label(app, stage))
+			start := time.Now()
+			if s.ssh == nil {
+				var errb strings.Builder
+				c := exec.CommandContext(cmd.Context(), "sh", "-c", remote)
+				c.Stdout, c.Stderr = f, &errb
+				if err = c.Run(); err != nil {
+					err = fmt.Errorf("%w: %s", err, strings.TrimSpace(errb.String()))
+				}
+			} else {
+				err = s.ssh.Stream(remote, f)
+			}
+			if cerr := f.Close(); err == nil {
+				err = cerr
+			}
+			if err != nil {
+				return fmt.Errorf("pg_dump failed: %w", err)
+			}
+			if err := checkDumpHeader(part); err != nil {
+				return err
+			}
+			if err := os.Rename(part, output); err != nil {
+				return err
+			}
+			st, _ := os.Stat(output)
+			ui.Success("Saved %s (%s in %s)", ui.Bold.Render(output), ui.Bytes(uint64(st.Size())), time.Since(start).Round(100*time.Millisecond))
+			ui.Hint("Restore: %s", ui.Code("pg_restore --clean --if-exists --no-owner -d <postgres-url> "+output))
+			return nil
+		},
+	}
+	cmd.Flags().StringVar(&service, "service", "", "database service (default: detected, or the shared one)")
+	cmd.Flags().StringVarP(&output, "output", "o", "", "local file (default: <database>-<stage>-<time>.dump)")
+	cmd.Flags().StringVar(&database, "database", "", "database to dump (default: the app's)")
+	return cmd
+}
+
+// checkDumpHeader makes sure a file is a pg_dump custom-format archive, not
+// an error message or an empty file.
+func checkDumpHeader(path string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	head := make([]byte, 5)
+	if _, err := io.ReadFull(f, head); err != nil || string(head) != "PGDMP" {
+		return fmt.Errorf("the dump is not a valid pg_dump archive")
+	}
+	return nil
 }
 
 func serveTunnel(ctx context.Context, ln net.Listener, c *client.Client, addr string) {

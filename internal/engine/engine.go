@@ -154,6 +154,9 @@ func (e *Engine) deployLocked(ctx context.Context, st store.Stage, spec DeploySp
 	if err != nil {
 		return 0, err
 	}
+	if err := e.checkUses(st, plan.Uses); err != nil {
+		return 0, err
+	}
 	for svc, img := range spec.Images {
 		ok, err := e.Docker.ImageExists(ctx, img.Ref)
 		if err != nil {
@@ -274,6 +277,9 @@ func (e *Engine) rollout(ctx context.Context, st store.Stage, rel *store.Release
 		emit(ev("data", "warn", "No stateful services anymore: stopping the data project (volumes are kept)"))
 		_ = e.compose(ctx, dataProject, "", nil, logLine("data"), "down", "--remove-orphans")
 	}
+	if err := e.linkShared(ctx, st, plan.Uses, emit); err != nil {
+		return err
+	}
 
 	var newProject string
 	if plan.App != nil {
@@ -330,6 +336,9 @@ func (e *Engine) rollout(ctx context.Context, st store.Stage, rel *store.Release
 		return err
 	}
 	emit(ev("switch", "done", fmt.Sprintf("v%d is live", rel.Version)))
+	// This stage may provide a shared service whose containers were just
+	// recreated, or have stopped using one: fix every attachment now.
+	e.syncSharedNow(ctx)
 
 	if old := st.ActiveColor; old != "" && old != rel.Color {
 		emit(ev("drain", "done", fmt.Sprintf("Previous version stops in %s (in-flight requests finish)", e.Drain)))
@@ -963,6 +972,9 @@ func (e *Engine) DestroyApp(ctx context.Context, app string, emit Emit) error {
 	a, err := e.Store.GetApp(app)
 	if err != nil {
 		return err
+	}
+	if users := e.Consumers(app); len(users) > 0 {
+		return fmt.Errorf("%s is used by %s (x-dokwalt.uses) — remove it from their compose files and redeploy them first", app, strings.Join(users, ", "))
 	}
 	stages, err := e.Store.Stages(a.ID)
 	if err != nil {

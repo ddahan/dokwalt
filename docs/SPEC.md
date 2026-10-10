@@ -87,7 +87,7 @@ Nothing else: no web UI, no cluster, no registry, no extra datastore.
 
 - Web UI or browser dashboard.
 - Docker Swarm, Kubernetes, clusters, multi-node scheduling. (Several *independent* servers via contexts: yes.)
-- Managed databases/add-ons, automated DB backups.
+- Managed databases/add-ons, automated DB backups. (One app may still *use* another app's database server, §6.3 `x-dokwalt.uses`; the provider stays an ordinary app.)
 - GitHub integration, push-to-deploy, review apps (the architecture leaves room, §17).
 - CI/CD, buildpacks, server-side builds, paid external services.
 - Multi-user accounts and roles.
@@ -559,6 +559,7 @@ Warnings in the deploy output:
 | Bind mount with any other absolute host path | Allowed; the path must exist on the server | warn |
 | Named volume | Top-level definition replaced by an external volume `dw-<app>-<stage>-<vol>` that the daemon creates. Shared by the data, blue and green projects. `external: true` volumes are kept as-is | — |
 | `networks` | Replaced by the single stage network `dw-<app>-<stage>`, with the service name as alias | — |
+| `x-dokwalt.uses: [<app>…]` (top level) | Shared services: the stateful containers of those apps join this stage's network (§11.5). Rejected if an app uses itself or a used app name is also one of its services; unknown `x-dokwalt` keys warn | error / warn |
 | `restart` | Default `unless-stopped` (`no` for one-shot jobs) if unset | — |
 | `logging` | Default `driver: local`, `max-size: 10m`, `max-file: 3` if unset | — |
 | `labels` | User labels kept; `dokwalt.*` labels set (and overwritten) by DokWalt | — |
@@ -945,6 +946,10 @@ dokwalt exec                                  # shell in web
 dokwalt exec --service web -- python manage.py migrate
 ```
 
+#### `dokwalt db:backup [--service <svc>] [-o/--output <file>] [--database <name>]`
+
+Postgres only. Resolves the target like `db:connect` (`GET …/db`, which also returns the container name), then runs `docker exec <container> pg_dump --format=custom --username=<user> --dbname=<db>` over an SSH session **without a PTY**, so the binary stream arrives intact, into `<file>.part`. pg_dump connects through the container's Unix socket (trusted by the official images), so no password is sent. The file is renamed to `<file>` (default `<database>-<stage>-<YYYYMMDD-HHMMSS>.dump`) only if pg_dump exited 0 and the file starts with the `PGDMP` magic.
+
 #### `dokwalt db:connect [--service <svc>] [--tunnel-only] [--port <n>] [--remote-port <n>]`
 
 - **Target.** Picks the database service (or `--service`; SQL databases are preferred over Redis-like ones) and detects its kind from the image (`postgres`/`postgis`/`timescaledb` → Postgres; `mysql`/`mariadb`/`percona` → MySQL; `mongo`; `redis`/`valkey`/`keydb`/`dragonfly` → Redis).
@@ -1189,6 +1194,7 @@ Then, for each **public stateless** service (it has a non-redirect domain), each
 1. **CLI** `GET …/db?service=&port=` → D picks the service (given, or the first service with a recognised database image, SQL databases preferred over Redis-like ones), its kind, the container IP on the stage network, the port (`--remote-port`, the kind's default port, or the first declared port), and user/password/database from the container's environment.
 2. **CLI** listens on `127.0.0.1:<--port or random>`. For each connection it opens an SSH session running `dokwalt dial-stdio --tcp <ip>:<port>` and copies bytes both ways.
 3. Without `--tunnel-only`: runs the local client (password in its environment, except mongosh which gets a URL) and closes the tunnel when the client exits. With `--tunnel-only`: prints the URL and waits for Ctrl+C.
+4. **Shared database.** If the stage has no database service of its own and no `--service` is given, but it uses other apps (`x-dokwalt.uses`), D resolves the first provider stage with a database service instead. User, password and database come from the consumer's connection URL whose host is one of the provider's aliases (config vars first, `DATABASE_URL` preferred, then the compose environment interpolated with config). Without one, D falls back to the provider's credentials and a database named after the consumer app. The response's `provider` field names the provider stage.
 
 ### 9.8 Remove app
 
@@ -1426,7 +1432,13 @@ The daemon writes `/var/lib/dokwalt/system/dokwalt-system.json` and runs it with
 
 ### 11.5 Isolation through networks
 
-There's no shared proxy network. Each app stage has a private bridge network `dw-<app>-<stage>` that its services join, with their service name as alias. Only `dokwalt-caddy` is attached to several networks. So an app can't reach another app's services, public or not, and Caddy reaches every service it routes to by container name.
+There's no shared proxy network. Each app stage has a private bridge network `dw-<app>-<stage>` that its services join, with their service name as alias. Only `dokwalt-caddy` and the stateful containers of shared-service providers are attached to several networks. So an app can't reach another app's services, public or not, and Caddy reaches every service it routes to by container name.
+
+**Shared services.** A stage whose compose file lists `x-dokwalt.uses: [<provider>…]` gets the provider's running stateful containers attached to its network, under the aliases `<provider>` (only when the provider has a single stateful service) and `<provider>-<service>`. The provider stage is the one with the consumer's stage name, else production.
+- **Deploy.** Validation fails before a release is created if a provider is missing or not deployed. The rollout attaches the providers after the data project and before the new color starts, so one-shot jobs can reach them. After the switch, D re-syncs every attachment, because this stage may itself be a provider whose containers were just recreated.
+- **Reconciler.** Each pass computes the desired attachments from every stage's current release, connects missing ones (fixing stale aliases), and disconnects provider containers from `dw-*` networks nobody wants them on. A recreated provider container loses its extra networks; compose leaves extra networks alone otherwise (checked with compose v2.39 and v5.6), so an unchanged provider never restarts.
+- **Isolation.** Consumers share no network with each other; only the provider sits on several.
+- `apps:destroy` refuses to delete an app other stages still use.
 
 ---
 
