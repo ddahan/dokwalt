@@ -122,7 +122,8 @@ server; the unit sets `HOME=/root`, so deploys use root's Docker credentials.
 
 - **Provider snapshots** are the easiest full-machine backup: schedule them daily or weekly.
   A snapshot of a running server is crash-consistent: databases recover as after a power cut.
-- Add **logical database dumps** with `dokwalt db:backup` (Postgres) and keep a copy of
+- Add **nightly off-site backups** of every Postgres database and of DokWalt's state with
+  `dokwalt backup:setup` (`dokwalt docs backups`), and keep a copy of
   `/var/lib/dokwalt/secret.key` off the server. File-level backups are the same as on a Pi
   (`dokwalt docs raspberry-pi`): `dokwalt.db`, `secret.key`, the Docker volume
   `dokwalt-caddy-data` (certificates) and the `dw-*` volumes.

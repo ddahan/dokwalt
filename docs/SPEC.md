@@ -13,7 +13,7 @@ This document describes DokWalt as implemented. The product brief is `docs/PROMP
 
 ## Implementation status
 
-v0.1 implements milestones M1–M4 (§18): server init/upgrade, single-environment and pipeline apps, zero-downtime blue/green deploys, config, releases and rollback, domains with automatic HTTPS, logs, `exec`, `db:connect`, metrics, alerts, the reconciler, `doctor`, the TUI dashboard, `server settings` and the embedded docs. The end-to-end suite (`make e2e`, §18.6) checks every one of these against a throwaway systemd + Docker server.
+v0.1 implements milestones M1–M4 (§18): server init/upgrade, single-environment and pipeline apps, zero-downtime blue/green deploys, config, releases and rollback, domains with automatic HTTPS, logs, `exec`, `db:connect`, `db:backup`, nightly off-site backups to S3/R2 (§7.7.1), metrics, alerts, the reconciler, `doctor`, the TUI dashboard, `server settings` and the embedded docs. The end-to-end suite (`make e2e`, §18.6) checks every one of these against a throwaway systemd + Docker server.
 
 Still open:
 
@@ -87,7 +87,7 @@ Nothing else: no web UI, no cluster, no registry, no extra datastore.
 
 - Web UI or browser dashboard.
 - Docker Swarm, Kubernetes, clusters, multi-node scheduling. (Several *independent* servers via contexts: yes.)
-- Managed databases/add-ons, automated DB backups. (One app may still *use* another app's database server, §6.3 `x-dokwalt.uses`; the provider stays an ordinary app.)
+- Managed databases/add-ons. (One app may still *use* another app's database server, §6.3 `x-dokwalt.uses`; the provider stays an ordinary app.) Off-site backups cover Postgres and DokWalt's own state only (§7.7.1); other stateful services are backed up by hand.
 - GitHub integration, push-to-deploy, review apps (the architecture leaves room, §17).
 - CI/CD, buildpacks, server-side builds, paid external services.
 - Multi-user accounts and roles.
@@ -181,6 +181,7 @@ flowchart LR
 /var/lib/dokwalt/
 ├── dokwalt.db, dokwalt.db-wal, -shm           SQLite (WAL)
 ├── secret.key                                 32 random bytes, 0600 (created by the daemon)
+├── backup-tmp/                                one dump at a time during an off-site backup (§7.7.1), deleted after
 ├── caddy/
 │   ├── config/caddy.json                      last-known-good Caddy config (→ /config in the container)
 │   └── run/                                   → /run/caddy: admin.sock, access.sock
@@ -436,8 +437,12 @@ Notes:
   | `alert.disk`, `alert.memory`, `alert.temperature`, `alert.restarts` | Alert thresholds | 90, 90, 80, 3 | `alerts:set` |
   | `check_token` | Random token served by Caddy for the domain check | random | daemon |
   | `stopped/<stage_id>` | `1` while a stage is stopped with `dokwalt stop` | — | `stop` / `start` |
+  | `backup_endpoint`, `backup_region`, `backup_bucket`, `backup_prefix`, `backup_access_key` | Off-site backup storage (§7.7.1) | —, `auto`, —, `dokwalt/<hostname>`, — | `backup:setup` |
+  | `backup_secret_key` | S3 secret key, encrypted with `secret.key` (base64) | — | `backup:setup` |
+  | `backup_time`, `backup_keep_daily`, `backup_keep_weekly` | Daily time (server local), retention | `03:00`, `7`, `4` | `backup:setup` |
+  | `backup_last_day`, `backup_last` | Date of the last scheduled attempt; outcome of the last run (JSON) | — | daemon |
 
-- `alert_state.key` identifies a condition: `site:<host>`, `cert:<host>`, `deploy:<app>/<stage>`, `restarts:<app>/<stage>/<service>`, `oom:<app>/<stage>/<service>`, `reconcile:<app>/<stage>`, `host:disk`, `host:memory`, `host:temperature`, `host:throttled`.
+- `alert_state.key` identifies a condition: `site:<host>`, `cert:<host>`, `deploy:<app>/<stage>`, `restarts:<app>/<stage>/<service>`, `oom:<app>/<stage>/<service>`, `reconcile:<app>/<stage>`, `backup`, `host:disk`, `host:memory`, `host:temperature`, `host:throttled`.
 
 ### 5.4 Release lifecycle
 
@@ -964,6 +969,27 @@ $ dokwalt db:connect --tunnel-only --port 5433
   postgres://blog:••••@127.0.0.1:5433/blog
   Press Ctrl+C to close.
 ```
+
+#### 7.7.1 Off-site backups
+
+| Command | Description |
+|---|---|
+| `dokwalt backup:setup [--r2-account <id> \| --endpoint <url> --region <r>] [--bucket] [--access-key] [--secret-key-stdin] [--prefix] [--time HH:MM] [--keep-daily n] [--keep-weekly n]` | Store and check the storage settings (`POST /v1/backups/config`). Omitted fields keep their value |
+| `dokwalt backup:disable` | Delete the `backup_*` settings (`DELETE /v1/backups/config`); objects stay in the bucket |
+| `dokwalt backups [id]` | Setup, last run and complete backups (`GET /v1/backups`), or one backup's files (`GET /v1/backups/{id}`). `latest` = newest |
+| `dokwalt backup:now` | Run a backup now (`POST /v1/backups/run`, NDJSON events) |
+| `dokwalt backup:download <id> [file] [-o dir]` | Stream files through the daemon (`GET /v1/backups/{id}/files/{path}`), check SHA-256, write via `.part` + rename |
+| `dokwalt backup:restore <id> [file] [--database name] [--confirm name]` | Restore into the originating service (`POST /v1/backups/{id}/restore`, NDJSON events) |
+
+- **Storage.** Any S3-compatible API (Cloudflare R2 first), through `internal/s3`: Signature V4, path-style URLs, standard library only. Files above 100 MiB use multipart uploads (64 MiB parts; aborted on failure). Setup writes, lists and deletes `<prefix>/.dokwalt-test` before saving anything. The secret key never leaves the server again: downloads and restores go through the daemon.
+- **Content.** One folder per backup, `<prefix>/<id>/`, `id` = start time in UTC (`20261010T030000Z`): `dokwalt.db` (`VACUUM INTO`, consistent while in use), and for each running Postgres service (stateful, Postgres image) of each deployed stage: `<app>-<stage>-<service>/globals.sql` (`pg_dumpall --globals-only`) and `<app>-<stage>-<service>/<db>.dump` (`pg_dump --format=custom`, checked for the `PGDMP` magic) for every database with `datallowconn` that isn't a template. Commands run with `docker exec` as `POSTGRES_USER` (default `postgres`) over the container's socket. `manifest.json` (paths, kinds, origin, sizes, SHA-256, errors) is uploaded last: a folder without it is an interrupted backup.
+- **Disk.** Dumps are written one at a time to `/var/lib/dokwalt/backup-tmp`, hashed, uploaded and deleted.
+- **Schedule.** `backupLoop` checks every minute; the backup is due once the daily time has passed and `backup_last_day` isn't today, so a server that was off catches up the same day. One attempt per day; `backup:setup` after the daily time doesn't trigger a run that day. One run at a time (a second gets 409).
+- **Partial runs.** A service that should run but doesn't, or a database that fails to dump, is recorded in the manifest's `errors`; the rest is uploaded. Stopped stages are skipped. Storage errors fail the run.
+- **Retention**, after complete runs only (a run with errors never deletes): keep the newest complete backup of each of the last `keep_daily` days that have one and of each of the last `keep_weekly` ISO weeks (overlapping, like restic), in server local time; delete the rest, manifest first. Interrupted folders older than 24 h are deleted. Folder names that aren't backup IDs are never touched.
+- **Alerts.** Key `backup`: fires when a run fails or is partial, resolves after a complete one.
+- **Restore.** The daemon downloads the file to `/var/lib/dokwalt`, checks its SHA-256, then runs in the originating service's container, as `POSTGRES_USER`: for a dump, `pg_restore --clean --if-exists -d <db>` if the database exists, else `pg_restore --create -d <maintenance db>` (no `--no-owner`: objects keep their owner, whose role must exist); for `globals.sql`, `psql` without `ON_ERROR_STOP` (existing roles are skipped with an error line). `dokwalt.db` is restored by hand (`dokwalt docs backups`).
+- **Not encrypted client-side**: dumps rely on the provider's encryption at rest and on a bucket-scoped token; config values inside `dokwalt.db` stay encrypted with `secret.key`, which isn't uploaded.
 
 ### 7.8 Pipelines
 
@@ -1528,7 +1554,7 @@ blog.example.com is not answering: HTTP 502
 - **On disk**: rendered compose files contain config keys only as `KEY: null` pass-through entries and literal `${VAR}` references; values exist only in the environment of the `docker compose` process.
 - **In output**: masked unless `--reveal`, `--shell` or `config:get`.
 - **In containers**: environment variables, visible to `docker inspect` (root and the docker group only).
-- **Backups**: `secret.key` must be backed up **separately** from `dokwalt.db`; without it config can't be recovered.
+- **Backups**: `secret.key` must be backed up **separately** from `dokwalt.db`, and isn't part of off-site backups (§7.7.1); without it config can't be recovered. The off-site storage secret key is stored encrypted with it.
 - **Export**: `apps:export` writes clear text (file mode 0600 + warning).
 
 ### 14.3 Network exposure
@@ -1831,7 +1857,7 @@ Recommendation: **Raspberry Pi OS Lite (64-bit)**: first-party hardware support 
 | Firewall | Provider firewall/security group: allow 22, 80, 443/tcp, 443/udp; plus ufw as on the Pi (same Docker-bypass reasoning) |
 | Users | Cloud-init creates the user with your key; ensure it's not root: create a user, add key, disable root login |
 | Updates | `unattended-upgrades` with automatic reboot at a quiet hour |
-| Backups | Provider snapshots (whole disk, simplest restore) + the same file/volume backups off-server |
+| Backups | Provider snapshots (whole disk, simplest restore) + nightly off-site backups (§7.7.1) |
 | Init | `dokwalt server init deploy@203.0.113.10 --name prod --email you@example.com` — identical |
 
 ---

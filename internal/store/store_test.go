@@ -126,3 +126,40 @@ func TestMetricsHistory(t *testing.T) {
 		t.Fatal("MetricsHistory deadlocked")
 	}
 }
+
+func TestSecretSettingsAndCopy(t *testing.T) {
+	s := open(t)
+	if err := s.SetSecretSetting("backup_secret_key", "s3cr3t"); err != nil {
+		t.Fatal(err)
+	}
+	if raw := s.Setting("backup_secret_key", ""); raw == "" || strings.Contains(raw, "s3cr3t") {
+		t.Fatalf("stored in clear: %q", raw)
+	}
+	if v, err := s.SecretSetting("backup_secret_key"); err != nil || v != "s3cr3t" {
+		t.Fatalf("got %q %v", v, err)
+	}
+	if v, err := s.SecretSetting("missing"); err != nil || v != "" {
+		t.Fatalf("missing: %q %v", v, err)
+	}
+
+	_ = s.SetSetting("backup_bucket", "b")
+	copyPath := filepath.Join(t.TempDir(), "copy.db")
+	if err := s.CopyTo(copyPath); err != nil {
+		t.Fatal(err)
+	}
+	c, err := Open(copyPath, secrets.NewForTest())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	if c.Setting("backup_bucket", "") != "b" {
+		t.Fatal("copy is missing data")
+	}
+
+	if err := s.DeleteSettings("backup_"); err != nil {
+		t.Fatal(err)
+	}
+	if s.Setting("backup_bucket", "gone") != "gone" {
+		t.Fatal("settings not deleted")
+	}
+}

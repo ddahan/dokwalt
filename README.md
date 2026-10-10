@@ -39,8 +39,9 @@ restart when their own definition changes. One-shot jobs run your migrations
 before the new version starts.
 
 🗄️ **Shared databases & backups** — run one Postgres for all your apps with
-`x-dokwalt: {uses: [postgres]}`, still isolated from each other. `dokwalt db:backup`
-downloads a dump to your Mac.
+`x-dokwalt: {uses: [postgres]}`, still isolated from each other. Every night, each
+database and DokWalt's own state go to Cloudflare R2 (or any S3 storage), with
+daily and weekly retention and one-command restores.
 
 🔒 **Automatic HTTPS** — Let's Encrypt certificates via Caddy, redirects, and a real
 check that your DNS and ports are right.

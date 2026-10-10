@@ -3,6 +3,7 @@ package store
 
 import (
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -629,6 +630,45 @@ func (s *Store) Setting(key, def string) string {
 
 func (s *Store) SetSetting(key, value string) error {
 	_, err := s.db.Exec(`INSERT INTO settings(key, value) VALUES(?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`, key, value)
+	return err
+}
+
+// SecretSetting reads a setting stored with SetSecretSetting.
+func (s *Store) SecretSetting(key string) (string, error) {
+	v := s.Setting(key, "")
+	if v == "" {
+		return "", nil
+	}
+	sealed, err := base64.StdEncoding.DecodeString(v)
+	if err != nil {
+		return "", fmt.Errorf("setting %s: %w", key, err)
+	}
+	plain, err := s.box.Open(sealed)
+	if err != nil {
+		return "", fmt.Errorf("setting %s: %w", key, err)
+	}
+	return string(plain), nil
+}
+
+// SetSecretSetting stores a setting encrypted, like config values.
+func (s *Store) SetSecretSetting(key, value string) error {
+	sealed, err := s.box.Seal([]byte(value))
+	if err != nil {
+		return err
+	}
+	return s.SetSetting(key, base64.StdEncoding.EncodeToString(sealed))
+}
+
+// DeleteSettings removes settings whose key starts with prefix.
+func (s *Store) DeleteSettings(prefix string) error {
+	_, err := s.db.Exec(`DELETE FROM settings WHERE key LIKE ? || '%'`, prefix)
+	return err
+}
+
+// CopyTo writes a consistent copy of the database to path, while it's in
+// use (VACUUM INTO). path must not exist.
+func (s *Store) CopyTo(path string) error {
+	_, err := s.db.Exec(`VACUUM INTO ?`, path)
 	return err
 }
 

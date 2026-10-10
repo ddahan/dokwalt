@@ -58,6 +58,9 @@ type Daemon struct {
 	kick      chan struct{}
 	restarts  *alerts.RestartTracker
 	wg        sync.WaitGroup
+
+	backupMu      sync.Mutex // one backup at a time
+	backupRunning atomic.Bool
 }
 
 // goLoop runs a background loop that shutdown waits for.
@@ -230,6 +233,7 @@ func (d *Daemon) mainLoop(ctx context.Context) {
 	d.goLoop(func() { d.collector.Run(ctx) })
 	d.goLoop(func() { d.watchEvents(ctx) })
 	d.goLoop(func() { d.checksLoop(ctx) })
+	d.goLoop(func() { d.backupLoop(ctx) })
 
 	t := time.NewTicker(60 * time.Second)
 	defer t.Stop()

@@ -390,6 +390,7 @@ func serverInfoCmd() *cobra.Command {
 				"Footprint", fmt.Sprintf("daemon %s · proxy %s", ui.Bytes(info.DaemonRSS), ui.Bytes(info.CaddyRSS))+
 					ui.MutedS.Render(fmt.Sprintf("  (heap %s + %s; the rest is shared binary code)", ui.Bytes(info.DaemonHeap), ui.Bytes(info.CaddyHeap))),
 				"Let's Encrypt", email,
+				"Backups", backupSummary(info.Backup),
 			))
 			return nil
 		},

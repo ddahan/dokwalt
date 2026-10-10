@@ -93,6 +93,7 @@ func newRoot() *cobra.Command {
 		{ID: "deploy", Title: "Deploy & releases:"},
 		{ID: "config", Title: "Configuration:"},
 		{ID: "observe", Title: "Logs & monitoring:"},
+		{ID: "backup", Title: "Backups:"},
 		{ID: "server", Title: "Server:"},
 	}
 	root.AddGroup(groups...)
@@ -106,6 +107,7 @@ func newRoot() *cobra.Command {
 	add("deploy", deployCommands()...)
 	add("config", configCommands()...)
 	add("observe", observeCommands()...)
+	add("backup", backupCommands()...)
 	add("server", serverCommands()...)
 	root.AddCommand(hiddenCommands()...)
 	root.SetHelpTemplate(helpTemplate)

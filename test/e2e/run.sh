@@ -2,7 +2,8 @@
 # End-to-end test: installs DokWalt on a throwaway Linux server (a privileged
 # Debian container running systemd + Docker + sshd) and exercises the real
 # workflows: deploy, zero downtime under load, config, rollback, pipeline,
-# failed deploy, db tunnel, reboot and power-cut recovery.
+# failed deploy, db tunnel, shared Postgres, off-site backups (S3), reboot
+# and power-cut recovery.
 #
 #   make e2e            # build + run
 #   KEEP=1 make e2e     # keep the server container afterwards
@@ -178,6 +179,48 @@ srv docker exec "$(webof blog)" nc -z -w 3 pg 5432 || fail "link lost after the 
 out=$($D apps:destroy pg --confirm pg 2>&1) && fail "destroyed a provider still in use"
 grep -q "used by blog/production" <<<"$out" || fail "unclear destroy refusal: $out"
 pass "link survives a provider redeploy; in-use provider can't be destroyed"
+
+step "Off-site backups (S3: SeaweedFS on the server stands in for R2)"
+echo '{"identities":[{"name":"dokwalt","credentials":[{"accessKey":"dokwalt","secretKey":"s3-secret"}],"actions":["Admin","Read","Write","List"]}]}' \
+  | docker exec -i $SERVER sh -c 'cat > /root/s3.json'
+srv docker run -d --name s3 -p 127.0.0.1:8333:8333 -v /root/s3.json:/s3.json:ro \
+  chrislusf/seaweedfs server -dir=/data -s3 -s3.config=/s3.json >/dev/null
+for _ in $(seq 1 60); do echo "s3.bucket.create -name backups" | docker exec -i $SERVER docker exec -i s3 weed shell 2>&1 | grep -qi error || break; sleep 1; done
+setup() { echo "$1" | $D backup:setup --endpoint http://127.0.0.1:8333 --region us-east-1 --bucket backups --access-key dokwalt \
+  --secret-key-stdin --keep-daily 1 --keep-weekly 1 2>&1; }
+# A wrong secret key is refused (this also waits for the S3 gateway to start).
+for _ in $(seq 1 60); do out=$(setup wrong) && fail "setup accepted a wrong secret key"; grep -q SignatureDoesNotMatch <<<"$out" && break; sleep 1; done
+grep -q "can't write to bucket backups: .*SignatureDoesNotMatch" <<<"$out" || fail "unclear setup error: $out"
+out=$(setup s3-secret) || fail "backup:setup failed: $out"
+# An old complete backup and an old interrupted one: retention removes both.
+old=/buckets/backups/dokwalt/$SERVER
+srv docker exec s3 mkdir -p /tmp/o
+echo '{"id":"20200101T030000Z"}' | docker exec -i $SERVER docker exec -i s3 tee /tmp/o/manifest.json >/dev/null
+echo partial | docker exec -i $SERVER docker exec -i s3 tee /tmp/o/blog.dump >/dev/null
+srv docker exec s3 weed filer.copy /tmp/o/manifest.json http://localhost:8888$old/20200101T030000Z/ >/dev/null
+srv docker exec s3 weed filer.copy /tmp/o/blog.dump http://localhost:8888$old/20200102T030000Z/pg-production-db/ >/dev/null
+$D backup:now >/dev/null || fail "backup:now failed"
+files=$($D backups latest --json)
+for f in dokwalt.db pg-production-db/globals.sql pg-production-db/blog.dump pg-production-db/postgres.dump; do
+  grep -q "\"path\": \"$f\"" <<<"$files" || fail "backup is missing $f: $files"
+done
+# Empty folders may linger in the filer: check the files are gone.
+left=$(printf 'fs.ls %s\n' $old/20200101T030000Z $old/20200102T030000Z/pg-production-db | docker exec -i $SERVER docker exec -i s3 weed shell 2>&1)
+grep -qE "manifest.json|blog.dump" <<<"$left" && fail "old backups not pruned: $left"
+$D server info | grep -q "Backups.*ok" || fail "server info doesn't show the last backup"
+pass "nightly backup set: dokwalt.db, roles, every database; old backups pruned"
+
+rm -rf "$WORK/dl"
+$D backup:download latest pg-production-db/blog.dump -o "$WORK/dl" >/dev/null || fail "backup:download failed"
+docker run --rm -v "$WORK/dl/blog.dump:/d.dump:ro" postgres:18-alpine pg_restore -l /d.dump | grep -q "TABLE DATA public posts" \
+  || fail "downloaded backup doesn't contain the posts table"
+psql_pg() { srv docker exec -i dw-pg-production-data-db-1 psql -XAtqU postgres -d blog -c "$1"; }
+psql_pg "DROP TABLE posts" >/dev/null
+$D backup:restore latest --database blog --confirm blog >/dev/null || fail "backup:restore failed"
+[[ $(psql_pg "SELECT count(*) FROM posts") == 1 ]] || fail "posts not restored"
+[[ $(psql_pg "SELECT tableowner FROM pg_tables WHERE tablename = 'posts'") == blog ]] || fail "restored table lost its owner"
+$D backup:restore latest pg-production-db/globals.sql --confirm roles >/dev/null || fail "roles restore failed"
+pass "download checks out; a dropped table comes back with its owner"
 
 step "Reboot"
 docker restart $SERVER >/dev/null

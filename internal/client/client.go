@@ -210,6 +210,21 @@ func (c *Client) Logs(ctx context.Context, path string, q url.Values, fn func(ap
 	return sc.Err()
 }
 
+// Download streams a raw response body to w. It returns the response
+// headers (a backup file's checksum travels in X-Dokwalt-Sha256).
+func (c *Client) Download(ctx context.Context, path string, w io.Writer) (http.Header, error) {
+	resp, err := c.do(ctx, c.stream, "GET", path, nil, "")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	n, err := io.Copy(w, resp.Body)
+	if err == nil && resp.ContentLength > 0 && n != resp.ContentLength {
+		err = fmt.Errorf("download cut short (%d of %d bytes)", n, resp.ContentLength)
+	}
+	return resp.Header, err
+}
+
 // Upload streams a request body (used for image transfer).
 func (c *Client) Upload(ctx context.Context, path string, body io.Reader) error {
 	resp, err := c.do(ctx, c.stream, "POST", path, body, "application/octet-stream")

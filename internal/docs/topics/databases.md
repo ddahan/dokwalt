@@ -188,9 +188,12 @@ command: `dokwalt exec --service web -- ./bin/migrate status`.
 
 ## Backups
 
-DokWalt doesn't back up your databases automatically. Two approaches.
+**Nightly off-site backups** of every Postgres database, to Cloudflare R2 or
+any S3 storage, run on the server: `dokwalt backup:setup`, see
+`dokwalt docs backups`. For other kinds of databases, and for one-off copies,
+two approaches.
 
-**Logical dump (recommended)** to your Mac, while the app runs:
+**Logical dump** to your Mac, while the app runs:
 
 ```text
 $ dokwalt db:backup
@@ -280,8 +283,9 @@ services:
   on a database named after the app.
 
 The provider stays an ordinary app: it has its own config, releases and
-logs, and nothing about it is managed. Backups are still up to you, and they
-matter more now that one server holds every app's data.
+logs, and nothing about it is managed. Backups matter more now that one
+server holds every app's data: nightly backups (`dokwalt docs backups`) dump
+each of its databases separately, with its roles.
 
 ## Major version upgrades
 
@@ -302,5 +306,5 @@ and redeploy. Registry images are used by tag, not pinned by digest, and
 are pulled only if the tag is missing on the server. So a floating tag like
 `postgres:17` doesn't move by itself. Pin exact tags.
 
-See also: `dokwalt docs compose`, `dokwalt docs config`, `dokwalt docs deploy`,
+See also: `dokwalt docs backups`, `dokwalt docs compose`, `dokwalt docs config`, `dokwalt docs deploy`,
 `dokwalt docs raspberry-pi`, `dokwalt docs security`

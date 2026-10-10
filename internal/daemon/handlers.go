@@ -46,6 +46,15 @@ func (d *Daemon) routes() http.Handler {
 	h("POST /v1/images/have", d.postImagesHave)
 	h("POST /v1/images/load", d.postImagesLoad)
 
+	h("GET /v1/backups/config", d.getBackupConfig)
+	h("POST /v1/backups/config", d.setBackupConfig)
+	h("DELETE /v1/backups/config", d.deleteBackupConfig)
+	h("POST /v1/backups/run", d.postBackupRun)
+	h("GET /v1/backups", d.listBackups)
+	h("GET /v1/backups/{id}", d.getBackup)
+	h("GET /v1/backups/{id}/files/{path...}", d.getBackupFile)
+	h("POST /v1/backups/{id}/restore", d.postBackupRestore)
+
 	h("GET /v1/apps", d.listApps)
 	h("POST /v1/apps", d.createApp)
 	h("POST /v1/apps/import", d.importApp)
@@ -181,6 +190,7 @@ func (d *Daemon) getInfo(w http.ResponseWriter, r *http.Request) error {
 		Version:   api.VersionInfo{APIVersion: api.Version, Build: d.opts.Build, OS: runtime.GOOS, Arch: runtime.GOARCH},
 		Host:      d.collector.Host(),
 		ACMEEmail: d.store.Setting("acme_email", ""),
+		Backup:    d.backupStatus(),
 	}
 	info.DaemonRSS, info.DaemonHeap = metrics.ProcessMem(os.Getpid())
 	info.Hostname, _ = os.Hostname()

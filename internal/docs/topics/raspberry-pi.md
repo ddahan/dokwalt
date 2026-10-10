@@ -205,6 +205,10 @@ throttled or under-voltage *now*); the temperature alert defaults to 80 °C:
 
 ## 11. Backups and restore
 
+**Databases and DokWalt's state:** `dokwalt backup:setup` sends them to Cloudflare R2 every night
+(`dokwalt docs backups`), off the Pi: a dead SD card or SSD doesn't take the data with it. Keep a
+copy of `secret.key` apart from the bucket. For a full copy of the Pi, by hand:
+
 Back up `/var/lib/dokwalt/dokwalt.db` (apps, releases, domains, encrypted config), `secret.key`
 (without it config cannot be decrypted), the Docker volume `dokwalt-caddy-data` (certificates and
 ACME account: no re-issuance, no rate limits after a restore) and the `dw-*` volumes (databases,

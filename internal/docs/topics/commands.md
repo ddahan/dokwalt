@@ -204,6 +204,28 @@ Flags: `-o, --output` (default `<database>-<stage>-<time>.dump`),
 `--service`, `--database`. Both commands also work from an app that uses a
 shared database (`x-dokwalt.uses`): see `dokwalt docs databases`.
 
+## Backups
+
+Server-wide: no app needed. Details: `dokwalt docs backups`.
+
+```bash
+# Nightly backups to R2: every Postgres database, their roles, dokwalt.db
+dokwalt backup:setup --r2-account <id> --bucket backups --access-key <key>
+dokwalt backup:setup --time 04:30 --keep-daily 14   # change one setting
+dokwalt backup:now                                   # one now
+dokwalt backups                                      # setup, last run, backups in the bucket
+dokwalt backups latest                               # files of one backup
+dokwalt backup:download latest [file] [-o folder]
+dokwalt backup:restore latest --database blog        # or a file path; --confirm blog
+dokwalt backup:disable
+```
+
+`backup:setup` flags: `--r2-account` or `--endpoint` + `--region`, `--bucket`,
+`--access-key`, `--secret-key-stdin` (else a prompt or
+`DOKWALT_BACKUP_SECRET_KEY`), `--prefix` (default `dokwalt/<hostname>`),
+`--time` (default `03:00`, server local time), `--keep-daily` (7),
+`--keep-weekly` (4).
+
 ## Pipelines
 
 ```bash

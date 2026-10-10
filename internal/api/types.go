@@ -1,7 +1,11 @@
 // Package api holds the request/response types shared by the CLI and the daemon.
 package api
 
-import "time"
+import (
+	"time"
+
+	"github.com/ddahan/dokwalt/internal/backup"
+)
 
 // Version is the API version. The CLI refuses to talk to a daemon with a
 // different major version and warns on a minor mismatch.
@@ -26,18 +30,19 @@ type Error struct {
 }
 
 type ServerInfo struct {
-	Version       VersionInfo `json:"version"`
-	Hostname      string      `json:"hostname"`
-	Uptime        int64       `json:"uptime_s"`
-	DockerVersion string      `json:"docker_version"`
-	ComposeVer    string      `json:"compose_version"`
-	DaemonRSS     uint64      `json:"daemon_rss"`
-	DaemonHeap    uint64      `json:"daemon_heap"`
-	CaddyRSS      uint64      `json:"caddy_rss"`
-	CaddyHeap     uint64      `json:"caddy_heap"`
-	Apps          int         `json:"apps"`
-	Host          HostMetrics `json:"host"`
-	ACMEEmail     string      `json:"acme_email"`
+	Backup        BackupStatus `json:"backup"`
+	Version       VersionInfo  `json:"version"`
+	Hostname      string       `json:"hostname"`
+	Uptime        int64        `json:"uptime_s"`
+	DockerVersion string       `json:"docker_version"`
+	ComposeVer    string       `json:"compose_version"`
+	DaemonRSS     uint64       `json:"daemon_rss"`
+	DaemonHeap    uint64       `json:"daemon_heap"`
+	CaddyRSS      uint64       `json:"caddy_rss"`
+	CaddyHeap     uint64       `json:"caddy_heap"`
+	Apps          int          `json:"apps"`
+	Host          HostMetrics  `json:"host"`
+	ACMEEmail     string       `json:"acme_email"`
 }
 
 type App struct {
@@ -289,4 +294,57 @@ type StageExport struct {
 	Config    map[string]string `json:"config"`
 	Domains   []Domain          `json:"domains"`
 	Overrides []ServiceOverride `json:"overrides"`
+}
+
+// BackupConfig sets up off-site backups (backup:setup). Empty fields keep
+// their current value.
+type BackupConfig struct {
+	Endpoint   string `json:"endpoint,omitempty"` // https://<account>.r2.cloudflarestorage.com
+	Region     string `json:"region,omitempty"`   // "auto" for R2
+	Bucket     string `json:"bucket,omitempty"`
+	Prefix     string `json:"prefix,omitempty"` // folder in the bucket, default "dokwalt/<hostname>"
+	AccessKey  string `json:"access_key,omitempty"`
+	SecretKey  string `json:"secret_key,omitempty"`
+	Time       string `json:"time,omitempty"` // daily, server local time, "03:00"
+	KeepDaily  int    `json:"keep_daily,omitempty"`
+	KeepWeekly int    `json:"keep_weekly,omitempty"`
+}
+
+// BackupStatus describes the backup setup and the last run.
+type BackupStatus struct {
+	Configured bool       `json:"configured"`
+	Endpoint   string     `json:"endpoint,omitempty"`
+	Region     string     `json:"region,omitempty"`
+	Bucket     string     `json:"bucket,omitempty"`
+	Prefix     string     `json:"prefix,omitempty"`
+	AccessKey  string     `json:"access_key,omitempty"`
+	Time       string     `json:"time,omitempty"`
+	TimeZone   string     `json:"time_zone,omitempty"`
+	KeepDaily  int        `json:"keep_daily,omitempty"`
+	KeepWeekly int        `json:"keep_weekly,omitempty"`
+	Next       time.Time  `json:"next,omitzero"`
+	Running    bool       `json:"running"`
+	Last       *BackupRun `json:"last,omitempty"`
+}
+
+// BackupRun is the outcome of the last backup run.
+type BackupRun struct {
+	ID       string    `json:"id,omitempty"`
+	Started  time.Time `json:"started"`
+	Duration int64     `json:"duration_ms"`
+	Status   string    `json:"status"` // ok | partial | failed
+	Error    string    `json:"error,omitempty"`
+	Size     int64     `json:"size"`
+	Files    int       `json:"files"`
+}
+
+// BackupList is what `dokwalt backups` shows: complete backups, newest first.
+type BackupList struct {
+	Status  BackupStatus      `json:"status"`
+	Backups []backup.Manifest `json:"backups"`
+}
+
+// BackupRestore restores one file of a backup into its database.
+type BackupRestore struct {
+	File string `json:"file"` // path in the backup, e.g. postgres-production-db/blog.dump
 }
