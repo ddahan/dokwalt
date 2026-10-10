@@ -78,27 +78,58 @@
           </h1>
 
           <p class="hero-sub reveal" style="--d:.55s">
-            Deploy Docker Compose apps to a cheap VPS or a box at home, the twelve-factor way: config lives on the
+            Deploy Docker Compose apps to a cheap VPS or a box at home, <a href="https://12factor.net/" rel="noopener">the twelve-factor way</a>: config lives on the
             server, every release is immutable, deploys have zero downtime and HTTPS is automatic.
             Your <code>docker-compose.yml</code> stays exactly as it is.
           </p>
 
-          <div class="install reveal" style="--d:.7s">
-            <div class="install-box">
-              <span class="prompt" aria-hidden="true">$</span>
-              <code id="install-cmd">curl -fsSL https://raw.githubusercontent.com/ddahan/dokwalt/main/install.sh | sh</code>
-              <button class="copy" data-copy="#install-cmd" aria-label="Copy install command">
-                <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
-                <svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
-              </button>
-            </div>
-            <p class="install-note">macOS &amp; Linux (Windows via WSL). Servers: any 64-bit Debian or Ubuntu machine — amd64 or arm64.</p>
-          </div>
-
-          <div class="hero-ctas reveal" style="--d:.85s">
-            <a class="btn btn-primary" href="#start">Get started <span aria-hidden="true">→</span></a>
-            <a class="btn btn-ghost" href="#deploys">Watch a deploy</a>
-          </div>
+          <ol class="hero-steps reveal" id="start" style="--d:.7s" aria-label="Get started in three commands">
+            <li class="hstep">
+              <span class="hstep-num" aria-hidden="true">1</span>
+              <div class="hstep-body">
+                <p class="hstep-label">Install the CLI <span>macOS &amp; Linux (Windows via WSL)</span></p>
+                <div class="install-box">
+                  <span class="prompt" aria-hidden="true">$</span>
+                  <code id="s1">curl -fsSL https://raw.githubusercontent.com/ddahan/dokwalt/main/install.sh | sh</code>
+                  <button class="copy" data-copy="#s1" aria-label="Copy">
+                    <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                    <svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+                  </button>
+                </div>
+              </div>
+            </li>
+            <li class="hstep">
+              <span class="hstep-num" aria-hidden="true">2</span>
+              <div class="hstep-body">
+                <p class="hstep-label">Set up your server <span>any 64-bit Debian or Ubuntu, amd64 or arm64</span></p>
+                <div class="install-box">
+                  <span class="prompt" aria-hidden="true">$</span>
+                  <code id="s2">dokwalt server init you@your-server --email you@example.com</code>
+                  <button class="copy" data-copy="#s2" aria-label="Copy">
+                    <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                    <svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+                  </button>
+                </div>
+              </div>
+            </li>
+            <li class="hstep">
+              <span class="hstep-num" aria-hidden="true">3</span>
+              <div class="hstep-body">
+                <p class="hstep-label">Deploy <span>in a folder with a <code>compose.yaml</code></span></p>
+                <div class="install-box install-multi">
+                  <span class="prompt" aria-hidden="true">$</span>
+                  <code id="s3">dokwalt apps:create myapp
+dokwalt deploy
+dokwalt domains:add myapp.example.com --service web</code>
+                  <button class="copy" data-copy="#s3" aria-label="Copy">
+                    <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                    <svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+                  </button>
+                </div>
+              </div>
+            </li>
+          </ol>
+          <p class="install-note reveal" style="--d:.85s">Needs Docker on your computer and SSH key access with <code>sudo</code> on the server, ports 80 and 443 open. 1 GB of RAM is enough for a few small sites.</p>
         </div>
 
         <div class="hero-visual reveal" style="--d:.4s">
@@ -119,6 +150,17 @@
               <div><b>shop.example.test</b><small>Let's Encrypt · auto-renew</small></div>
             </div>
           </div>
+          <div class="footprint reveal" style="--d:.9s">
+            <div class="fp-head">
+              <div class="fp-num"><span class="count" data-to="27">0</span><small>MB</small></div>
+              <p><b>of RAM, in one Go binary.</b></p>
+            </div>
+            <div class="fp-bar" role="img" aria-label="DokWalt uses about 27 MB of a 1 GB server"><span class="fp-used"></span></div>
+            <div class="fp-legend" aria-hidden="true">
+              <span><i class="fp-dot"></i>dokwalt <b id="fp-rss">27.4 MB</b></span>
+              <span>free for your apps <b>997 MB</b></span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -127,26 +169,6 @@
           <span>Docker Compose</span><span>◆</span><span>Caddy</span><span>◆</span><span>Let's Encrypt</span><span>◆</span><span>SQLite</span><span>◆</span><span>systemd</span><span>◆</span><span>SSH</span><span>◆</span><span>amd64 &amp; arm64</span><span>◆</span><span>Debian</span><span>◆</span><span>Ubuntu</span><span>◆</span><span>Go</span><span>◆</span>
           <span aria-hidden="true">Docker Compose</span><span aria-hidden="true">◆</span><span aria-hidden="true">Caddy</span><span aria-hidden="true">◆</span><span aria-hidden="true">Let's Encrypt</span><span aria-hidden="true">◆</span><span aria-hidden="true">SQLite</span><span aria-hidden="true">◆</span><span aria-hidden="true">systemd</span><span aria-hidden="true">◆</span><span aria-hidden="true">SSH</span><span aria-hidden="true">◆</span><span aria-hidden="true">amd64 &amp; arm64</span><span aria-hidden="true">◆</span><span aria-hidden="true">Debian</span><span aria-hidden="true">◆</span><span aria-hidden="true">Ubuntu</span><span aria-hidden="true">◆</span><span aria-hidden="true">Go</span><span aria-hidden="true">◆</span>
         </div>
-      </div>
-    </section>
-
-    <!-- ───────────────────────── Stats ───────────────────────── -->
-    <section class="stats wrap" aria-label="At a glance">
-      <div class="stat reveal">
-        <div class="stat-num"><span class="count" data-to="27">0</span><small>MB</small></div>
-        <p>RAM for the server daemon, next to Caddy</p>
-      </div>
-      <div class="stat reveal" style="--d:.08s">
-        <div class="stat-num"><span class="count" data-to="1">0</span><small>binary</small></div>
-        <p>CLI on your laptop, daemon on your server</p>
-      </div>
-      <div class="stat reveal" style="--d:.16s">
-        <div class="stat-num"><span class="count" data-to="0" data-from="9">9</span><small>open ports</small></div>
-        <p>for the control plane — you talk to it over SSH</p>
-      </div>
-      <div class="stat reveal" style="--d:.24s">
-        <div class="stat-num"><span class="count" data-to="0" data-from="7">7</span><small>files to add</small></div>
-        <p>to your repo — config lives on the server</p>
       </div>
     </section>
 
@@ -396,7 +418,8 @@
       <div class="wrap">
         <div class="center-head">
           <p class="eyebrow reveal"><span>◆</span> Everyday commands</p>
-          <h2 class="reveal">Everything from your terminal.</h2>
+          <h2 class="reveal">Everything from your terminal.<br><span class="muted-h">Or your AI agent's.</span></h2>
+          <p class="lead reveal">Every action is a plain command, so a coding agent can deploy, read the logs and roll back for you: <code>--json</code> output, <code>--confirm</code> instead of prompts, a non-zero exit code on failure, and the full docs one <code>dokwalt docs</code> away.</p>
         </div>
         <div class="tour reveal">
           <div class="tour-tabs" role="tablist" aria-label="Commands" id="tour-tabs"></div>
@@ -405,39 +428,6 @@
             <pre class="term-body" id="tour-body" role="tabpanel" aria-live="polite"></pre>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- ───────────────────────── Get started ───────────────────────── -->
-    <section class="section" id="start">
-      <div class="wrap">
-        <div class="center-head">
-          <p class="eyebrow reveal"><span>◆</span> Get started</p>
-          <h2 class="reveal">From zero to HTTPS in three commands.</h2>
-        </div>
-        <div class="start">
-          <div class="start-step reveal">
-            <span class="num">1</span>
-            <h3>Install the CLI</h3>
-            <p>On your Mac or Linux machine. Run it again later to upgrade.</p>
-            <div class="code"><code id="s1">curl -fsSL https://raw.githubusercontent.com/ddahan/dokwalt/main/install.sh | sh</code><button class="copy" data-copy="#s1" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>
-          </div>
-          <div class="start-step reveal" style="--d:.1s">
-            <span class="num">2</span>
-            <h3>Set up your server</h3>
-            <p>Installs Docker if needed, the systemd service and Caddy. Any SSH-reachable Debian or Ubuntu machine.</p>
-            <div class="code"><code id="s2">dokwalt server init you@your-server --email you@example.com</code><button class="copy" data-copy="#s2" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>
-          </div>
-          <div class="start-step reveal" style="--d:.2s">
-            <span class="num">3</span>
-            <h3>Deploy</h3>
-            <p>In any folder with a <code>compose.yaml</code>. Point DNS at your server and add a domain.</p>
-            <div class="code code-multi"><code id="s3">dokwalt apps:create myapp
-dokwalt deploy
-dokwalt domains:add myapp.example.com --service web</code><button class="copy" data-copy="#s3" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>
-          </div>
-        </div>
-        <p class="reqs reveal">Needs Docker on your computer (Docker Desktop or OrbStack) and SSH key access with <code>sudo</code> on a 64-bit server with ports 80 and 443 open. 1 GB of RAM is enough for a few small sites.</p>
       </div>
     </section>
 

@@ -90,7 +90,8 @@ const revealIO = new IntersectionObserver((entries) => {
     if (!e.isIntersecting) continue;
     e.target.classList.add("in");
     revealIO.unobserve(e.target);
-    if (e.target.classList.contains("stat")) countUp($(".count", e.target));
+    const count = $(".count", e.target);
+    if (count) countUp(count);
   }
 }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
 $$(".reveal").forEach((el) => revealIO.observe(el));
@@ -106,6 +107,13 @@ function countUp(el) {
   };
   requestAnimationFrame(tick);
 }
+
+// The footprint card's RSS readout drifts a little, like the real one.
+(function footprint() {
+  const rss = $("#fp-rss");
+  if (!rss || reduced) return;
+  setInterval(() => { rss.textContent = (26.8 + Math.random() * 1.1).toFixed(1) + " MB"; }, 1800);
+})();
 
 // ───────── Copy buttons ─────────
 $$(".copy").forEach((btn) => btn.addEventListener("click", async () => {
@@ -583,6 +591,31 @@ async function stepLine(term, text, ms, dur = "", token) {
         await stepLine(t, "Containers running", 900, "1.1s", k);
         await stepLine(t, "web is healthy", 700, "", k);
         line(t, `${ok} Rolled back — v7 is live`);
+      },
+    },
+    {
+      cmd: "dokwalt apps --json", desc: "for scripts and AI agents",
+      run: async (t) => {
+        const k = (s) => `<span class="c-blue">"${s}"</span>`, str = (s) => `<span class="c-ok">"${s}"</span>`, lit = (s) => `<span class="c-yellow">${s}</span>`;
+        const rows = [
+          "[",
+          "  {",
+          `    ${k("name")}: ${str("shop")},`,
+          `    ${k("pipeline")}: ${lit("false")},`,
+          `    ${k("created_at")}: ${str("2026-09-28T09:14:02Z")},`,
+          `    ${k("stages")}: [`,
+          "      {",
+          `        ${k("name")}: ${str("production")},`,
+          `        ${k("active_color")}: ${str("green")},`,
+          `        ${k("current_release")}: ${lit(7)},`,
+          `        ${k("status")}: ${str("running")},`,
+          `        ${k("domains")}: [${str("shop.example.com")}]`,
+          "      }",
+          "    ]",
+          "  }",
+          "]",
+        ];
+        for (const r of rows) { await sleep(40); line(t, r); }
       },
     },
     {
