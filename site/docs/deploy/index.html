@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Deploying · DokWalt docs</title>
+  <meta name="description" content="How dokwalt deploy builds on your Mac, ships only changed images and swaps versions with zero downtime.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Deploying</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/" class="active" aria-current="page">Deploying</a></li><li><a href="/docs/compose/">Docker Compose apps</a></li><li><a href="/docs/config/">Config and secrets</a></li><li><a href="/docs/domains/">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/">Databases</a></li><li><a href="/docs/backups/">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/">Logs</a></li><li><a href="/docs/monitoring/">Monitoring</a></li><li><a href="/docs/alerts/">Alerts</a></li><li><a href="/docs/troubleshooting/">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Deploy &amp; ship</p>
+          <h1>Deploying</h1>
+          <p class="doc-lead">How <code>dokwalt deploy</code> builds on your Mac, ships only changed images and swaps versions with zero downtime.</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs deploy</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/deploy.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<h2 id="usage">Usage</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> deploy                          <span class="t-com"># from a linked folder</span>
+<span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-m</span> <span class="t-str">&#34;new homepage&#34;</span>        <span class="t-com"># description (default: last commit subject)</span>
+<span class="t-cmd">dokwalt</span> deploy <span class="t-flag">--no-cache</span>               <span class="t-com"># rebuild without the build cache</span>
+<span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-f</span> compose.yaml <span class="t-flag">-f</span> compose.prod.yaml   <span class="t-com"># explicit compose files</span>
+<span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-a</span> blog                  <span class="t-com"># explicit app</span></code></pre></div>
+<p>Without <code>-f</code>, compose's own defaults apply (<code>compose.yaml</code>,
+<code>docker-compose.yml</code>). <code>-f</code> is repeatable.</p>
+<h2 id="what-happens-step-by-step">What happens, step by step</h2>
+<p>On your Mac:</p>
+<ol>
+<li><strong>Read the compose file</strong> with
+<code>docker compose config --no-interpolate --format json</code>. Your local
+<code>.env</code> is not applied: <code>${VAR}</code> values come from the server config.</li>
+<li><strong>Build</strong> services that have <code>build:</code> for the server's platform
+(<code>linux/arm64</code> for a Pi, <code>linux/amd64</code> for most VPSs), with
+<code>BUILDX_NO_DEFAULT_ATTESTATIONS=1</code> so identical builds give identical
+image IDs. Each image is tagged <code>dokwalt/&lt;app&gt;-&lt;service&gt;:&lt;id12&gt;</code> (the
+first 12 hex characters of its image ID). Services built from the same
+Dockerfile share one image.</li>
+<li><strong>Capture the git sha</strong> (<code>-dirty</code> if there are uncommitted changes).</li>
+<li><strong>Ask the daemon which images it already has</strong> and skip them.</li>
+<li><strong>Upload</strong> the rest: <code>docker save --platform linux/&lt;arch&gt;</code>, compressed
+with zstd, streamed over the SSH connection, loaded by the daemon.
+Unchanged code means <code>Images unchanged — nothing to upload</code>.</li>
+<li><strong>Send the deploy request</strong> with the normalized model. From here the
+daemon owns the deploy.</li>
+</ol>
+<p>On the server (under the server-wide operation lock):</p>
+<ol start="7">
+<li><strong>Validate</strong>: transform the model for this stage (see
+<a class="xref" href="/docs/compose/"><code>dokwalt docs compose</code></a>) and check that every image exists. An invalid
+compose file stops here and does not use up a release number.</li>
+<li><strong>Create release vN</strong> with status <code>deploying</code>. The release stores the
+normalized model exactly as sent; it is transformed again at every
+rollout, so rollback and promote re-transform for their target stage.</li>
+<li><strong>Prepare</strong>: ensure Caddy runs, ensure the stage network
+<code>dw-&lt;app&gt;-&lt;stage&gt;</code>, attach Caddy to it, create named volumes.</li>
+<li><strong>Data project</strong>: <code>docker compose up -d --remove-orphans</code>, then wait
+until ready (up to 3 min). Stateful containers are only recreated if
+their definition changed.</li>
+<li><strong>New color</strong> (blue ↔ green): <code>up -d --remove-orphans</code>, wait until
+ready including one-shot jobs exiting 0 (up to 3 min).</li>
+<li><strong>HTTP health check</strong> of public services (see below).</li>
+<li><strong>Switch</strong> Caddy to the new color in one atomic config load. The
+release becomes <code>succeeded</code>, older ones <code>superseded</code>.</li>
+<li><strong>Drain</strong> the old color for 10 s (in-flight requests finish), then
+<code>docker compose down</code>. Named volumes are never removed.</li>
+<li><strong>Prune</strong> images: keep those of the last 5 successful releases per
+stage. Registry images (e.g. <code>postgres</code>) are not pruned.</li>
+</ol>
+<p>Registry images without <code>build:</code> get <code>pull_policy: missing</code>: pulled on
+the server if absent, referenced by tag (not pinned by digest).</p>
+<h2 id="sample-output">Sample output</h2>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-m</span> <span class="t-str">&#34;new homepage&#34;</span>
+<span class="t-cmd">◆</span> Deploying blog  to pi (linux/arm64)
+<span class="t-ok">✓</span> Built migrate, web, worker 23.4s
+<span class="t-ok">✓</span> Uploaded 12.8 MiB in 1.9s
+! web: published ports removed — traffic reaches services only through the proxy (use `dokwalt domains:add` or `dokwalt db:connect`)
+<span class="t-ok">✓</span> Services — db: keeps its data (named volume pgdata), migrate: runs once per deploy, web: zero-downtime swap, worker: zero-downtime swap
+<span class="t-ok">✓</span> Created release v8
+<span class="t-ok">✓</span> Stateful services ready 3.1s
+<span class="t-ok">✓</span> Containers running 9.8s
+<span class="t-ok">✓</span> web is healthy
+<span class="t-ok">✓</span> v8 is live
+<span class="t-ok">✓</span> Previous version stops in 10s (in-flight requests finish)
+
+<span class="t-ok">✓</span> blog is live at https://blog.example.com</code></pre></div>
+<h2 id="migrations-one-shot-jobs-release-phase">Migrations: one-shot jobs (release phase)</h2>
+<p>Declare migrations as a service that others depend on with
+<code>condition: service_completed_successfully</code>:</p>
+<div class="code" data-lang="yaml"><div class="code-bar"><span>yaml</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-key">services</span>:
+  <span class="t-key">migrate</span>:
+    <span class="t-key">build</span>: .
+    <span class="t-key">command</span>: [<span class="t-str">&#34;./bin/migrate&#34;</span>, <span class="t-str">&#34;up&#34;</span>]
+    <span class="t-key">depends_on</span>:
+      <span class="t-key">db</span>: { condition: service_healthy }
+  <span class="t-key">web</span>:
+    <span class="t-key">build</span>: .
+    <span class="t-key">depends_on</span>:
+      <span class="t-key">migrate</span>: { condition: service_completed_successfully }
+  <span class="t-key">db</span>:
+    <span class="t-key">image</span>: postgres:17-alpine
+    <span class="t-key">volumes</span>: [pgdata:/var/lib/postgresql/data]
+<span class="t-key">volumes</span>:
+  <span class="t-key">pgdata</span>:</code></pre></div>
+<p><code>migrate</code> becomes a one-shot job: <code>restart: &#34;no&#34;</code>, label
+<code>dokwalt.oneshot=true</code>. It runs in the <strong>new color</strong> before <code>web</code> starts,
+on <strong>every</strong> release (deploys, config changes, rollbacks, promotions).
+A non-zero exit fails the deploy and the old version keeps serving. The
+<code>migrate → db</code> dependency crosses the data/color split and is dropped;
+the data project is always started and ready first anyway. The reconciler
+never restarts a job, <code>dokwalt restart</code> skips it and it triggers no
+crash-loop alert. <code>dokwalt ps</code> shows it as <code>✓ completed</code>.</p>
+<h2 id="when-a-deploy-fails">When a deploy fails</h2>
+<p>Any failure before or at the switch removes the new color. The old
+version never stops serving. The release is marked <code>failed</code>, a
+&quot;Deploy failed&quot; alert is sent, and the last 30 log lines of the failing
+container are shown:</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-ok">✓</span> Created release v9
+<span class="t-ok">✓</span> Stateful services ready
+• Starting v9 next to the current version
+! Last log lines of web:
+  | web Error: connect ECONNREFUSED 10.0.3.4:6379
+• Stopping the new version; the current version keeps serving
+<span class="t-err">✗</span> service web is crash-looping</code></pre></div>
+<p>Failed releases stay in <code>dokwalt releases</code> with the error as description.</p>
+<h2 id="readiness-and-health-checks">Readiness and health checks</h2>
+<p>Before the switch, every container of the new color must be ready:
+running and, if it has a compose <code>healthcheck:</code>, <code>healthy</code>; one-shot jobs
+must have exited 0. Unhealthy, exited or restarting fails the deploy.
+Then a <strong>3-second stability check</strong>: no container may restart.</p>
+<p>Public stateless services (with a non-redirect domain) then get an HTTP
+probe per container, <code>GET http://&lt;container-ip&gt;:&lt;domain port&gt;&lt;path&gt;</code>,
+every second until the timeout:</p>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Path</th>
+<th>Passes when</th>
+<th>Timeout</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>default</td>
+<td><code>/</code></td>
+<td>any status &lt; 500</td>
+<td>60 s</td>
+</tr>
+<tr>
+<td><code>healthcheck:set --path</code></td>
+<td>the path</td>
+<td>2xx or 3xx</td>
+<td><code>--timeout</code> (60 s)</td>
+</tr>
+</tbody>
+</table>
+<p>Services without a domain and without a compose healthcheck only need to
+be running and stable. Set a stricter check (applies from the next
+release):</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> healthcheck:set <span class="t-flag">--service</span> web <span class="t-flag">--path</span> /healthz
+<span class="t-cmd">dokwalt</span> healthcheck:set <span class="t-flag">--service</span> web <span class="t-flag">--path</span> /healthz <span class="t-flag">--timeout</span> 120s
+<span class="t-cmd">dokwalt</span> healthcheck:unset <span class="t-flag">--service</span> web       <span class="t-com"># back to GET / &lt; 500</span></code></pre></div>
+<h2 id="deploying-and-going-offline">Deploying and going offline</h2>
+<p>The build and upload need your Mac. Once the deploy request is sent, the
+daemon finishes alone: closing the laptop or losing Wi-Fi does not abort
+it. Check the result later with <code>dokwalt releases</code>. If the upload is
+interrupted, run <code>dokwalt deploy</code> again; images already on the server
+are skipped.</p>
+<h2 id="one-operation-at-a-time">One operation at a time</h2>
+<p>Deploys, rollbacks, promotions, config changes and restarts share one
+server-wide lock. A second operation, for any app, waits for the first
+to finish and then runs. It never fails with &quot;deploy in progress&quot;.</p>
+<h2 id="overlap-workers-and-migrations">Overlap: workers and migrations</h2>
+<p>Both colors run side by side for about 10 to 15 seconds, and old code
+serves until the switch.</p>
+<ul>
+<li><strong>Workers</strong> of both colors run at the same time. Jobs must tolerate
+two consumers (locks or idempotent jobs).</li>
+<li><strong>Migrations</strong> must be backward compatible: the old version keeps
+serving against the migrated schema. Add columns first, remove them in
+a later deploy (expand/contract).</li>
+</ul>
+<h2 id="other-ways-to-create-a-release">Other ways to create a release</h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Build</th>
+<th>Upload</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>deploy</code></td>
+<td>yes</td>
+<td>yes</td>
+<td>new images, current config</td>
+</tr>
+<tr>
+<td><code>config:set/unset/import</code></td>
+<td>no</td>
+<td>no</td>
+<td>same images, new config</td>
+</tr>
+<tr>
+<td><code>rollback [vN]</code></td>
+<td>no</td>
+<td>no</td>
+<td>vN's images and model, current config</td>
+</tr>
+<tr>
+<td><code>rollback --with-config</code></td>
+<td>no</td>
+<td>no</td>
+<td>vN's images, model and config</td>
+</tr>
+<tr>
+<td><code>promote</code></td>
+<td>no</td>
+<td>no</td>
+<td>staging images, production config</td>
+</tr>
+<tr>
+<td><code>services:set</code></td>
+<td>no</td>
+<td>no</td>
+<td>current images, new stateful override</td>
+</tr>
+</tbody>
+</table>
+<p>All of them use the same blue/green engine. <code>dokwalt restart</code> is
+different: it restarts the active containers one at a time with
+<code>docker restart</code> (replicas keep serving, jobs skipped) and creates no
+release.</p>
+<h2 id="rollback">Rollback</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> rollback          <span class="t-com"># latest successful release older than the current one</span>
+<span class="t-cmd">dokwalt</span> rollback v5       <span class="t-com"># a specific one</span></code></pre></div>
+<p>No confirmation prompt. The new release is described <code>Rollback to v5</code>.
+If v5's images were pruned it fails with <code>image ... is not on the server</code>: redeploy from source.</p>
+<p>See also: <a class="xref" href="/docs/compose/"><code>dokwalt docs compose</code></a>, <a class="xref" href="/docs/releases/"><code>dokwalt docs releases</code></a>,
+<a class="xref" href="/docs/config/"><code>dokwalt docs config</code></a>, <a class="xref" href="/docs/pipelines/"><code>dokwalt docs pipelines</code></a>, <a class="xref" href="/docs/logs/"><code>dokwalt docs logs</code></a>,
+<a class="xref" href="/docs/troubleshooting/"><code>dokwalt docs troubleshooting</code></a>.</p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <a class="pager-prev" href="/docs/concepts/"><small>← Previous</small><b>Concepts</b></a>
+          <a class="pager-next" href="/docs/compose/"><small>Next →</small><b>Docker Compose apps</b></a>
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#usage">Usage</a></li><li class="toc-2"><a href="#what-happens-step-by-step">What happens, step by step</a></li><li class="toc-2"><a href="#sample-output">Sample output</a></li><li class="toc-2"><a href="#migrations-one-shot-jobs-release-phase">Migrations: one-shot jobs (release phase)</a></li><li class="toc-2"><a href="#when-a-deploy-fails">When a deploy fails</a></li><li class="toc-2"><a href="#readiness-and-health-checks">Readiness and health checks</a></li><li class="toc-2"><a href="#deploying-and-going-offline">Deploying and going offline</a></li><li class="toc-2"><a href="#one-operation-at-a-time">One operation at a time</a></li><li class="toc-2"><a href="#overlap-workers-and-migrations">Overlap: workers and migrations</a></li><li class="toc-2"><a href="#other-ways-to-create-a-release">Other ways to create a release</a></li><li class="toc-2"><a href="#rollback">Rollback</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

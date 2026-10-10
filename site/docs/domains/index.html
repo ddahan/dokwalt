@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Domains &amp; HTTPS · DokWalt docs</title>
+  <meta name="description" content="Point DNS at your server, attach a domain to a service, and HTTPS is set up automatically.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Domains &amp; HTTPS</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/">Deploying</a></li><li><a href="/docs/compose/">Docker Compose apps</a></li><li><a href="/docs/config/">Config and secrets</a></li><li><a href="/docs/domains/" class="active" aria-current="page">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/">Databases</a></li><li><a href="/docs/backups/">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/">Logs</a></li><li><a href="/docs/monitoring/">Monitoring</a></li><li><a href="/docs/alerts/">Alerts</a></li><li><a href="/docs/troubleshooting/">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Deploy &amp; ship</p>
+          <h1>Domains &amp; HTTPS</h1>
+          <p class="doc-lead">Point DNS at your server, attach a domain to a service, and HTTPS is set up automatically.</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs domains</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/domains.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<p>Every public site in DokWalt is an explicit domain attached to one service
+and one container port. Caddy (the <code>dokwalt-caddy</code> container) is the only
+thing listening on ports 80 and 443. It routes each domain to the right
+containers and obtains and renews certificates by itself.</p>
+<p>Each app stage has its own private network <code>dw-&lt;app&gt;-&lt;stage&gt;</code>. The daemon
+attaches Caddy to every one of them, and Caddy reaches your service by
+container name (e.g. <code>dw-blog-production-green-web-1:3000</code>), round robin
+across replicas. There is no shared proxy network: apps can't reach each
+other, whether they are public or not.</p>
+<h2 id="1-create-the-dns-records-first">1. Create the DNS records first</h2>
+<p>At your DNS provider, create a record for each domain pointing at the
+server's public IP:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Name</th>
+<th>Value</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>A</code></td>
+<td><code>blog.example.com</code></td>
+<td><code>203.0.113.10</code></td>
+<td>always (IPv4)</td>
+</tr>
+<tr>
+<td><code>AAAA</code></td>
+<td><code>blog.example.com</code></td>
+<td><code>2001:db8::10</code></td>
+<td>only if IPv6 works</td>
+</tr>
+<tr>
+<td><code>A</code></td>
+<td><code>www.blog.example.com</code></td>
+<td><code>203.0.113.10</code></td>
+<td>if you want a redirect</td>
+</tr>
+</tbody>
+</table>
+<p>Only publish an <code>AAAA</code> record if the server is really reachable over IPv6
+on 80 and 443: Let's Encrypt prefers IPv6, and a broken <code>AAAA</code> record makes
+validation fail even when IPv4 is fine. Check propagation from your Mac:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dig</span> +short A blog.example.com
+<span class="t-cmd">dig</span> +short AAAA blog.example.com</code></pre></div>
+<p>Home server with a changing public IP? Use dynamic DNS; see
+<a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>.</p>
+<h2 id="2-attach-the-domain">2. Attach the domain</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> domains:add blog.example.com                              <span class="t-com"># defaults</span>
+<span class="t-cmd">dokwalt</span> domains:add blog.example.com <span class="t-flag">--service</span> web <span class="t-flag">--port</span> 3000    <span class="t-com"># explicit</span></code></pre></div>
+<ul>
+<li><code>--service</code> defaults to the only stateless service (not a one-shot job)
+that declares a port. If there are several candidates, or none, the
+command fails and lists the services: pass <code>--service</code>.</li>
+<li><code>--port</code> defaults to the service's first declared container port, from
+<code>ports:</code> or <code>expose:</code> in your compose file. DokWalt removes <code>ports:</code> at
+deploy time but remembers the container ports as defaults. With no
+declared port, it routes to 80 and warns you.</li>
+<li>Before the first deploy there is no compose model yet, so <code>--service</code> is
+required. Without <code>--port</code>, the port is taken from the compose file at
+the first deploy.</li>
+<li>Hostnames are lowercased, a trailing dot is stripped, wildcards are
+rejected, and each hostname can be used only once per server.</li>
+</ul>
+<p><strong>The domain is always added</strong>: there is no confirmation prompt. It gets
+routed immediately and HTTP redirects to HTTPS. Then DokWalt checks whether
+the domain actually reaches this server and tells you.</p>
+<h3 id="the-reachability-check">The reachability check</h3>
+<p>The daemon fetches
+<code>http://&lt;domain&gt;/.well-known/dokwalt-check/probe</code> (8 s timeout). Caddy
+answers that path on port 80 for any host with the server's own check
+token. Getting the token back proves that DNS, your router or provider
+firewall, and Caddy are all right, so the certificate request will succeed.</p>
+<p>The domain is resolved through <strong>public resolvers</strong> (1.1.1.1, then 8.8.8.8),
+like Let's Encrypt and your visitors see it. The server's own resolver would
+cache &quot;no such name&quot; for a while when you run <code>domains:add</code> before creating
+the record, and keep reporting it after the record is live. If no public
+resolver answers (outbound DNS blocked, or a name that only exists on your
+network), the check uses the server's resolver.</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> domains:add blog.example.com <span class="t-flag">--service</span> web <span class="t-flag">--port</span> 3000
+  blog.example.com → web:3000
+<span class="t-ok">✓</span> blog.example.com → reachable; HTTPS certificate is issued automatically</code></pre></div>
+<h3 id="when-the-check-fails">When the check fails</h3>
+<p>If the probe fails, a DNS lookup explains why. No record:</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> domains:add api.example.com <span class="t-flag">--service</span> api
+  api.example.com → api:8080
+! api.example.com was added but isn&#39;t reachable yet:
+  no DNS record yet — create an A (and/or AAAA) record pointing to this server
+  Caddy keeps retrying the certificate; check again with dokwalt domains</code></pre></div>
+<p>A record exists but port 80 doesn't reach Caddy:</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code>! shop.example.com was added but isn&#39;t reachable yet:
+  DNS points to 198.51.100.7 but this server&#39;s proxy didn&#39;t answer on port 80 — check
+  the IP, firewall (80/443) and router port forwarding. (Testing from the same LAN? Your
+  router may not support hairpin NAT: then this check can&#39;t succeed but the site may
+  still work from outside.)
+  Caddy keeps retrying the certificate; check again with dokwalt domains</code></pre></div>
+<p>What to fix:</p>
+<ul>
+<li><strong>Wrong IP</strong>: fix the <code>A</code> record and wait for its TTL.</li>
+<li><strong>Home</strong>: forward TCP 80 and 443 (and UDP 443) to the server's LAN IP.</li>
+<li><strong>VPS</strong>: allow 80/tcp, 443/tcp, 443/udp in the provider firewall and ufw.</li>
+<li><strong>Hairpin NAT</strong>: the check runs on the server, which calls its own public
+IP. Many home routers don't loop that back. Verify from outside, e.g. a
+phone on mobile data: <code>curl -I http://blog.example.com</code>. Let's Encrypt
+connects from the internet, so certificates still work.</li>
+</ul>
+<p>A failed check is only a warning: the domain stays configured, and Caddy
+keeps retrying the certificate on its own.</p>
+<h2 id="3-certificates">3. Certificates</h2>
+<ul>
+<li><strong>Public names</strong>: Let's Encrypt (ACME), using the email from
+<code>dokwalt server init --email</code>. Caddy renews automatically before expiry.</li>
+<li><strong>Local names</strong>: hostnames ending in <code>.localhost</code>, <code>.test</code>, <code>.internal</code>,
+<code>.local</code>, <code>.lan</code> or <code>.home.arpa</code>, and bare IP addresses, get a certificate
+from Caddy's <strong>internal CA</strong> instead. No Let's Encrypt, and no probe: the
+check reports <code>ok (local name, internal certificate)</code>. Browsers don't
+trust that CA until you import its root certificate:
+<code>ssh pi.home docker cp dokwalt-caddy:/data/caddy/pki/authorities/local/root.crt .</code></li>
+<li><strong>Storage</strong>: certificates live in the Docker volume <code>dokwalt-caddy-data</code>
+(<code>/data</code> in the Caddy container). They survive reboots, <code>server upgrade</code>
+and Caddy being recreated. Include that volume in server backups.</li>
+<li><strong>HTTP/3</strong>: Caddy publishes 443/udp. If UDP 443 is blocked, browsers use
+HTTP/2 instead.</li>
+</ul>
+<h3 id="rate-limits">Rate limits</h3>
+<p>Let's Encrypt limits failed validations per hostname per hour, and
+certificates per domain per week. Two things protect you. The reachability
+check catches most mistakes before you wait on a certificate. And when
+issuance fails, Caddy retries with backoff against the Let's Encrypt
+<strong>staging</strong> endpoint until it works again, which spares the production
+limits. Fix the cause, then wait: retries are automatic.</p>
+<h2 id="4-listing-domains">4. Listing domains</h2>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> domains
+DOMAIN                  TARGET               REACHABILITY
+blog.example.com        web:3000             <span class="t-ok">✓</span> ok
+www.blog.example.com    → blog.example.com   <span class="t-ok">✓</span> ok
+api.blog.example.com    api:8080             ! no DNS record yet — create an A (and/or AAAA) record …</code></pre></div>
+<p><code>dokwalt domains</code> re-runs the reachability check for every domain.
+<code>--no-check</code> skips the probes and lists instantly. <code>--json</code> for scripts.</p>
+<h2 id="5-redirects-www--apex">5. Redirects (www → apex)</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> domains:redirect www.blog.example.com blog.example.com</code></pre></div>
+<p>The source domain needs its own DNS record and gets its own certificate.
+The same check runs. Caddy answers with a <strong>308</strong> to <code>https://&lt;to&gt;{uri}</code>,
+so path and query are kept: <code>https://www.blog.example.com/a?b=1</code> →
+<code>https://blog.example.com/a?b=1</code>. Remove a redirect like any domain:
+<code>dokwalt domains:remove www.blog.example.com</code>.</p>
+<h2 id="6-several-domains-several-services">6. Several domains, several services</h2>
+<p>Run <code>domains:add</code> once per hostname. Each gets its own certificate:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> domains:add blog.example.com   <span class="t-flag">--service</span> web
+<span class="t-cmd">dokwalt</span> domains:add blog.example.org   <span class="t-flag">--service</span> web
+<span class="t-cmd">dokwalt</span> domains:add admin.example.com  <span class="t-flag">--service</span> admin <span class="t-flag">--port</span> 8080</code></pre></div>
+<p>A service with at least one domain is <strong>public</strong>. Only public services get
+the HTTP health check during deploys (<a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>).</p>
+<h2 id="7-domains-per-stage-pipelines">7. Domains per stage (pipelines)</h2>
+<p>With a pipeline enabled, each stage has its own domains:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> domains:add blog.example.com                    <span class="t-flag">--service</span> web
+<span class="t-cmd">dokwalt</span> domains:add staging.blog.example.com <span class="t-flag">-s</span> staging <span class="t-flag">--service</span> web</code></pre></div>
+<p><code>promote</code> never moves domains: each stage keeps its own.</p>
+<h2 id="8-removing-a-domain">8. Removing a domain</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> domains:remove blog.example.com</code></pre></div>
+<p>Caddy stops routing it right away, through an atomic config reload that
+doesn't affect other sites. Delete the DNS record yourself.</p>
+<h2 id="what-visitors-see-when-the-app-isnt-serving">What visitors see when the app isn't serving</h2>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>added before the first deploy</td>
+<td>503 <code>&lt;app&gt; is not running yet.</code></td>
+</tr>
+<tr>
+<td>after <code>dokwalt stop</code></td>
+<td>503 <code>&lt;app&gt; is temporarily unavailable for maintenance.</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-is-not-supported">What is not supported</h2>
+<ul>
+<li><strong>Wildcards</strong> (<code>*.example.com</code>) and wildcard certificates: add each host.</li>
+<li><strong>DNS-01 challenge</strong>: ports 80/443 must reach the server. Behind CGNAT or
+a router you can't configure, see <a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a> (Cloudflare
+Tunnel / Tailscale options).</li>
+</ul>
+<h2 id="when-something-goes-wrong">When something goes wrong</h2>
+<ul>
+<li>A failed issuance reported by Caddy fires the <strong>Certificate error</strong> alert
+(<code>Could not get a certificate for &lt;host&gt;: …</code>). It resolves when the
+certificate is obtained. See <a class="xref" href="/docs/alerts/"><code>dokwalt docs alerts</code></a>.</li>
+<li><code>dokwalt doctor</code> runs the reachability check for every domain:</li>
+</ul>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> doctor
+<span class="t-ok">✓</span> Domain blog.example.com      ok
+! Domain api.blog.example.com  no DNS record yet — create an A (and/or AAAA) record pointing to this server</code></pre></div>
+<ul>
+<li>Caddy's own log (ACME errors, config loads):
+<code>ssh pi.home docker logs --since 1h dokwalt-caddy</code>.</li>
+</ul>
+<p>See also: <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>, <a class="xref" href="/docs/alerts/"><code>dokwalt docs alerts</code></a>,
+<a class="xref" href="/docs/troubleshooting/"><code>dokwalt docs troubleshooting</code></a>, <a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>, <a class="xref" href="/docs/vps/"><code>dokwalt docs vps</code></a></p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <a class="pager-prev" href="/docs/config/"><small>← Previous</small><b>Config and secrets</b></a>
+          <a class="pager-next" href="/docs/releases/"><small>Next →</small><b>Releases &amp; rollback</b></a>
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#1-create-the-dns-records-first">1. Create the DNS records first</a></li><li class="toc-2"><a href="#2-attach-the-domain">2. Attach the domain</a></li><li class="toc-3"><a href="#the-reachability-check">The reachability check</a></li><li class="toc-3"><a href="#when-the-check-fails">When the check fails</a></li><li class="toc-2"><a href="#3-certificates">3. Certificates</a></li><li class="toc-3"><a href="#rate-limits">Rate limits</a></li><li class="toc-2"><a href="#4-listing-domains">4. Listing domains</a></li><li class="toc-2"><a href="#5-redirects-www--apex">5. Redirects (www → apex)</a></li><li class="toc-2"><a href="#6-several-domains-several-services">6. Several domains, several services</a></li><li class="toc-2"><a href="#7-domains-per-stage-pipelines">7. Domains per stage (pipelines)</a></li><li class="toc-2"><a href="#8-removing-a-domain">8. Removing a domain</a></li><li class="toc-2"><a href="#what-visitors-see-when-the-app-isnt-serving">What visitors see when the app isn&#39;t serving</a></li><li class="toc-2"><a href="#what-is-not-supported">What is not supported</a></li><li class="toc-2"><a href="#when-something-goes-wrong">When something goes wrong</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

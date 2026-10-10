@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Releases &amp; rollback · DokWalt docs</title>
+  <meta name="description" content="Every deploy, config change, promote and rollback creates an immutable, numbered release you can return to.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Releases &amp; rollback</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/">Deploying</a></li><li><a href="/docs/compose/">Docker Compose apps</a></li><li><a href="/docs/config/">Config and secrets</a></li><li><a href="/docs/domains/">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/" class="active" aria-current="page">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/">Databases</a></li><li><a href="/docs/backups/">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/">Logs</a></li><li><a href="/docs/monitoring/">Monitoring</a></li><li><a href="/docs/alerts/">Alerts</a></li><li><a href="/docs/troubleshooting/">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Deploy &amp; ship</p>
+          <h1>Releases &amp; rollback</h1>
+          <p class="doc-lead">Every deploy, config change, promote and rollback creates an immutable, numbered release you can return to.</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs releases</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/releases.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<h2 id="what-a-release-is">What a release is</h2>
+<p>A release is a frozen snapshot of what runs, numbered per stage: <code>v1</code>,
+<code>v2</code>, <code>v3</code>… (production and staging each have their own numbers).</p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>images</td>
+<td>each built service → <code>dokwalt/&lt;app&gt;-&lt;svc&gt;:&lt;12 hex of image ID&gt;</code></td>
+</tr>
+<tr>
+<td>compose</td>
+<td>your normalized compose model, as sent by the CLI</td>
+</tr>
+<tr>
+<td>config</td>
+<td>the config version, shown as <code>c&lt;N&gt;</code> (values are not copied)</td>
+</tr>
+<tr>
+<td>description</td>
+<td>your <code>deploy -m</code> message, the last commit subject, or automatic</td>
+</tr>
+<tr>
+<td>git sha</td>
+<td>short commit of the folder you deployed from (<code>-dirty</code> if uncommitted changes)</td>
+</tr>
+<tr>
+<td>color</td>
+<td><code>blue</code> or <code>green</code></td>
+</tr>
+<tr>
+<td>status, error</td>
+<td>see below</td>
+</tr>
+<tr>
+<td>created</td>
+<td>timestamp</td>
+</tr>
+</tbody>
+</table>
+<p>The compose model is stored as you wrote it (without interpolation), and
+it is transformed for the target stage at deploy time. That is why a
+promote or rollback gets the right networks, volumes and domains.</p>
+<p>Registry images (e.g. <code>postgres:17-alpine</code>) are referenced <strong>by tag</strong>, not
+pinned by digest. They are pulled only if missing on the server.</p>
+<p>Releases are never edited: any change creates a new one.</p>
+<h2 id="what-creates-a-release">What creates a release</h2>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>New release contains</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dokwalt deploy</code></td>
+<td>new images + compose, current config</td>
+<td><code>-m</code> or commit subject</td>
+</tr>
+<tr>
+<td><code>config:set</code> / <code>unset</code> / <code>import</code></td>
+<td>same images + compose, new config version</td>
+<td><code>Set SMTP_HOST, SMTP_PORT</code></td>
+</tr>
+<tr>
+<td><code>dokwalt rollback v12</code></td>
+<td>v12's images + compose, current config</td>
+<td><code>Rollback to v12</code></td>
+</tr>
+<tr>
+<td><code>dokwalt promote</code></td>
+<td>staging's current images + compose, production config</td>
+<td><code>Promote staging v8: …</code></td>
+</tr>
+<tr>
+<td><code>services:set --stateful=…</code></td>
+<td>same images + compose, new override</td>
+<td><code>Service cache stateful=false</code></td>
+</tr>
+</tbody>
+</table>
+<p>A config change doesn't create a release with <code>config:set --no-restart</code>, or
+if the stage was never deployed. It applies at the next release.</p>
+<p>Each release goes through the same zero-downtime flow: start the new color,
+run one-shot jobs, wait for readiness and the health check, switch
+traffic, then drain and stop the old color.</p>
+<p><code>restart</code>, <code>stop</code>, <code>start</code>, domain changes and <code>healthcheck:set</code> do <strong>not</strong>
+create releases. A compose file that fails validation is rejected before
+any release is created, so it doesn't use up a version number.</p>
+<h2 id="statuses">Statuses</h2>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>deploying</code></td>
+<td>created, containers starting / checks running</td>
+</tr>
+<tr>
+<td><code>succeeded</code></td>
+<td>passed its checks and received traffic</td>
+</tr>
+<tr>
+<td><code>failed</code></td>
+<td>aborted before the switch: the previous release stayed live and a <em>Deploy failed</em> alert was sent</td>
+</tr>
+<tr>
+<td><code>superseded</code></td>
+<td>succeeded earlier, then replaced by a newer release</td>
+</tr>
+</tbody>
+</table>
+<p>There is no pending status: a release is created when its deploy starts.
+The release currently serving traffic is shown as <code>▶ vN</code> with status <code>live</code>.</p>
+<h2 id="listing-releases">Listing releases</h2>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> releases
+RELEASE  STATUS         DESCRIPTION                                   COMMIT        CONFIG  CREATED
+▶ v16    ● live         Rollback to v14                               a1b2c3d       c7      3m ago
+  v15    ● failed       web did not pass its health check             9f3e2a1       c7      12m ago
+  v14    ● superseded   fix feed                                      a1b2c3d       c7      2d ago
+  v13    ● superseded   Set SMTP_HOST                                 77d0c4e       c7      2d ago
+  v12    ● superseded   new theme                                     77d0c4e-dirty c6      5d ago</code></pre></div>
+<p>For a failed release, the first line of the error replaces the description.
+<code>-n/--limit</code> sets how many releases are shown (default 15).
+<code>--json</code> returns the full records, including images and the complete error.
+With a pipeline: <code>dokwalt releases -s staging</code>.</p>
+<h2 id="rolling-back">Rolling back</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> rollback          <span class="t-com"># to the latest successful release before the current one</span>
+<span class="t-cmd">dokwalt</span> rollback v12      <span class="t-com"># to a specific release</span></code></pre></div>
+<p>Without an argument, the target is the most recent <code>succeeded</code> or
+<code>superseded</code> release older than the current one. The CLI asks <strong>no
+confirmation</strong> (the dashboard's <code>r</code> key asks with <code>y</code>).</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> rollback v12
+<span class="t-cmd">◆</span> Rolling back blog
+<span class="t-ok">✓</span> Services — db: keeps its data (named volume pgdata), web: zero-downtime swap
+<span class="t-ok">✓</span> Created release v17
+<span class="t-ok">✓</span> Stateful services unchanged
+<span class="t-ok">✓</span> Starting v17 next to the current version · containers running
+<span class="t-ok">✓</span> web is healthy
+<span class="t-ok">✓</span> v17 is live
+<span class="t-ok">✓</span> Previous version stops in 10s (in-flight requests finish)
+<span class="t-ok">✓</span> Rolled back — v17 is live</code></pre></div>
+<p>A rollback <strong>creates a new release</strong> (<code>v17</code>, &quot;Rollback to v12&quot;). It doesn't
+reactivate v12 itself. It's fast because nothing is built or uploaded: the
+images are still on the server. It still runs the normal checks, and
+one-shot jobs run again, so a broken target is refused and the current
+release stays live.</p>
+<h3 id="config-during-rollback">Config during rollback</h3>
+<p>By default a rollback keeps the <strong>current</strong> config. That is usually what
+you want: secrets you rotated since v12 stay rotated.</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> rollback v12 <span class="t-flag">--with-config</span></code></pre></div>
+<p><code>--with-config</code> first restores the config v12 was deployed with, as a new
+config version, then deploys. Use it to undo a bad config change:</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> config:set CACHE_TTL=0       <span class="t-com"># v18 (c8), the site gets slow</span>
+<span class="t-com">$</span> <span class="t-cmd">dokwalt</span> rollback <span class="t-flag">--with-config</span>       <span class="t-com"># v19 = v17&#39;s images + v17&#39;s config (c9)</span></code></pre></div>
+<h3 id="what-rollback-doesnt-undo">What rollback doesn't undo</h3>
+<ul>
+<li><strong>Data</strong>: databases and volumes are never rolled back. Undo migrations
+yourself, and keep them backward compatible so old code works.</li>
+<li><strong>Domains, redirects, health checks, service overrides, alert
+settings</strong>: they live outside releases.</li>
+<li><strong>Stateful services</strong>: if the target release's db definition differs
+(e.g. another postgres image), the db container is recreated with that
+definition. Be careful across major versions (<a class="xref" href="/docs/databases/"><code>dokwalt docs databases</code></a>).</li>
+</ul>
+<h2 id="retention">Retention</h2>
+<p>After each successful deploy, DokWalt prunes built images. It keeps those
+of the <strong>5 most recent successful releases per stage</strong>, always including
+the current one (server setting <code>keep_releases</code>, which has no CLI command
+yet).
+Registry images are never pruned. Release records stay in the history, but
+rolling back to one whose images are gone fails before any release is
+created:</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> rollback v9
+<span class="t-err">✗</span> image dokwalt/blog-web:3f9c2a1b7d0e for service web is not on the server (was it pruned? keep fewer releases or redeploy)</code></pre></div>
+<p>Redeploy that version from source instead:
+<code>git checkout &lt;sha&gt; &amp;&amp; dokwalt deploy</code>.</p>
+<h2 id="promote-pipeline-apps">Promote (pipeline apps)</h2>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> promote
+<span class="t-cmd">◆</span> Promoting blog  staging → production
+<span class="t-ok">✓</span> Promoting staging v8 to production (same images, production config)
+<span class="t-ok">✓</span> Created release v21
+<span class="t-ok">✓</span> Starting v21 next to the current version · containers running
+<span class="t-ok">✓</span> web is healthy
+<span class="t-ok">✓</span> v21 is live
+<span class="t-ok">✓</span> Promoted — production is now v21</code></pre></div>
+<p>Promote copies the images and compose model of staging's current release
+into a new production release, with production's config, overrides and
+domains. No build, no upload, and no confirmation prompt in the CLI. To
+undo a promote, run <code>dokwalt rollback</code> in production.</p>
+<h2 id="failed-releases">Failed releases</h2>
+<p>A deploy fails if:</p>
+<ul>
+<li>a container exits, restarts or turns unhealthy, or isn't ready within
+3 minutes;</li>
+<li>a one-shot job exits non-zero;</li>
+<li>a public service doesn't pass its HTTP check within its timeout (60 s by
+default). By default any answer below 500 on <code>/</code> passes. With
+<code>healthcheck:set --path</code>, the answer must be 2xx/3xx;</li>
+<li>a container restarts during the final 3-second stability check.</li>
+</ul>
+<p>DokWalt then removes the new color, keeps the old one serving, marks the
+release <code>failed</code>, streams the last 30 log lines of the failing container
+and sends a <em>Deploy failed</em> alert.</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> releases                          <span class="t-com"># the error is shown on v15</span>
+<span class="t-cmd">dokwalt</span> logs <span class="t-flag">--service</span> web <span class="t-flag">--since</span> 15m    <span class="t-com"># what the app printed</span></code></pre></div>
+<h2 id="concurrency-and-interruptions">Concurrency and interruptions</h2>
+<ul>
+<li><strong>One operation at a time, server-wide</strong>: deploys, rollbacks, promotes and
+config changes share a single lock. A second one <strong>waits</strong> for the first
+to finish, even for another app. There is no &quot;deploy in progress&quot; error.</li>
+<li><strong>Deploys belong to the daemon</strong>: pressing Ctrl+C or closing the laptop
+after the upload doesn't abort anything. Check the outcome later with
+<code>dokwalt releases</code>.</li>
+<li><strong>Interrupted by a reboot</strong>: a release still <code>deploying</code> when the daemon
+starts is marked <code>failed</code> and its color torn down. The reconciler keeps
+the previous release running.</li>
+</ul>
+<p>See also: <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>, <a class="xref" href="/docs/config/"><code>dokwalt docs config</code></a>, <a class="xref" href="/docs/pipelines/"><code>dokwalt docs pipelines</code></a>,
+<a class="xref" href="/docs/databases/"><code>dokwalt docs databases</code></a>, <a class="xref" href="/docs/reboot-recovery/"><code>dokwalt docs reboot-recovery</code></a></p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <a class="pager-prev" href="/docs/domains/"><small>← Previous</small><b>Domains &amp; HTTPS</b></a>
+          <a class="pager-next" href="/docs/pipelines/"><small>Next →</small><b>Pipelines: staging and promote</b></a>
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#what-a-release-is">What a release is</a></li><li class="toc-2"><a href="#what-creates-a-release">What creates a release</a></li><li class="toc-2"><a href="#statuses">Statuses</a></li><li class="toc-2"><a href="#listing-releases">Listing releases</a></li><li class="toc-2"><a href="#rolling-back">Rolling back</a></li><li class="toc-3"><a href="#config-during-rollback">Config during rollback</a></li><li class="toc-3"><a href="#what-rollback-doesnt-undo">What rollback doesn&#39;t undo</a></li><li class="toc-2"><a href="#retention">Retention</a></li><li class="toc-2"><a href="#promote-pipeline-apps">Promote (pipeline apps)</a></li><li class="toc-2"><a href="#failed-releases">Failed releases</a></li><li class="toc-2"><a href="#concurrency-and-interruptions">Concurrency and interruptions</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

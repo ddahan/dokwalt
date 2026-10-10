@@ -12,7 +12,7 @@
    Ink: text, accents and lines. Terminal-like surfaces (.term, snippets, mini terminals) stay
    dark in both themes, so they redeclare the dark ink for everything inside them. */
 :root,
-.term, .install-box, .mini-term, .yaml, .logs {
+.term, .install-box, .mini-term, .yaml, .logs, .code, .term-chip {
   --text: #ececf4;
   --muted: #9ca3af;
   --faint: #4b5563;
@@ -28,7 +28,7 @@
   --line-2: rgba(255, 255, 255, .14);
   --hover: rgba(255, 255, 255, .05);
 }
-.term, .install-box, .mini-term, .yaml, .logs { color: var(--text); color-scheme: dark; }
+.term, .install-box, .mini-term, .yaml, .logs, .code, .term-chip { color: var(--text); color-scheme: dark; }
 
 /* Surfaces, glows and shadows: page level only. */
 :root {

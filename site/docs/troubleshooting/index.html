@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Troubleshooting · DokWalt docs</title>
+  <meta name="description" content="Symptom → cause → fix for the problems you are most likely to hit, with the exact commands.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Troubleshooting</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/">Deploying</a></li><li><a href="/docs/compose/">Docker Compose apps</a></li><li><a href="/docs/config/">Config and secrets</a></li><li><a href="/docs/domains/">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/">Databases</a></li><li><a href="/docs/backups/">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/">Logs</a></li><li><a href="/docs/monitoring/">Monitoring</a></li><li><a href="/docs/alerts/">Alerts</a></li><li><a href="/docs/troubleshooting/" class="active" aria-current="page">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Operate</p>
+          <h1>Troubleshooting</h1>
+          <p class="doc-lead">Symptom → cause → fix for the problems you are most likely to hit, with the exact commands.</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs troubleshooting</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/troubleshooting.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<p>Start with <code>dokwalt doctor</code>: most failures show up there with a <code>→</code> hint. Commands marked
+<code># on the server</code> run over <code>ssh</code>; everything else runs on your Mac.</p>
+<h2 id="connecting">Connecting</h2>
+<h3 id="host-key-mismatch-host-key--not-trusted-or-authentication-fails"><code>HOST KEY MISMATCH</code>, <code>host key … not trusted</code>, or authentication fails</h3>
+<p>DokWalt uses your SSH settings, so first make plain <code>ssh</code> work: <code>ssh -v dd@pi.home true</code>.</p>
+<ul>
+<li><strong>Host key changed</strong> (reinstalled server): always refused; <code>ssh-keygen -R pi.home</code>, reconnect.</li>
+<li><strong>Unknown host:</strong> DokWalt shows the fingerprint and asks. <code>StrictHostKeyChecking accept-new</code> (or
+<code>no</code>) accepts it without asking; <code>StrictHostKeyChecking yes</code> refuses it: add it with <code>ssh</code> first.</li>
+<li><strong>No key offered:</strong> <code>ssh-add -l</code> lists agent keys; <code>ssh-add ~/.ssh/id_ed25519</code> adds one.</li>
+<li><strong>Wrong host/user/port/jump host:</strong> DokWalt reads <code>ssh -G</code>; check what it will use with
+<code>ssh -G pi.home | grep -E &#39;^(hostname|user|port|identityfile|proxyjump|stricthostkeychecking) &#39;</code>.
+A non-default config file must be exported as <code>DOKWALT_SSH_CONFIG=/path/to/config</code>.</li>
+</ul>
+<h3 id="permission-denied-on-rundokwaltdokwaltsock"><code>permission denied</code> on <code>/run/dokwalt/dokwalt.sock</code></h3>
+<p><strong>Cause:</strong> your user is not (yet) in group <code>dokwalt</code>, or the shell predates <code>server init</code>.
+Group membership only applies to new logins.</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># on the server</span>
+<span class="t-cmd">id</span>                                   <span class="t-com"># must list dokwalt and docker</span>
+<span class="t-cmd">ls</span> <span class="t-flag">-l</span> /run/dokwalt/dokwalt.sock      <span class="t-com"># srw-rw---- root dokwalt</span>
+<span class="t-cmd">sudo</span> <span class="t-cmd">usermod</span> <span class="t-flag">-aG</span> dokwalt,docker $USER   <span class="t-com"># if missing; then log out and back in</span></code></pre></div>
+<h3 id="dokwalt-command-not-found-on-the-server-or-daemon-unreachable"><code>dokwalt: command not found</code> on the server, or daemon unreachable</h3>
+<p><code>server init</code> did not finish (it prints the daemon's last 30 journal lines if it failed to start),
+or the service is down: <code>ssh pi.home systemctl status dokwalt</code>. Re-running <code>server init</code> is safe.</p>
+<h3 id="version-mismatch-between-cli-and-daemon">Version mismatch between CLI and daemon</h3>
+<p><code>dokwalt version</code> prints the CLI's build; <code>dokwalt doctor</code> shows the daemon's and warns
+(<code>Versions</code>) when they differ. <code>dokwalt server upgrade</code> installs the CLI's own version on the
+server; if the CLI is the older one, update the CLI first.</p>
+<h2 id="building-and-images">Building and images</h2>
+<h3 id="exec-format-error"><code>exec format error</code></h3>
+<p><strong>Cause:</strong> a binary for the wrong architecture. DokWalt already builds for the server
+(<code>DOCKER_DEFAULT_PLATFORM=linux/&lt;server arch&gt;</code>), so it's usually a Dockerfile downloading an
+amd64 binary. <strong>Fix:</strong> a multi-arch base image, and per-architecture assets with <code>TARGETARCH</code>:</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code>ARG TARGETARCH
+RUN curl -fsSL -o /usr/local/bin/tool https://example.com/tool-linux-${TARGETARCH}</code></pre></div>
+<h3 id="registry-image-has-no-arm64-variant-no-matching-manifest">Registry image has no arm64 variant (<code>no matching manifest</code>)</h3>
+<p>The server's <code>docker compose up</code> fails and the release is <code>failed</code>. Check with
+<code>docker manifest inspect image:tag | grep -c arm64</code>. Pick another tag or image, or build it from
+source with <code>build:</code> (native arm64 on Apple Silicon). Avoid QEMU on the Pi.</p>
+<h3 id="private-registry-pull-access-denied--unauthorized">Private registry: <code>pull access denied</code> / <code>unauthorized</code></h3>
+<p>Registry images are pulled on the server (only if absent). Log in there, as root:
+<code>ssh -t pi.home sudo docker login registry.example.com</code>. The daemon runs with <code>HOME=/root</code>,
+so it uses root's Docker credentials.</p>
+<h3 id="docker-save-failed---update-docker-desktop-to-28-for---platform-support"><code>docker save failed (…) — update Docker Desktop to 28+ for --platform support</code></h3>
+<p>Uploads use <code>docker save --platform linux/&lt;arch&gt;</code>: update Docker on the Mac to 28 or newer.</p>
+<h3 id="transfer-interrupted-or-a-deploy-waits-before-starting">Transfer interrupted, or a deploy waits before starting</h3>
+<p>Laptop sleep or Wi-Fi drop during the upload: no release is created; deploy again (images already
+on the server are skipped). After the upload the daemon finishes the deploy even if you disconnect.
+Mutating operations (deploy, rollback, promote, config changes, stop/start) share one server-wide
+lock: a second one waits for the first instead of failing.</p>
+<h2 id="deploys">Deploys</h2>
+<h3 id="deploy-failed-health-check-readiness-or-a-job">Deploy failed: health check, readiness or a job</h3>
+<p>The old version keeps serving; the new color is removed and the output shows the last 30 log
+lines of the failing container.</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> releases                        <span class="t-com"># the failed version and its error</span>
+<span class="t-cmd">dokwalt</span> logs <span class="t-flag">--service</span> web <span class="t-flag">-n</span> 200 <span class="t-flag">--since</span> 15m
+<span class="t-cmd">dokwalt</span> config                          <span class="t-com"># missing variable? typo in DATABASE_URL?</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Error</th>
+<th>Meaning and fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>health check failed for web: … is the app listening on port 3000?</code></td>
+<td>Public services get <code>GET /</code> on the domain's port: <strong>any status &lt; 500 passes</strong>. The app listens on <code>127.0.0.1</code> instead of <code>0.0.0.0</code>, or the port is wrong (<code>domains:remove</code> + <code>domains:add --port</code>)</td>
+</tr>
+<tr>
+<td>same, after <code>healthcheck:set --path /healthz</code></td>
+<td>With a custom path the answer must be <strong>2xx or 3xx</strong>; 4xx now fails</td>
+</tr>
+<tr>
+<td>timeout (default 60 s)</td>
+<td>Slow start: <code>dokwalt healthcheck:set --service web --path /healthz --timeout 120s</code></td>
+</tr>
+<tr>
+<td><code>service web is unhealthy</code> / <code>exited with code N</code></td>
+<td>Its compose <code>healthcheck</code> failed, or it crashed; <code>(out of memory)</code> = OOM kill. It must also stay up 3 s without restarting</td>
+</tr>
+<tr>
+<td><code>job migrate failed with exit code 1</code></td>
+<td>A one-shot job (a dependency with <code>condition: service_completed_successfully</code>) failed; it runs on every deploy, rollback and promote. Fix the migration; keep migrations backward compatible</td>
+</tr>
+<tr>
+<td><code>timed out after 3m0s waiting for containers to become ready</code></td>
+<td>A service stayed <code>starting</code>; check its healthcheck and logs</td>
+</tr>
+</tbody>
+</table>
+<p>Services without a domain aren't probed over HTTP: running (and healthy, if they have a compose
+healthcheck) plus the 3-second stability check is enough.</p>
+<h3 id="compose-warnings-and-errors">Compose warnings and errors</h3>
+<table>
+<thead>
+<tr>
+<th>Message</th>
+<th>Meaning and fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>web: `ports` ignored — only the proxy is public</code></td>
+<td>Expected. <code>dokwalt domains:add &lt;host&gt; --service web --port 3000</code>; databases via <code>dokwalt db:connect</code></td>
+</tr>
+<tr>
+<td><code>web: env_file ignored — config lives on the server</code></td>
+<td>Load it once: <code>dokwalt config:import .env</code>. Stateful services only get config through <code>${VAR}</code></td>
+</tr>
+<tr>
+<td><code>container_name removed</code></td>
+<td>It would collide between blue and green; remove it</td>
+</tr>
+<tr>
+<td><code>bind mount of a project file (x) is not possible on the server</code></td>
+<td>Bake the files into the image (<code>COPY</code>), or use a named volume (<code>uploads:/app/uploads</code>)</td>
+</tr>
+<tr>
+<td><code>host path /srv/x must exist on the server</code></td>
+<td>Absolute bind mounts are allowed; create the path on the server</td>
+</tr>
+<tr>
+<td><code>network_mode &#34;host&#34; is not supported</code></td>
+<td>Use the stage network; services reach each other by name</td>
+</tr>
+<tr>
+<td><code>compose secrets are not supported; use dokwalt config:set</code></td>
+<td>Move them to config</td>
+</tr>
+<tr>
+<td><code>${X} is used in the compose file but not set</code></td>
+<td><code>dokwalt config:set X=…</code></td>
+</tr>
+<tr>
+<td>(no message) custom <code>networks:</code></td>
+<td>Silently replaced by the stage network, service name as alias</td>
+</tr>
+</tbody>
+</table>
+<h3 id="rollback-fails-images-pruned">Rollback fails: images pruned</h3>
+<p><code>image dokwalt/blog-web:… for service web is not on the server (was it pruned? …)</code>. After each
+successful deploy, images beyond the current release and the stage's last 5 earlier releases
+are pruned (registry images are never pruned). Check out that commit and run <code>dokwalt deploy</code> instead.</p>
+<h2 id="domains-and-certificates">Domains and certificates</h2>
+<h3 id="domain-check-fails-or-no-certificate-is-issued">Domain check fails, or no certificate is issued</h3>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dig</span> +short blog.example.com A          <span class="t-com"># must be your public IP</span>
+<span class="t-cmd">dig</span> +short blog.example.com AAAA       <span class="t-com"># empty, or an IPv6 that really reaches the server</span>
+<span class="t-cmd">curl</span> <span class="t-flag">-4</span> <span class="t-flag">-s</span> https://ifconfig.me         <span class="t-com"># your public IPv4 (on the server&#39;s network)</span>
+<span class="t-cmd">curl</span> <span class="t-flag">-I</span> http://blog.example.com        <span class="t-com"># from a phone on mobile data, not home Wi-Fi</span></code></pre></div>
+<ul>
+<li><code>no DNS record yet</code>: create the A (and/or AAAA) record, then check again with <code>dokwalt domains</code>.
+The check asks public resolvers (1.1.1.1, 8.8.8.8), so a new record shows up within
+seconds. If your own machine still can't open the site, flush its DNS cache.</li>
+<li><code>DNS points to … but this server&#39;s proxy didn&#39;t answer on port 80</code>: wrong IP, or ports
+80/443 not forwarded (home) or blocked (VPS firewall). Port 80 is required for HTTP-01.</li>
+<li>A broken AAAA record: Let's Encrypt prefers IPv6. Fix it or delete it.</li>
+<li>Cloudflare proxy (orange cloud): switch the record to DNS-only until the certificate exists.</li>
+<li>A CAA record that doesn't allow <code>letsencrypt.org</code>.</li>
+<li>Hairpin NAT: the check from the server's own LAN fails while the site works from outside.</li>
+<li><code>.localhost</code>, <code>.test</code>, <code>.internal</code>, <code>.local</code>, <code>.lan</code>, <code>.home.arpa</code> names and IPs get Caddy's
+internal CA certificate (untrusted by browsers, by design).</li>
+</ul>
+<p>A &quot;Certificate error&quot; alert fires when Caddy can't get one. Caddy's own log, on the server:
+<code>docker logs --tail 100 dokwalt-caddy 2&gt;&amp;1 | grep -i acme</code>.</p>
+<h3 id="rate-limited">Rate limited</h3>
+<p>Nothing to do: Caddy retries by itself with backoff (using Let's Encrypt staging for retries).
+Fix the underlying DNS or port problem so the next attempt succeeds.</p>
+<h3 id="tls-errors-certificate-not-yet-valid-acme-failures-clock-wrong">TLS errors, &quot;certificate not yet valid&quot;, ACME failures: clock wrong</h3>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># on the server</span>
+<span class="t-cmd">timedatectl</span>                          <span class="t-com"># System clock synchronized: yes</span>
+<span class="t-cmd">sudo</span> <span class="t-cmd">timedatectl</span> set-ntp true &amp;&amp; <span class="t-cmd">sudo</span> <span class="t-cmd">systemctl</span> restart systemd-timesyncd</code></pre></div>
+<p>Outbound UDP 123 must be allowed. On a Pi, the RTC battery keeps time across power cuts.</p>
+<h2 id="runtime">Runtime</h2>
+<h3 id="site-down-after-a-reboot">Site down after a reboot</h3>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> doctor
+<span class="t-cmd">ssh</span> pi.home <span class="t-str">&#39;systemctl status docker dokwalt; journalctl -u dokwalt -b --no-pager | tail -50&#39;</span>
+<span class="t-cmd">ssh</span> pi.home <span class="t-str">&#39;docker ps -a --filter label=dokwalt.app&#39;</span></code></pre></div>
+<ul>
+<li>503 <code>&lt;app&gt; is temporarily unavailable for maintenance.</code>: stopped on purpose, which survives
+reboots: <code>dokwalt start</code>. 503 <code>&lt;app&gt; is not running yet.</code>: never deployed.</li>
+<li>&quot;Self-healing failed&quot; alert: the reconciler can't restart the stage. After a restore onto a
+new server, built images are missing: <code>dokwalt deploy</code> once from each app folder.</li>
+<li>Also check: disk full, clock wrong, or an SD card gone read-only
+(<code>dmesg | grep -i -e mmc -e &#39;read-only&#39;</code>). See <a class="xref" href="/docs/reboot-recovery/"><code>dokwalt docs reboot-recovery</code></a>.</li>
+</ul>
+<h3 id="container-restart-loop">Container restart loop</h3>
+<p><code>dokwalt ps</code> shows the restart count. A &quot;Crash loop&quot; alert fires at 3 deaths in 10 minutes (tune:
+<code>dokwalt alerts:set restarts=5</code>; one-shot jobs excluded) and resolves after 10 quiet minutes.</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> logs <span class="t-flag">--service</span> worker <span class="t-flag">-n</span> 100
+<span class="t-cmd">ssh</span> pi.home <span class="t-str">&#34;docker inspect --format &#39;{{.State.OOMKilled}} {{.State.ExitCode}}&#39; &lt;container&gt;&#34;</span></code></pre></div>
+<p>Usual causes: a missing config variable, the database not ready yet after a reboot (make the app
+retry its connection), or an out-of-memory kill (see below). Fix and <code>dokwalt deploy</code>, or roll
+back with <code>dokwalt rollback</code>.</p>
+<h3 id="disk-full">Disk full</h3>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># on the server</span>
+<span class="t-cmd">df</span> <span class="t-flag">-h</span> / &amp;&amp; <span class="t-cmd">docker</span> system df
+<span class="t-cmd">docker</span> image prune                     <span class="t-com"># dangling images only: safe</span>
+<span class="t-cmd">sudo</span> <span class="t-cmd">journalctl</span> <span class="t-flag">--vacuum-size=100M</span> &amp;&amp; <span class="t-cmd">sudo</span> <span class="t-cmd">apt</span> clean</code></pre></div>
+<p>Don't run <code>docker image prune -a</code> or <code>docker volume prune</code>: the first deletes the images kept for
+rollbacks, the second can delete app data. Container logs are capped by the <code>local</code> driver
+(10 MB × 3 per container). The &quot;Disk almost full&quot; alert fires at 90 % (<code>alerts:set disk=85</code>).</p>
+<h3 id="memory-pressure-or-oom-kills">Memory pressure or OOM kills</h3>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> top                            <span class="t-com"># which service uses what</span>
+<span class="t-cmd">ssh</span> pi.home <span class="t-str">&#39;free -h; journalctl -k -b | grep -i -e oom -e &#34;killed process&#34;&#39;</span></code></pre></div>
+<p>Set limits in compose (<code>mem_limit: 256m</code>), reduce workers (e.g. Gunicorn/Puma processes), add zram
+(Pi) or a swap file (VPS), and remember that during a deploy the old and new stateless services
+run side by side for a few seconds. An &quot;Out of memory&quot; alert fires on OOM kills.</p>
+<h3 id="dbconnect-client-not-found"><code>db:connect</code>: client not found</h3>
+<p>The local client is missing. Install it, or use <code>--tunnel-only</code> with a GUI tool:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">brew</span> install libpq &amp;&amp; <span class="t-cmd">brew</span> link <span class="t-flag">--force</span> libpq    <span class="t-com"># psql</span>
+<span class="t-cmd">brew</span> install mysql-client mongosh redis           <span class="t-com"># mysql, mongosh, redis-cli</span>
+<span class="t-cmd">dokwalt</span> db:connect <span class="t-flag">--tunnel-only</span> <span class="t-flag">--port</span> 5433</code></pre></div>
+<h3 id="pi-throttling-or-high-temperature">Pi: throttling or high temperature</h3>
+<p><code>vcgencmd get_throttled</code>: <code>0x50000</code> = under-voltage since boot (official 27 W PSU and cable),
+<code>0x80008</code> = heat (Active Cooler, fan, airflow). The throttling alert is always on; tune the
+temperature one with <code>dokwalt alerts:set temperature=75</code>.</p>
+<h2 id="collecting-information-for-a-bug-report">Collecting information for a bug report</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> version
+<span class="t-cmd">dokwalt</span> doctor <span class="t-flag">--json</span> &gt; doctor.json
+<span class="t-cmd">dokwalt</span> server info <span class="t-flag">--json</span> &gt; server-info.json
+<span class="t-cmd">ssh</span> pi.home <span class="t-str">&#39;journalctl -u dokwalt -b --no-pager -n 500&#39;</span> &gt; dokwalt.log
+<span class="t-cmd">ssh</span> pi.home <span class="t-str">&#39;docker logs --tail 200 dokwalt-caddy&#39;</span> &gt; caddy.log 2&gt;&amp;<span class="t-cmd">1</span></code></pre></div>
+<p>Include the command you ran and its full output. Review the files first: they contain domain
+names. Config values are masked; never attach <code>config --reveal</code> output or <code>apps:export</code> files.</p>
+<p>See also: <a class="xref" href="/docs/reboot-recovery/"><code>dokwalt docs reboot-recovery</code></a>, <a class="xref" href="/docs/domains/"><code>dokwalt docs domains</code></a>, <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>,
+<a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>, <a class="xref" href="/docs/commands/"><code>dokwalt docs commands</code></a>.</p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <a class="pager-prev" href="/docs/alerts/"><small>← Previous</small><b>Alerts</b></a>
+          <a class="pager-next" href="/docs/raspberry-pi/"><small>Next →</small><b>Raspberry Pi 5</b></a>
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#connecting">Connecting</a></li><li class="toc-3"><a href="#host-key-mismatch-host-key--not-trusted-or-authentication-fails">HOST KEY MISMATCH, host key … not trusted, or authentication fails</a></li><li class="toc-3"><a href="#permission-denied-on-rundokwaltdokwaltsock">permission denied on /run/dokwalt/dokwalt.sock</a></li><li class="toc-3"><a href="#dokwalt-command-not-found-on-the-server-or-daemon-unreachable">dokwalt: command not found on the server, or daemon unreachable</a></li><li class="toc-3"><a href="#version-mismatch-between-cli-and-daemon">Version mismatch between CLI and daemon</a></li><li class="toc-2"><a href="#building-and-images">Building and images</a></li><li class="toc-3"><a href="#exec-format-error">exec format error</a></li><li class="toc-3"><a href="#registry-image-has-no-arm64-variant-no-matching-manifest">Registry image has no arm64 variant (no matching manifest)</a></li><li class="toc-3"><a href="#private-registry-pull-access-denied--unauthorized">Private registry: pull access denied / unauthorized</a></li><li class="toc-3"><a href="#docker-save-failed---update-docker-desktop-to-28-for---platform-support">docker save failed (…) — update Docker Desktop to 28&#43; for --platform support</a></li><li class="toc-3"><a href="#transfer-interrupted-or-a-deploy-waits-before-starting">Transfer interrupted, or a deploy waits before starting</a></li><li class="toc-2"><a href="#deploys">Deploys</a></li><li class="toc-3"><a href="#deploy-failed-health-check-readiness-or-a-job">Deploy failed: health check, readiness or a job</a></li><li class="toc-3"><a href="#compose-warnings-and-errors">Compose warnings and errors</a></li><li class="toc-3"><a href="#rollback-fails-images-pruned">Rollback fails: images pruned</a></li><li class="toc-2"><a href="#domains-and-certificates">Domains and certificates</a></li><li class="toc-3"><a href="#domain-check-fails-or-no-certificate-is-issued">Domain check fails, or no certificate is issued</a></li><li class="toc-3"><a href="#rate-limited">Rate limited</a></li><li class="toc-3"><a href="#tls-errors-certificate-not-yet-valid-acme-failures-clock-wrong">TLS errors, &#34;certificate not yet valid&#34;, ACME failures: clock wrong</a></li><li class="toc-2"><a href="#runtime">Runtime</a></li><li class="toc-3"><a href="#site-down-after-a-reboot">Site down after a reboot</a></li><li class="toc-3"><a href="#container-restart-loop">Container restart loop</a></li><li class="toc-3"><a href="#disk-full">Disk full</a></li><li class="toc-3"><a href="#memory-pressure-or-oom-kills">Memory pressure or OOM kills</a></li><li class="toc-3"><a href="#dbconnect-client-not-found">db:connect: client not found</a></li><li class="toc-3"><a href="#pi-throttling-or-high-temperature">Pi: throttling or high temperature</a></li><li class="toc-2"><a href="#collecting-information-for-a-bug-report">Collecting information for a bug report</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

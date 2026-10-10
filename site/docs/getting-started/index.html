@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Getting started · DokWalt docs</title>
+  <meta name="description" content="From an empty server to a site served over HTTPS in about ten minutes.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Getting started</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/" class="active" aria-current="page">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/">Deploying</a></li><li><a href="/docs/compose/">Docker Compose apps</a></li><li><a href="/docs/config/">Config and secrets</a></li><li><a href="/docs/domains/">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/">Databases</a></li><li><a href="/docs/backups/">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/">Logs</a></li><li><a href="/docs/monitoring/">Monitoring</a></li><li><a href="/docs/alerts/">Alerts</a></li><li><a href="/docs/troubleshooting/">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Start here</p>
+          <h1>Getting started</h1>
+          <p class="doc-lead">From an empty server to a site served over HTTPS in about ten minutes.</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs getting-started</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/getting-started.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<h2 id="what-you-need">What you need</h2>
+<p>On your Mac:</p>
+<ul>
+<li><strong>Docker Desktop (Docker 28+) or OrbStack</strong> with the Compose v2 plugin.
+DokWalt builds your images locally, so <code>docker compose version</code> must
+work. Docker 28+ is needed for <code>docker save --platform</code>.</li>
+<li>An <strong>SSH key</strong> that can log in to the server (<code>ssh dd@pi.home</code> works).
+Agent keys are tried first, then identity files. <code>~/.ssh/config</code>
+aliases and <code>ProxyJump</code> are honoured.</li>
+<li>A project folder with a <code>Dockerfile</code> and a compose file
+(<code>compose.yaml</code> or <code>docker-compose.yml</code>).</li>
+</ul>
+<p>On the server:</p>
+<ul>
+<li>A 64-bit Linux with systemd (Debian, Ubuntu, Raspberry Pi OS), amd64
+or arm64. 32-bit Raspberry Pi OS is refused.</li>
+<li>A user with <code>sudo</code> (or root). You type the sudo password yourself.</li>
+<li>Ports <strong>80 and 443</strong> reachable from the internet (router port forwarding
+at home, firewall rules on a VPS).</li>
+<li>A <strong>DNS A/AAAA record</strong> for each domain, pointing to the server.</li>
+</ul>
+<p>Docker does not need to be installed on the server: <code>server init</code> does it.</p>
+<h2 id="1-install-the-cli">1. Install the CLI</h2>
+<p>On macOS or Linux (on Windows, inside WSL):</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">curl</span> <span class="t-flag">-fsSL</span> https://raw.githubusercontent.com/ddahan/dokwalt/main/install.sh | <span class="t-cmd">sh</span>
+<span class="t-cmd">dokwalt</span> version</code></pre></div>
+<p>The script detects your system and CPU, downloads the matching binary from
+the latest GitHub release, verifies it against <code>checksums.txt</code> and installs
+it in a folder on your <code>PATH</code> (using sudo only if it has to). Run it again
+to upgrade. <code>server init</code> later downloads the Linux binary for the server,
+for the same version, and verifies it the same way.</p>
+<h2 id="2-set-up-the-server">2. Set up the server</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> server init dd@pi.home <span class="t-flag">--name</span> pi <span class="t-flag">--email</span> you@example.com</code></pre></div>
+<p>The target is <code>user@host</code>, <code>user@host:port</code> or any <code>~/.ssh/config</code>
+alias. <code>--email</code> is the Let's Encrypt account email. <code>--name</code> sets the
+context name (default: the host's first label, <code>default</code> for an IP). The
+first server you add becomes the current one.</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">◆</span> Installing DokWalt on dd@pi.home
+<span class="t-ok">✓</span> Connecting over SSH
+<span class="t-ok">✓</span> Uploading dokwalt for linux/arm64 (14.2 MiB)
+<span class="t-cmd">◆</span> Running the installer with sudo on the server (you may be asked for your password)
+[sudo] password for dd:
+<span class="t-cmd">◆</span> Installing DokWalt  arm64
+→ Installing Docker (official get.docker.com script)
+<span class="t-ok">✓</span> Docker 28.4.0
+<span class="t-ok">✓</span> Docker Compose 2.39.2
+→ Configuring Docker: live-restore (containers survive Docker restarts), bounded logs
+<span class="t-ok">✓</span> Docker configured
+<span class="t-ok">✓</span> User dd can manage DokWalt (groups dokwalt, docker)
+<span class="t-ok">✓</span> Installed /usr/local/bin/dokwalt
+→ Waiting for the daemon
+<span class="t-ok">✓</span> Daemon running (systemd unit dokwalt.service, starts at boot)
+<span class="t-ok">✓</span> Let&#39;s Encrypt account email: you@example.com
+
+<span class="t-ok">✓</span> dd@pi.home is ready — saved as server pi</code></pre></div>
+<p>What init did: upload the Linux binary, install Docker if missing (and
+the compose plugin), merge <code>live-restore: true</code> and <code>log-driver: local</code>
+into <code>/etc/docker/daemon.json</code>, create the <code>dokwalt</code> group and add you to
+<code>dokwalt</code> and <code>docker</code>, install <code>/usr/local/bin/dokwalt</code>, create
+<code>/var/lib/dokwalt</code>, install and start the systemd unit. The daemon then
+starts Caddy (<code>dokwalt-caddy</code>) and keeps it running.</p>
+<p>Nothing listens on a new public port except Caddy on 80/443. The CLI
+always talks to the daemon through SSH.</p>
+<h2 id="3-create-the-app">3. Create the app</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">cd</span> ~/Code/blog
+<span class="t-cmd">dokwalt</span> apps:create blog</code></pre></div>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-ok">✓</span> Created blog on pi
+  Linked to /Users/dd/Code/blog
+  Next: dokwalt deploy then dokwalt domains:add example.com --service web</code></pre></div>
+<p><code>apps:create</code> links the current folder by default (<code>--no-link</code> to skip;
+<code>dokwalt link blog</code> links another folder later). The link lives in
+<code>~/.config/dokwalt/config.json</code> on your Mac; nothing is written to the
+repository. From this folder (or any subfolder) you can omit <code>-a blog</code>.</p>
+<h2 id="4-set-config">4. Set config</h2>
+<p>Config lives on the server, encrypted. Import your <code>.env</code> and add values:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> config:import .env
+<span class="t-cmd">dokwalt</span> config:set DB_PASSWORD=$(openssl rand <span class="t-flag">-hex</span> 16) NODE_ENV=production
+<span class="t-cmd">dokwalt</span> config</code></pre></div>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">◆</span> Config of blog
+KEY           VALUE
+DB_PASSWORD   9f••••••••••••
+NODE_ENV      pr••••••••
+SMTP_HOST     sm••••••••••••</code></pre></div>
+<p>Before the first deploy this only stores values (&quot;applies on first
+deploy&quot;). Stateless services receive every key as an environment
+variable; <code>${VAR}</code> in the compose file is interpolated on the server.
+See <a class="xref" href="/docs/config/"><code>dokwalt docs config</code></a>.</p>
+<h2 id="5-deploy">5. Deploy</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-m</span> <span class="t-str">&#34;first deploy&#34;</span></code></pre></div>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">◆</span> Deploying blog  to pi (linux/arm64)
+<span class="t-ok">✓</span> Built migrate, web, worker
+<span class="t-ok">✓</span> Uploaded 41.3 MiB in 7.2s
+! web: published ports removed — traffic reaches services only through the proxy (use `dokwalt domains:add` or `dokwalt db:connect`)
+<span class="t-ok">✓</span> Services — db: keeps its data (named volume pgdata), migrate: runs once per deploy, web: zero-downtime swap, worker: zero-downtime swap
+<span class="t-ok">✓</span> Created release v1
+<span class="t-ok">✓</span> Stateful services ready
+<span class="t-ok">✓</span> Containers running
+<span class="t-ok">✓</span> v1 is live
+
+<span class="t-ok">✓</span> blog is live — no domain yet
+  Add one: dokwalt domains:add example.com --service &lt;service&gt;</code></pre></div>
+<p>The first deploy has no domain yet, so the app runs but is not public.
+Registry images such as <code>postgres:17</code> are pulled on the server if absent.</p>
+<h2 id="6-add-a-domain">6. Add a domain</h2>
+<p>Create the DNS record first, then:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> domains:add blog.example.com <span class="t-flag">--service</span> web <span class="t-flag">--port</span> 3000</code></pre></div>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code>  blog.example.com → web:3000
+<span class="t-ok">✓</span> blog.example.com → reachable; HTTPS certificate is issued automatically</code></pre></div>
+<p>Both flags are optional: <code>--service</code> defaults to the only stateless
+service that declares a port, <code>--port</code> to its first declared port. The
+domain is always added, without a prompt. If DNS or port forwarding is
+not ready, the CLI prints <code>... was added but isn&#39;t reachable yet:</code> with
+the reason; Caddy keeps retrying the certificate. Redirect <code>www</code> with
+<code>dokwalt domains:redirect www.blog.example.com blog.example.com</code>.</p>
+<h2 id="7-check-it">7. Check it</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> ps
+<span class="t-cmd">dokwalt</span> logs <span class="t-flag">-f</span>
+<span class="t-cmd">dokwalt</span> doctor</code></pre></div>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> ps
+SERVICE   CONTAINER                            STATE        HEALTH    RESTARTS   STATUS
+db        dw-blog-production-data-db-1         ● running    healthy   0          Up 3 minutes (healthy)
+migrate   dw-blog-production-blue-migrate-1    <span class="t-ok">✓</span> completed  —         0          Exited (0) 2 minutes ago
+web       dw-blog-production-blue-web-1        ● running    healthy   0          Up 2 minutes (healthy)
+worker    dw-blog-production-blue-worker-1     ● running    —         0          Up 2 minutes</code></pre></div>
+<p><code>doctor</code> checks the connection and versions, Docker, live-restore, the
+memory cgroup, the compose plugin, start on boot, disk, memory,
+temperature, clock, the daemon, Caddy, the Let's Encrypt email and each
+domain.</p>
+<h2 id="everyday-loop">Everyday loop</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">git</span> commit <span class="t-flag">-am</span> <span class="t-str">&#34;new homepage&#34;</span>
+<span class="t-cmd">dokwalt</span> deploy                     <span class="t-com"># zero-downtime; -m defaults to the commit subject</span>
+<span class="t-cmd">dokwalt</span> releases                   <span class="t-com"># history</span>
+<span class="t-cmd">dokwalt</span> rollback                   <span class="t-com"># back to the previous release, no prompt</span></code></pre></div>
+<p>Run <code>dokwalt</code> with no arguments for the full-screen dashboard.</p>
+<h2 id="next-steps">Next steps</h2>
+<ul>
+<li>Reboot the server (<code>sudo reboot</code>) and watch the site come back by itself.</li>
+<li>Add alerts: <code>dokwalt alerts:add discord &lt;webhook-url&gt;</code>.</li>
+<li>Open a database shell: <code>dokwalt db:connect</code>.</li>
+</ul>
+<p>See also: <a class="xref" href="/docs/concepts/"><code>dokwalt docs concepts</code></a>, <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>,
+<a class="xref" href="/docs/compose/"><code>dokwalt docs compose</code></a>, <a class="xref" href="/docs/domains/"><code>dokwalt docs domains</code></a>, <a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>,
+<a class="xref" href="/docs/vps/"><code>dokwalt docs vps</code></a>.</p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <span></span>
+          <a class="pager-next" href="/docs/concepts/"><small>Next →</small><b>Concepts</b></a>
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#what-you-need">What you need</a></li><li class="toc-2"><a href="#1-install-the-cli">1. Install the CLI</a></li><li class="toc-2"><a href="#2-set-up-the-server">2. Set up the server</a></li><li class="toc-2"><a href="#3-create-the-app">3. Create the app</a></li><li class="toc-2"><a href="#4-set-config">4. Set config</a></li><li class="toc-2"><a href="#5-deploy">5. Deploy</a></li><li class="toc-2"><a href="#6-add-a-domain">6. Add a domain</a></li><li class="toc-2"><a href="#7-check-it">7. Check it</a></li><li class="toc-2"><a href="#everyday-loop">Everyday loop</a></li><li class="toc-2"><a href="#next-steps">Next steps</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

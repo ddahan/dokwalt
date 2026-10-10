@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Databases · DokWalt docs</title>
+  <meta name="description" content="Databases are ordinary compose services: kept in one stable place, never exposed, reachable through an SSH tunnel.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Databases</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/">Deploying</a></li><li><a href="/docs/compose/">Docker Compose apps</a></li><li><a href="/docs/config/">Config and secrets</a></li><li><a href="/docs/domains/">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/" class="active" aria-current="page">Databases</a></li><li><a href="/docs/backups/">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/">Logs</a></li><li><a href="/docs/monitoring/">Monitoring</a></li><li><a href="/docs/alerts/">Alerts</a></li><li><a href="/docs/troubleshooting/">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Data</p>
+          <h1>Databases</h1>
+          <p class="doc-lead">Databases are ordinary compose services: kept in one stable place, never exposed, reachable through an SSH tunnel.</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs databases</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/databases.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<p>DokWalt has no managed add-ons. A database is a service in your compose
+file, and DokWalt handles it correctly because it detects it as
+<strong>stateful</strong>.</p>
+<h2 id="how-dokwalt-treats-a-database">How DokWalt treats a database</h2>
+<div class="code" data-lang="yaml"><div class="code-bar"><span>yaml</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-key">services</span>:
+  <span class="t-key">web</span>:
+    <span class="t-key">build</span>: .
+    <span class="t-key">environment</span>:
+      <span class="t-key">DATABASE_URL</span>: postgres://blog:${POSTGRES_PASSWORD}@db:5432/blog
+  <span class="t-key">db</span>:
+    <span class="t-key">image</span>: postgres:17-alpine
+    <span class="t-key">environment</span>:
+      <span class="t-key">POSTGRES_USER</span>: blog
+      <span class="t-key">POSTGRES_DB</span>: blog
+      <span class="t-key">POSTGRES_PASSWORD</span>: ${POSTGRES_PASSWORD}
+    <span class="t-key">volumes</span>:
+      - pgdata:/var/lib/postgresql/data
+<span class="t-key">volumes</span>:
+  <span class="t-key">pgdata</span>:</code></pre></div>
+<ul>
+<li><strong>Stateful detection</strong>, in this order: a <code>services:set</code> override, then a
+named volume, then a well-known image (postgres, postgis, timescaledb,
+mysql, mariadb, percona, mongo, redis, valkey, keydb, dragonfly,
+memcached, rabbitmq, elasticsearch, opensearch, clickhouse, influxdb,
+minio, cassandra, couchdb, neo4j, nats, meilisearch, typesense, qdrant,
+and <code>&lt;name&gt;-*</code> variants). Absolute host bind mounts don't make a service
+stateful.</li>
+<li><strong>Data project</strong>: stateful services run in the compose project
+<code>dw-blog-production-data</code>. It is never duplicated during blue/green
+deploys, and <code>up -d</code> only recreates a container if its definition changed.</li>
+<li><strong>Stable volumes</strong>: named volumes become external volumes
+<code>dw-&lt;app&gt;-&lt;stage&gt;-&lt;vol&gt;</code>, here <code>dw-blog-production-pgdata</code>. With a
+pipeline, staging has its own: <code>dw-blog-staging-pgdata</code>.</li>
+<li><strong>Never public</strong>: <code>ports:</code> are removed (with a warning). The database is
+only reachable on the stage's private network <code>dw-blog-production</code>, under
+its service name, so the app connects to <code>db:5432</code>. Other apps can't
+reach it at all.</li>
+<li><strong>Deploys never delete volumes</strong>: old colors are removed with
+<code>docker compose down</code>, which leaves volumes alone. Only <code>apps:destroy</code>
+and <code>pipeline:disable</code> delete volumes, so back them up first.</li>
+</ul>
+<p>Check or fix detection:</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> services
+SERVICE   ON EACH DEPLOY                                                                WHY                                     HEALTH CHECK
+db        keeps its data (never duplicated; restarted only if its definition changes)   named volume pgdata                     default
+web       zero-downtime swap (a new copy starts, then replaces the old one)             no named volume, not a database image   default
+Override: dokwalt services:set &lt;service&gt; --stateful=false
+
+<span class="t-com">$</span> <span class="t-cmd">dokwalt</span> services:set cache <span class="t-flag">--stateful=false</span>   <span class="t-com"># e.g. a throwaway redis</span></code></pre></div>
+<p><code>services:set</code> stores the override and redeploys the current release right
+away. Moving a service between the data and color projects recreates its
+container, and named volumes are kept.</p>
+<h2 id="config-and-restarts">Config and restarts</h2>
+<p>Config values are never written to disk. Stateless services get every
+config key as an environment variable. All services, stateful included, can
+use <code>${VAR}</code> interpolation. Stateful services only see the values they
+reference as <code>${VAR}</code>. So:</p>
+<ul>
+<li><code>dokwalt config:set SMTP_HOST=…</code> creates a release that restarts <code>web</code>
+with zero downtime and never touches <code>db</code>.</li>
+<li>Changing a value the db definition references (<code>POSTGRES_PASSWORD</code> above)
+changes that definition, so <code>db</code> is recreated at the next release. That
+means a short restart, not zero downtime.</li>
+<li>Most images only read <code>POSTGRES_PASSWORD</code> and similar variables on first
+init. Changing it later does <strong>not</strong> change the real password: run
+<code>ALTER USER</code> first, then update the config.</li>
+</ul>
+<h2 id="connecting-from-your-mac">Connecting from your Mac</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> db:connect</code></pre></div>
+<ol>
+<li><strong>Service</strong>: <code>--service</code>, or else the first service with a recognised
+database image. SQL databases are preferred over Redis-like ones. The
+stage must be deployed and the service running.</li>
+<li><strong>Port</strong>: <code>--remote-port</code>, or else the kind's default port (5432, 3306,
+27017, 6379), or else the service's first declared port.</li>
+<li><strong>Tunnel</strong>: a local port (<code>--port</code>, default a random free port) on
+<code>127.0.0.1</code>, tunnelled through SSH to the container. Nothing is exposed
+on the server.</li>
+<li><strong>Client</strong>: the matching local client starts with credentials read from
+the container's environment. The tunnel closes when you exit it.</li>
+</ol>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> db:connect
+<span class="t-cmd">◆</span> Connected to db (postgres) through SSH — exit the shell to close the tunnel
+psql (17.2)
+blog=# \dt</code></pre></div>
+<h3 id="gui-tools-tableplus-dbeaver-postico">GUI tools (TablePlus, DBeaver, Postico…)</h3>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> db:connect <span class="t-flag">--tunnel-only</span> <span class="t-flag">--port</span> 5433
+<span class="t-cmd">◆</span> Tunnel to db (postgres)
+Local address   127.0.0.1:5433
+URL             postgres://blog:s3cr3t@127.0.0.1:5433/blog
+  Press Ctrl+C to close the tunnel</code></pre></div>
+<p>Use <code>--port</code> for a fixed local port so a saved GUI connection keeps working.
+The URL contains the password in clear text. If the local client isn't
+installed, DokWalt says <code>psql not found on this machine — keeping the tunnel open instead</code> and behaves like <code>--tunnel-only</code>.</p>
+<h3 id="other-services-and-stages">Other services and stages</h3>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> db:connect <span class="t-flag">--service</span> cache               <span class="t-com"># the redis service</span>
+<span class="t-cmd">dokwalt</span> db:connect <span class="t-flag">-s</span> staging                    <span class="t-com"># staging&#39;s database</span>
+<span class="t-cmd">dokwalt</span> db:connect <span class="t-flag">--service</span> search <span class="t-flag">--remote-port</span> 7700 <span class="t-flag">--tunnel-only</span></code></pre></div>
+<p>For an image DokWalt doesn't recognise, you get a plain <code>tcp://</code> tunnel
+(always tunnel-only). If no port is known, it fails with
+<code>unknown port for &lt;svc&gt; — pass --remote-port</code>.</p>
+<h2 id="supported-kinds">Supported kinds</h2>
+<table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Images</th>
+<th>Client</th>
+<th>Credentials from the container env</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>postgres</td>
+<td>postgres, postgis, timescaledb</td>
+<td><code>psql</code></td>
+<td><code>POSTGRES_USER</code> (default <code>postgres</code>), <code>POSTGRES_PASSWORD</code>, <code>POSTGRES_DB</code> (default: the user)</td>
+</tr>
+<tr>
+<td>mysql</td>
+<td>mysql, mariadb, percona</td>
+<td><code>mysql</code></td>
+<td><code>MYSQL_USER</code>/<code>MARIADB_USER</code> + <code>*_PASSWORD</code>, else <code>root</code> + <code>MYSQL_ROOT_PASSWORD</code>/<code>MARIADB_ROOT_PASSWORD</code>; <code>MYSQL_DATABASE</code>/<code>MARIADB_DATABASE</code></td>
+</tr>
+<tr>
+<td>mongo</td>
+<td>mongo</td>
+<td><code>mongosh</code></td>
+<td><code>MONGO_INITDB_ROOT_USERNAME</code>/<code>PASSWORD</code>, <code>MONGO_INITDB_DATABASE</code></td>
+</tr>
+<tr>
+<td>redis</td>
+<td>redis, valkey, keydb, dragonfly</td>
+<td><code>redis-cli</code></td>
+<td><code>REDIS_PASSWORD</code> or <code>VALKEY_PASSWORD</code>, if set</td>
+</tr>
+</tbody>
+</table>
+<p>Passwords reach <code>psql</code>, <code>mysql</code> and <code>redis-cli</code> through the environment
+(<code>PGPASSWORD</code>, <code>MYSQL_PWD</code>, <code>REDISCLI_AUTH</code>), not command-line arguments.
+<code>mongosh</code> is the exception: it gets a <code>mongodb://</code> URL that includes the
+password (with <code>authSource=admin</code>).</p>
+<p>Install clients with Homebrew: <code>brew install libpq</code> (psql),
+<code>brew install mysql-client</code>, <code>brew install mongosh</code>, <code>brew install redis</code>.</p>
+<h2 id="migrations-one-shot-jobs">Migrations: one-shot jobs</h2>
+<p>During a deploy, the old version keeps serving until traffic switches.
+DokWalt's release phase is a <strong>one-shot job</strong>: a service that another
+service depends on with <code>condition: service_completed_successfully</code>.</p>
+<div class="code" data-lang="yaml"><div class="code-bar"><span>yaml</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-key">services</span>:
+  <span class="t-key">migrate</span>:
+    <span class="t-key">build</span>: .
+    <span class="t-key">command</span>: [<span class="t-str">&#34;./bin/migrate&#34;</span>, <span class="t-str">&#34;up&#34;</span>]
+    <span class="t-key">environment</span>:
+      <span class="t-key">DATABASE_URL</span>: postgres://blog:${POSTGRES_PASSWORD}@db:5432/blog
+    <span class="t-key">depends_on</span>:
+      <span class="t-key">db</span>: { condition: service_healthy }
+  <span class="t-key">web</span>:
+    <span class="t-key">build</span>: .
+    <span class="t-key">depends_on</span>:
+      <span class="t-key">migrate</span>: { condition: service_completed_successfully }
+  <span class="t-key">db</span>:
+    <span class="t-key">image</span>: postgres:17-alpine
+    <span class="t-com"># …</span></code></pre></div>
+<ul>
+<li>It runs in the <strong>new</strong> color before its dependents start, on <strong>every</strong>
+release: deploys, config changes, rollbacks and promotes.</li>
+<li>A non-zero exit fails the deploy. The old version keeps serving, and the
+job's last log lines are shown.</li>
+<li>It gets <code>restart: &#34;no&#34;</code>. The reconciler never restarts it, <code>restart</code>
+skips it, and it never triggers crash-loop alerts.</li>
+<li><code>depends_on: db</code> crosses the data/color split, so DokWalt drops it. That
+is harmless: the data project is always started and ready first.</li>
+<li>The same file works locally with <code>docker compose up</code>.</li>
+</ul>
+<p>Keep migrations <strong>backward compatible</strong> (expand, then contract): the old
+code runs against the migrated schema until the switch, and again after a
+rollback. A <code>rollback</code> doesn't undo migrations or data changes. For a one-off
+command: <code>dokwalt exec --service web -- ./bin/migrate status</code>.</p>
+<h2 id="backups">Backups</h2>
+<p><strong>Nightly off-site backups</strong> of every Postgres database, to Cloudflare R2 or
+any S3 storage, run on the server: <code>dokwalt backup:setup</code>, see
+<a class="xref" href="/docs/backups/"><code>dokwalt docs backups</code></a>. For other kinds of databases, and for one-off copies,
+two approaches.</p>
+<p><strong>Logical dump</strong> to your Mac, while the app runs:</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> db:backup
+ℹ Dumping database blog from db (production)…
+<span class="t-ok">✓</span> Saved blog-production-20261010-153000.dump (2.4 MB in 1.2s)
+  Restore: pg_restore --clean --if-exists --no-owner -d &lt;postgres-url&gt; blog-production-20261010-153000.dump</code></pre></div>
+<ul>
+<li><code>pg_dump --format=custom</code> runs <strong>inside</strong> the database container, through
+its Unix socket, and the dump streams back over SSH. Nothing is exposed, and
+no Postgres client is needed on the Mac.</li>
+<li>The file is written as <code>&lt;file&gt;.part</code> and renamed only once pg_dump
+succeeded and the file is a valid archive, so a failed dump never leaves a
+file that looks good.</li>
+<li><code>-o &lt;file&gt;</code> picks the file, <code>--service</code> the database service, and
+<code>--database</code> another database of the same server.</li>
+<li>Postgres only. For other kinds, dump through <code>db:connect --tunnel-only</code>
+with the kind's own tool.</li>
+</ul>
+<p><code>dokwalt exec</code> allocates a terminal, so never redirect binary output (a dump)
+through it.</p>
+<p><strong>Volume archive</strong> on the server. Stop the stage first for a consistent copy:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> stop
+<span class="t-cmd">ssh</span> pi.home <span class="t-str">&#39;docker run --rm -v dw-blog-production-pgdata:/data:ro \</span>
+  <span class="t-flag">-v</span> <span class="t-str">&#34;$HOME&#34;</span>:/backup alpine tar czf /backup/pgdata.tgz <span class="t-flag">-C</span> /data .&#39;
+<span class="t-cmd">dokwalt</span> start</code></pre></div>
+<p>Restore a dump with <code>pg_restore -d &#34;postgres://…@127.0.0.1:5433/blog&#34;</code>.
+Full-server backups: <a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>.</p>
+<h2 id="one-database-server-for-several-apps">One database server for several apps</h2>
+<p>Running one Postgres per app costs memory on a small server. Instead, deploy
+the database server as its own app, and let other apps <strong>use</strong> it:</p>
+<div class="code" data-lang="yaml"><div class="code-bar"><span>yaml</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># postgres/compose.yaml: an ordinary app with one stateful service</span>
+<span class="t-key">services</span>:
+  <span class="t-key">db</span>:
+    <span class="t-key">image</span>: postgres:18-alpine
+    <span class="t-key">environment</span>:
+      <span class="t-key">POSTGRES_PASSWORD</span>: ${POSTGRES_PASSWORD}
+    <span class="t-key">volumes</span>:
+      - pgdata:/var/lib/postgresql
+<span class="t-key">volumes</span>:
+  <span class="t-key">pgdata</span>:</code></pre></div>
+<div class="code" data-lang="yaml"><div class="code-bar"><span>yaml</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># blog/compose.yaml</span>
+<span class="t-key">x-dokwalt</span>:
+  <span class="t-key">uses</span>: [postgres]          <span class="t-com"># app names</span>
+<span class="t-key">services</span>:
+  <span class="t-key">web</span>:
+    <span class="t-key">build</span>: .
+    <span class="t-key">environment</span>:
+      <span class="t-key">DATABASE_URL</span>: postgres://blog:${BLOG_DB_PASSWORD}@postgres:5432/blog</code></pre></div>
+<ul>
+<li><strong>Networking.</strong> The provider's stateful containers join the consumer's
+private network under the provider's <strong>app name</strong> (<code>postgres</code>), and also as
+<code>&lt;app&gt;-&lt;service&gt;</code> (<code>postgres-db</code>). When the provider has several stateful
+services, only the <code>&lt;app&gt;-&lt;service&gt;</code> names exist. Consumers still share no
+network with each other: <code>blog</code> can't reach another app that uses
+<code>postgres</code>.</li>
+<li><strong>Stages.</strong> A consumer stage uses the provider stage with the same name
+if it exists, otherwise its production.</li>
+<li><strong>Order.</strong> Deploy the provider first. A consumer deploy fails early if the
+provider is missing or not deployed, and attaches the provider <strong>before</strong>
+the new version starts, so migrations can already reach it.</li>
+<li><strong>Self-healing.</strong> When the provider's container is recreated (an image
+change, a reboot), the reconciler attaches it again within seconds. Removing
+<code>uses</code> and redeploying detaches it.</li>
+<li><strong>Safety.</strong> <code>apps:destroy</code> refuses to delete a provider that other apps
+still use.</li>
+<li><strong>One role and database per app.</strong> DokWalt doesn't create them; do it once
+per app with <code>dokwalt db:connect -a postgres</code>:
+<code>CREATE ROLE blog LOGIN PASSWORD &#39;…&#39;; CREATE DATABASE blog OWNER blog;</code></li>
+<li><strong>From a consumer</strong>, <code>db:connect</code> and <code>db:backup</code> find the shared database
+and use the app's own role and database, read from the connection URL whose
+host is the provider (config vars first, <code>DATABASE_URL</code> preferred, then the
+compose environment). Without such a URL, they use the provider's superuser
+on a database named after the app.</li>
+</ul>
+<p>The provider stays an ordinary app: it has its own config, releases and
+logs, and nothing about it is managed. Backups matter more now that one
+server holds every app's data: nightly backups (<a class="xref" href="/docs/backups/"><code>dokwalt docs backups</code></a>) dump
+each of its databases separately, with its roles.</p>
+<h2 id="major-version-upgrades">Major version upgrades</h2>
+<p>Changing <code>postgres:16</code> to <code>postgres:17</code> reuses the same volume, and
+PostgreSQL refuses to start on files from another major version. The data
+project is updated first, so this means <strong>downtime and a failed deploy</strong>.
+Instead:</p>
+<ol>
+<li>Dump the database (above).</li>
+<li>In compose, change the image <strong>and</strong> the volume name (<code>pgdata17</code>).</li>
+<li><code>dokwalt deploy</code> creates a fresh, empty <code>dw-blog-production-pgdata17</code>.</li>
+<li>Restore the dump through <code>db:connect --tunnel-only</code>.</li>
+<li>Once verified, delete the old volume on the server:
+<code>ssh pi.home docker volume rm dw-blog-production-pgdata</code>.</li>
+</ol>
+<p>Minor updates are safe: change the tag (<code>postgres:17.1</code> → <code>postgres:17.2</code>)
+and redeploy. Registry images are used by tag, not pinned by digest, and
+are pulled only if the tag is missing on the server. So a floating tag like
+<code>postgres:17</code> doesn't move by itself. Pin exact tags.</p>
+<p>See also: <a class="xref" href="/docs/backups/"><code>dokwalt docs backups</code></a>, <a class="xref" href="/docs/compose/"><code>dokwalt docs compose</code></a>, <a class="xref" href="/docs/config/"><code>dokwalt docs config</code></a>, <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>,
+<a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>, <a class="xref" href="/docs/security/"><code>dokwalt docs security</code></a></p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <a class="pager-prev" href="/docs/pipelines/"><small>← Previous</small><b>Pipelines: staging and promote</b></a>
+          <a class="pager-next" href="/docs/backups/"><small>Next →</small><b>Backups</b></a>
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#how-dokwalt-treats-a-database">How DokWalt treats a database</a></li><li class="toc-2"><a href="#config-and-restarts">Config and restarts</a></li><li class="toc-2"><a href="#connecting-from-your-mac">Connecting from your Mac</a></li><li class="toc-3"><a href="#gui-tools-tableplus-dbeaver-postico">GUI tools (TablePlus, DBeaver, Postico…)</a></li><li class="toc-3"><a href="#other-services-and-stages">Other services and stages</a></li><li class="toc-2"><a href="#supported-kinds">Supported kinds</a></li><li class="toc-2"><a href="#migrations-one-shot-jobs">Migrations: one-shot jobs</a></li><li class="toc-2"><a href="#backups">Backups</a></li><li class="toc-2"><a href="#one-database-server-for-several-apps">One database server for several apps</a></li><li class="toc-2"><a href="#major-version-upgrades">Major version upgrades</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

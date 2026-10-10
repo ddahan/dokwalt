@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Pipelines: staging and promote · DokWalt docs</title>
+  <meta name="description" content="Optional per-app staging stage, with instant promotion of the exact images you tested.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Pipelines: staging and promote</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/">Deploying</a></li><li><a href="/docs/compose/">Docker Compose apps</a></li><li><a href="/docs/config/">Config and secrets</a></li><li><a href="/docs/domains/">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/" class="active" aria-current="page">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/">Databases</a></li><li><a href="/docs/backups/">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/">Logs</a></li><li><a href="/docs/monitoring/">Monitoring</a></li><li><a href="/docs/alerts/">Alerts</a></li><li><a href="/docs/troubleshooting/">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Deploy &amp; ship</p>
+          <h1>Pipelines: staging and promote</h1>
+          <p class="doc-lead">Optional per-app staging stage, with instant promotion of the exact images you tested.</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs pipelines</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/pipelines.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<h2 id="single-stage-by-default">Single stage by default</h2>
+<p>Every app starts with one stage, <code>production</code>, and it is invisible: you
+never pass a stage, and no output mentions one. Small apps pay nothing
+for pipelines. <code>-s staging</code> fails on apps without a pipeline:</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> releases <span class="t-flag">-s</span> staging
+<span class="t-err">✗</span> app &#34;blog&#34; has no staging stage (enable it with `dokwalt pipeline:enable`): not found</code></pre></div>
+<h2 id="enable-a-pipeline">Enable a pipeline</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> pipeline:enable</code></pre></div>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-ok">✓</span> Pipeline enabled for blog: staging → production
+  1. dokwalt domains:add staging.example.com -s staging --service web
+  2. dokwalt deploy -s staging
+  3. dokwalt promote  (same images, production config, no rebuild)</code></pre></div>
+<p>Production keeps running untouched (no redeploy). Staging runs on the
+<strong>same server</strong>, fully separate:</p>
+<table>
+<thead>
+<tr>
+<th>Thing</th>
+<th>production</th>
+<th>staging</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Projects</td>
+<td><code>dw-blog-production-*</code></td>
+<td><code>dw-blog-staging-*</code></td>
+</tr>
+<tr>
+<td>Network</td>
+<td><code>dw-blog-production</code></td>
+<td><code>dw-blog-staging</code></td>
+</tr>
+<tr>
+<td>Volumes</td>
+<td><code>dw-blog-production-pgdata</code></td>
+<td><code>dw-blog-staging-pgdata</code></td>
+</tr>
+<tr>
+<td>Config</td>
+<td>its own</td>
+<td>its own</td>
+</tr>
+<tr>
+<td>Domains</td>
+<td><code>blog.example.com</code></td>
+<td><code>staging.blog.example.com</code></td>
+</tr>
+<tr>
+<td>Overrides</td>
+<td>its own</td>
+<td>its own</td>
+</tr>
+<tr>
+<td>Releases</td>
+<td>v1, v2, ...</td>
+<td>v1, v2, ...</td>
+</tr>
+</tbody>
+</table>
+<p>Each stage has its own private network, with Caddy attached to both.
+Staging containers cannot reach production containers (and the reverse),
+and staging's database lives in its own volume.</p>
+<p>Once the pipeline is on, output shows the stage for staging
+(<code>blog (staging)</code>), and commands without <code>-s</code> target production.</p>
+<h2 id="configure-staging">Configure staging</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> config:set <span class="t-flag">-s</span> staging NODE_ENV=staging DB_PASSWORD=staging-pw
+<span class="t-cmd">dokwalt</span> config <span class="t-flag">-s</span> staging
+<span class="t-cmd">dokwalt</span> domains:add staging.blog.example.com <span class="t-flag">-s</span> staging <span class="t-flag">--service</span> web <span class="t-flag">--port</span> 3000</code></pre></div>
+<p>Before staging's first deploy, <code>domains:add</code> needs <code>--service</code> (the port
+defaults to the service's declared port). Create the DNS record for
+<code>staging.blog.example.com</code> first. Use a separate domain per stage;
+wildcards are not supported.</p>
+<h2 id="deploy-to-staging">Deploy to staging</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-s</span> staging <span class="t-flag">-m</span> <span class="t-str">&#34;new checkout flow&#34;</span></code></pre></div>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">◆</span> Deploying blog (staging)  to pi (linux/arm64)
+<span class="t-ok">✓</span> Built migrate, web, worker
+<span class="t-ok">✓</span> Uploaded 12.8 MiB in 1.9s
+<span class="t-ok">✓</span> Services — db: keeps its data (named volume pgdata), migrate: runs once per deploy, web: zero-downtime swap, worker: zero-downtime swap
+<span class="t-ok">✓</span> Created release v14
+<span class="t-ok">✓</span> Stateful services ready
+<span class="t-ok">✓</span> Containers running
+<span class="t-ok">✓</span> web is healthy
+<span class="t-ok">✓</span> v14 is live
+<span class="t-ok">✓</span> Previous version stops in 10s (in-flight requests finish)
+
+<span class="t-ok">✓</span> blog (staging) is live at https://staging.blog.example.com</code></pre></div>
+<p>Test it at <code>https://staging.blog.example.com</code>, look at
+<code>dokwalt logs -s staging -f</code>, run <code>dokwalt db:connect -s staging</code>.</p>
+<h2 id="promote-to-production">Promote to production</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> promote</code></pre></div>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">◆</span> Promoting blog  staging → production
+<span class="t-ok">✓</span> Promoting staging v14 to production (same images, production config)
+<span class="t-ok">✓</span> Services — db: keeps its data (named volume pgdata), migrate: runs once per deploy, web: zero-downtime swap, worker: zero-downtime swap
+<span class="t-ok">✓</span> Created release v31
+<span class="t-ok">✓</span> Stateful services ready
+<span class="t-ok">✓</span> Containers running
+<span class="t-ok">✓</span> web is healthy
+<span class="t-ok">✓</span> v31 is live
+<span class="t-ok">✓</span> Previous version stops in 10s (in-flight requests finish)
+<span class="t-ok">✓</span> Promoted — production is now v31</code></pre></div>
+<p>There is no confirmation prompt in the CLI (the dashboard asks with <code>y</code>).
+What promote does:</p>
+<ul>
+<li>Takes the images and the stored compose model of <strong>staging's current
+release</strong>: the built images are the very same content-addressed tags
+you tested. Registry images are referenced by tag and reused from the
+server's local image store.</li>
+<li>Re-transforms that model for production and uses <strong>production's
+config, overrides and domains</strong>, never staging's.</li>
+<li><strong>No build, no upload</strong>: the images are already on the server. It
+takes as long as the rollout and health checks.</li>
+<li>Creates a normal production release, described
+<code>Promote staging v14: new checkout flow</code>, with the same blue/green
+switch, one-shot jobs, health checks and automatic abort on failure.</li>
+</ul>
+<p>Promote only reads staging; it never changes it. It fails if staging has
+no release yet (<code>deploy to staging first</code>).</p>
+<h2 id="rollback-per-stage">Rollback per stage</h2>
+<p>Each stage has its own release history:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> releases                 <span class="t-com"># production</span>
+<span class="t-cmd">dokwalt</span> releases <span class="t-flag">-s</span> staging
+<span class="t-cmd">dokwalt</span> rollback                 <span class="t-com"># production to its previous release</span>
+<span class="t-cmd">dokwalt</span> rollback <span class="t-flag">-s</span> staging v12  <span class="t-com"># staging to v12</span></code></pre></div>
+<p>A bad promotion is undone with <code>dokwalt rollback</code> (no prompt): production
+goes back to its previous images, staging keeps what it has.</p>
+<h2 id="typical-workflow">Typical workflow</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-s</span> staging <span class="t-flag">-m</span> <span class="t-str">&#34;feature X&#34;</span>   <span class="t-com"># build + ship to staging</span>
+<span class="t-com"># test https://staging.blog.example.com</span>
+<span class="t-cmd">dokwalt</span> promote                            <span class="t-com"># same images, prod config</span>
+<span class="t-cmd">dokwalt</span> rollback                           <span class="t-com"># if production misbehaves</span></code></pre></div>
+<p>In the dashboard (<code>dokwalt</code>), select an app and press <code>p</code> to promote,
+then <code>y</code> to confirm.</p>
+<h2 id="disable-the-pipeline">Disable the pipeline</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> pipeline:disable
+<span class="t-cmd">dokwalt</span> pipeline:disable <span class="t-flag">--confirm</span> blog    <span class="t-com"># non-interactive</span></code></pre></div>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code>! This deletes the staging stage of blog: containers, volumes, config and domains.
+  Type blog to confirm: blog
+<span class="t-ok">✓</span> Pipeline disabled for blog</code></pre></div>
+<p>Staging's containers, <strong>volumes</strong>, network, config, domains and releases
+are deleted; production keeps running untouched and the stage disappears
+from output again. If staging's database holds anything you need, dump it
+first with <code>dokwalt db:connect -s staging --tunnel-only</code>.</p>
+<p>See also: <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>, <a class="xref" href="/docs/releases/"><code>dokwalt docs releases</code></a>,
+<a class="xref" href="/docs/config/"><code>dokwalt docs config</code></a>, <a class="xref" href="/docs/domains/"><code>dokwalt docs domains</code></a>, <a class="xref" href="/docs/concepts/"><code>dokwalt docs concepts</code></a>.</p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <a class="pager-prev" href="/docs/releases/"><small>← Previous</small><b>Releases &amp; rollback</b></a>
+          <a class="pager-next" href="/docs/databases/"><small>Next →</small><b>Databases</b></a>
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#single-stage-by-default">Single stage by default</a></li><li class="toc-2"><a href="#enable-a-pipeline">Enable a pipeline</a></li><li class="toc-2"><a href="#configure-staging">Configure staging</a></li><li class="toc-2"><a href="#deploy-to-staging">Deploy to staging</a></li><li class="toc-2"><a href="#promote-to-production">Promote to production</a></li><li class="toc-2"><a href="#rollback-per-stage">Rollback per stage</a></li><li class="toc-2"><a href="#typical-workflow">Typical workflow</a></li><li class="toc-2"><a href="#disable-the-pipeline">Disable the pipeline</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

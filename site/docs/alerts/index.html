@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Alerts · DokWalt docs</title>
+  <meta name="description" content="Get a Discord or Slack message when a site goes down, a deploy fails or the server runs hot.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Alerts</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/">Deploying</a></li><li><a href="/docs/compose/">Docker Compose apps</a></li><li><a href="/docs/config/">Config and secrets</a></li><li><a href="/docs/domains/">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/">Databases</a></li><li><a href="/docs/backups/">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/">Logs</a></li><li><a href="/docs/monitoring/">Monitoring</a></li><li><a href="/docs/alerts/" class="active" aria-current="page">Alerts</a></li><li><a href="/docs/troubleshooting/">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Operate</p>
+          <h1>Alerts</h1>
+          <p class="doc-lead">Get a Discord or Slack message when a site goes down, a deploy fails or the server runs hot.</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs alerts</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/alerts.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<p>Alerts are evaluated and sent by the daemon on the server, so they work
+while your laptop is closed. Channels and thresholds apply to the whole
+server (all apps). With no channel configured, alerts are only written to
+the daemon log (<code>journalctl -u dokwalt</code>).</p>
+<h2 id="1-create-a-webhook-url">1. Create a webhook URL</h2>
+<p><strong>Discord</strong></p>
+<ol>
+<li>Open the server settings → <strong>Integrations</strong> → <strong>Webhooks</strong>.</li>
+<li><strong>New Webhook</strong>, give it a name (e.g. <code>DokWalt</code>), choose the channel.</li>
+<li><strong>Copy Webhook URL</strong>:
+<code>https://discord.com/api/webhooks/&lt;id&gt;/&lt;token&gt;</code></li>
+</ol>
+<p><strong>Slack</strong></p>
+<ol>
+<li>Go to <code>https://api.slack.com/apps</code> → <strong>Create New App</strong> → <em>From scratch</em>,
+pick your workspace.</li>
+<li><strong>Incoming Webhooks</strong> → turn <strong>Activate Incoming Webhooks</strong> on.</li>
+<li><strong>Add New Webhook to Workspace</strong>, choose the channel, <strong>Allow</strong>.</li>
+<li>Copy the URL: <code>https://hooks.slack.com/services/T…/B…/…</code></li>
+</ol>
+<p>Treat webhook URLs as secrets: anyone who has one can post to your channel.
+DokWalt hides everything after the host when listing them. They are stored
+unencrypted in the server's database.</p>
+<h2 id="2-add-the-channel-and-test-it">2. Add the channel and test it</h2>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> alerts:add discord https://discord.com/api/webhooks/1234/abcd
+<span class="t-ok">✓</span> Added discord channel #1
+  Try it: dokwalt alerts:test
+
+<span class="t-com">$</span> <span class="t-cmd">dokwalt</span> alerts:test
+<span class="t-ok">✓</span> Test alert sent — check your channel(s)</code></pre></div>
+<p>The channel receives <strong>👋 DokWalt test alert</strong>, followed by
+<code>Alerts from &lt;hostname&gt; reach this channel.</code> The kind must be <code>discord</code> or
+<code>slack</code>, and the URL must start with <code>https://</code>. If a delivery fails, the
+command reports each channel, e.g.
+<code>✗ discord #1: webhook answered HTTP 404</code>.</p>
+<p>You can add several channels (e.g. Discord and Slack), and every alert goes
+to all of them:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> alerts:add slack https://hooks.slack.com/services/T0/B0/xyz</code></pre></div>
+<h2 id="3-review-the-setup">3. Review the setup</h2>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> alerts
+<span class="t-cmd">◆</span> Alerts on pi
+
+ID  CHANNEL  WEBHOOK
+1   discord  https://discord.com/•••
+2   slack    https://hooks.slack.com/•••
+
+Disk          90% used
+Memory        90% used
+Temperature   80°C
+Crash loop    3 restarts / 10 min
+Always on     site down · deploy failed · certificate errors · out of memory · throttling
+
+<span class="t-err">✗</span> site:blog.example.com</code></pre></div>
+<p>The last part lists the alert keys currently firing, or <code>✓ Nothing firing</code>.</p>
+<h2 id="4-tune-thresholds">4. Tune thresholds</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> alerts:set disk=85 memory=95
+<span class="t-cmd">dokwalt</span> alerts:set temperature=75 restarts=5
+<span class="t-cmd">dokwalt</span> alerts:set restarts=0          <span class="t-com"># no crash-loop alerts</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>disk</code></td>
+<td>disk used on the server, in %</td>
+<td><code>90</code></td>
+</tr>
+<tr>
+<td><code>memory</code></td>
+<td>memory used on the server, in %</td>
+<td><code>90</code></td>
+</tr>
+<tr>
+<td><code>temperature</code></td>
+<td>CPU temperature, in °C</td>
+<td><code>80</code></td>
+</tr>
+<tr>
+<td><code>restarts</code></td>
+<td>deaths of one service within 10 minutes</td>
+<td><code>3</code></td>
+</tr>
+</tbody>
+</table>
+<p>These are the only four keys, and values must be numbers. Any other key
+(there is no <code>throttling</code> key) is refused with
+<code>unknown alert setting … (known: disk, memory, temperature, restarts)</code>.</p>
+<p>Setting any of them to <code>0</code> disables that rule (e.g. <code>temperature=0</code> on a VPS
+without a sensor). Otherwise a rule fires when the value is <strong>≥</strong> the threshold.</p>
+<h2 id="the-rules">The rules</h2>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Triggers when</th>
+<th>Resolves when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Site down</td>
+<td>2 consecutive failed probes of a domain (error or 5xx)</td>
+<td>the next probe succeeds</td>
+</tr>
+<tr>
+<td>Deploy failed</td>
+<td>a deploy, config release, rollback or promote fails</td>
+<td>the next release succeeds</td>
+</tr>
+<tr>
+<td>Certificate error</td>
+<td>Caddy couldn't get a certificate for a domain</td>
+<td>the certificate is obtained</td>
+</tr>
+<tr>
+<td>Crash loop</td>
+<td>a service dies ≥ <code>restarts</code> times in 10 minutes</td>
+<td>10 minutes without a death</td>
+</tr>
+<tr>
+<td>Out of memory</td>
+<td>Docker reports an OOM kill in one of your containers</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Self-healing failed</td>
+<td>the reconciler can't restore a stage</td>
+<td>a later pass succeeds</td>
+</tr>
+<tr>
+<td>Disk</td>
+<td>disk usage ≥ <code>disk</code> %</td>
+<td>below the threshold</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>memory usage ≥ <code>memory</code> %</td>
+<td>below the threshold</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>CPU temperature ≥ <code>temperature</code> °C</td>
+<td>below the threshold</td>
+</tr>
+<tr>
+<td>CPU throttling</td>
+<td>the Pi reports under-voltage or throttling <strong>now</strong></td>
+<td>the condition clears</td>
+</tr>
+</tbody>
+</table>
+<p>Site down, deploy failed, certificate error, out of memory, self-healing
+failed and throttling are <strong>always on</strong>. Disk, memory and temperature are
+checked every minute. Crash loops count Docker <code>die</code> events, and one-shot
+jobs (migrations) are excluded.</p>
+<p><strong>How site down is probed.</strong> Every 60 seconds the daemon connects to
+<code>127.0.0.1:443</code> with the domain as SNI and requests <code>GET /</code>. The
+certificate is <strong>not</strong> validated: the probe checks that your app answers.
+Certificate problems have their own alert. Going through localhost avoids
+hairpin-NAT problems on home networks. It doesn't test DNS or your router:
+<code>dokwalt doctor</code> and <code>dokwalt domains</code> do. Stopped, deploying and
+never-deployed stages are skipped, and so are redirect domains.</p>
+<h2 id="rate-limiting-and-resolved-messages">Rate limiting and resolved messages</h2>
+<ul>
+<li>At most <strong>one message per alert key every 30 minutes</strong> while it is
+firing. The key is e.g. <code>site:&lt;host&gt;</code>, <code>deploy:&lt;app&gt;/&lt;stage&gt;</code>,
+<code>restarts:&lt;app&gt;/&lt;stage&gt;/&lt;svc&gt;</code> or <code>host:disk</code>. A site that stays down
+sends one message, then a reminder every 30 minutes at most.</li>
+<li>When the condition clears, one <code>✅ Resolved: &lt;title&gt;</code> message is sent.</li>
+</ul>
+<h2 id="message-format">Message format</h2>
+<p>Discord (posted as user <code>DokWalt</code>):</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code>**🔴 &lt;title&gt;** — `&lt;hostname&gt;`
+&lt;message&gt;</code></pre></div>
+<p>Slack:</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code>*🔴 &lt;title&gt;* — `&lt;hostname&gt;`
+&lt;message&gt;</code></pre></div>
+<p>Examples as they appear in the channel:</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code>🔴 Site down — pi
+blog.example.com is not answering: HTTP 502
+
+✅ Resolved: Site down — pi
+blog.example.com answers again
+
+🔴 Deploy failed — pi
+blog/production v15 failed: web did not pass its health check
+
+🔴 Crash loop — pi
+blog/production/worker restarted 4 times in 10 minutes (exit code 1). `dokwalt logs -a blog`
+
+🔴 Out of memory — pi
+blog/production/worker was killed: out of memory
+
+🔴 Certificate error — pi
+Could not get a certificate for api.example.com: …
+Run `dokwalt doctor` to check DNS and ports.
+
+🔴 Self-healing failed — pi
+blog/production: …
+
+🔴 Disk almost full — pi
+Disk is 91% full (threshold 90%). Try `docker system prune` or remove old apps.
+
+🔴 Memory pressure — pi
+Memory is 93% used (threshold 90%).
+
+🔴 CPU temperature high — pi
+CPU at 81°C (threshold 80°C). Check cooling.
+
+🔴 CPU throttling — pi
+Raspberry Pi reports: now: under-voltage. Check power supply and cooling.</code></pre></div>
+<p>A deploy failure resolves with <code>✅ Resolved: Deploy succeeded</code> and
+<code>&lt;app&gt;/&lt;stage&gt; vN is live</code>.</p>
+<h2 id="removing-a-channel">Removing a channel</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> alerts                 <span class="t-com"># find the id</span>
+<span class="t-cmd">dokwalt</span> alerts:remove 2</code></pre></div>
+<p>With no channel left, alerts are only logged on the server. Thresholds are
+kept.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<ul>
+<li><code>alerts:test</code> reports HTTP 401/404: the webhook was deleted or the URL is
+incomplete. Create a new one, <code>alerts:remove</code> the old id, then
+<code>alerts:add</code> the new one.</li>
+<li>No messages at all: check the server can reach the internet
+(<code>ssh pi.home curl -I https://discord.com</code>) and read the daemon log, where
+failed deliveries are logged:
+<code>ssh pi.home journalctl -u dokwalt --since &#34;1 hour ago&#34;</code>.</li>
+</ul>
+<p>See also: <a class="xref" href="/docs/monitoring/"><code>dokwalt docs monitoring</code></a>, <a class="xref" href="/docs/domains/"><code>dokwalt docs domains</code></a>,
+<a class="xref" href="/docs/releases/"><code>dokwalt docs releases</code></a>, <a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a></p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <a class="pager-prev" href="/docs/monitoring/"><small>← Previous</small><b>Monitoring</b></a>
+          <a class="pager-next" href="/docs/troubleshooting/"><small>Next →</small><b>Troubleshooting</b></a>
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#1-create-a-webhook-url">1. Create a webhook URL</a></li><li class="toc-2"><a href="#2-add-the-channel-and-test-it">2. Add the channel and test it</a></li><li class="toc-2"><a href="#3-review-the-setup">3. Review the setup</a></li><li class="toc-2"><a href="#4-tune-thresholds">4. Tune thresholds</a></li><li class="toc-2"><a href="#the-rules">The rules</a></li><li class="toc-2"><a href="#rate-limiting-and-resolved-messages">Rate limiting and resolved messages</a></li><li class="toc-2"><a href="#message-format">Message format</a></li><li class="toc-2"><a href="#removing-a-channel">Removing a channel</a></li><li class="toc-2"><a href="#troubleshooting">Troubleshooting</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

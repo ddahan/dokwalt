@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Reboot recovery · DokWalt docs</title>
+  <meta name="description" content="Why sites break after a reboot on other setups, and how DokWalt brings every site back on its own.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Reboot recovery</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/">Deploying</a></li><li><a href="/docs/compose/">Docker Compose apps</a></li><li><a href="/docs/config/">Config and secrets</a></li><li><a href="/docs/domains/">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/">Databases</a></li><li><a href="/docs/backups/">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/">Logs</a></li><li><a href="/docs/monitoring/">Monitoring</a></li><li><a href="/docs/alerts/">Alerts</a></li><li><a href="/docs/troubleshooting/">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/" class="active" aria-current="page">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Servers</p>
+          <h1>Reboot recovery</h1>
+          <p class="doc-lead">Why sites break after a reboot on other setups, and how DokWalt brings every site back on its own.</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs reboot-recovery</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/reboot-recovery.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<p>After a <code>sudo reboot</code>, a kernel update at 04:00 or a power cut, every site must serve HTTPS again
+<strong>without you typing anything</strong>. This page explains the mechanisms and how to test them.</p>
+<h2 id="why-sites-break-elsewhere">Why sites break elsewhere</h2>
+<table>
+<thead>
+<tr>
+<th>Common cause</th>
+<th>What DokWalt does instead</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The orchestrator is itself a container, relying on Docker restart policies or Swarm state</td>
+<td>The daemon is a native systemd service, ordered after and requiring Docker</td>
+</tr>
+<tr>
+<td>The proxy starts empty and discovers backends late</td>
+<td>Caddy boots from the last config file on disk; the daemon re-applies routes computed from SQLite and running containers</td>
+</tr>
+<tr>
+<td>Containers made with <code>docker run</code> and no restart policy, or removed</td>
+<td>Every service gets <code>restart: unless-stopped</code>; the reconciler recreates anything missing</td>
+</tr>
+<tr>
+<td>A deploy was half done at reboot time (two versions, proxy on a dead one)</td>
+<td>Startup recovery marks it failed and tears down the unfinished color</td>
+</tr>
+<tr>
+<td>An old color left running after an interrupted drain</td>
+<td>The reconciler removes it (never while it is still draining)</td>
+</tr>
+<tr>
+<td>Certificates lost or re-requested (and rate limited)</td>
+<td>Certificates persist in the Docker volume <code>dokwalt-caddy-data</code></td>
+</tr>
+<tr>
+<td>SD card corruption</td>
+<td>NVMe recommended (<a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>); SQLite in WAL mode</td>
+</tr>
+<tr>
+<td>Wrong clock at boot, TLS failures</td>
+<td><code>doctor</code> checks clock sync; Caddy retries</td>
+</tr>
+<tr>
+<td>Restarting Docker kills all containers</td>
+<td>Docker <code>live-restore: true</code>, set by <code>server init</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="the-systemd-unit">The systemd unit</h2>
+<p><code>server init</code> writes <code>/etc/systemd/system/dokwalt.service</code> (see it with <code>systemctl cat dokwalt</code>):</p>
+<div class="code" data-lang="ini"><div class="code-bar"><span>ini</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">[Unit]</span>
+<span class="t-key">Description</span>=DokWalt — Docker Compose apps with zero-downtime deploys
+<span class="t-key">Documentation</span>=https://github.com/ddahan/dokwalt
+<span class="t-key">After</span>=docker.service network-online.target
+<span class="t-key">Wants</span>=network-online.target
+<span class="t-key">Requires</span>=docker.service
+
+<span class="t-cmd">[Service]</span>
+<span class="t-key">Type</span>=notify
+<span class="t-key">ExecStart</span>=/usr/local/bin/dokwalt daemon
+<span class="t-key">Restart</span>=always
+<span class="t-key">RestartSec</span>=2
+<span class="t-com"># systemd restarts the daemon if its main loop hangs.</span>
+<span class="t-key">WatchdogSec</span>=60
+<span class="t-key">TimeoutStartSec</span>=120
+<span class="t-key">TimeoutStopSec</span>=15
+<span class="t-key">Environment</span>=GOMEMLIMIT=40MiB
+<span class="t-key">Environment</span>=HOME=/root
+<span class="t-key">RuntimeDirectory</span>=dokwalt
+<span class="t-key">RuntimeDirectoryMode</span>=0755
+<span class="t-key">NoNewPrivileges</span>=yes
+<span class="t-key">PrivateTmp</span>=yes
+<span class="t-key">ProtectSystem</span>=full
+<span class="t-key">ProtectKernelTunables</span>=yes
+<span class="t-key">ProtectControlGroups</span>=no
+<span class="t-key">LockPersonality</span>=yes
+
+<span class="t-cmd">[Install]</span>
+<span class="t-key">WantedBy</span>=multi-user.target</code></pre></div>
+<ul>
+<li><strong><code>After=</code> / <code>Requires=docker.service</code></strong>: the daemon starts after Docker; if Docker stops, the
+daemon stops too, and <code>Restart=always</code> brings it back (2 s later) once Docker is back.</li>
+<li><strong><code>Type=notify</code></strong>: <code>READY=1</code> is sent as soon as the API socket listens, well within
+<code>TimeoutStartSec=120</code>. The status (<code>systemctl status dokwalt</code>) then moves through
+<code>starting: waiting for docker</code> → <code>recovering</code> → <code>running</code>.</li>
+<li><strong><code>WatchdogSec=60</code></strong>: the daemon pings systemd while its main loop heartbeat is less than
+10 minutes old; a stuck main loop stops the pings and systemd restarts it.</li>
+<li><strong><code>HOME=/root</code></strong>: the <code>docker compose</code> processes the daemon runs use root's Docker config, so
+private registries work after <code>sudo docker login</code> on the server.</li>
+<li><strong><code>GOMEMLIMIT=40MiB</code></strong>: keeps the Go heap small; the daemon also disables transparent huge
+pages for itself at start (and re-execs), which keeps it around 27 MiB RSS.</li>
+</ul>
+<p>The daemon is <strong>never</strong> a container: the component that repairs containers must not depend on
+Docker's restart policies to come back itself.</p>
+<h2 id="the-reconciler">The reconciler</h2>
+<p>Desired state lives in SQLite (apps, stages, current release, active color, stopped flag). Actual
+state is read from Docker through the labels on every container: <code>dokwalt.app</code>, <code>dokwalt.stage</code>,
+<code>dokwalt.service</code>, <code>dokwalt.role</code> (<code>data</code> or <code>app</code>), and <code>dokwalt.color</code> + <code>dokwalt.release</code> on
+stateless services.</p>
+<p><strong>When it runs:</strong></p>
+<ul>
+<li>at startup, after waiting for the Docker API (backoff 0.5 s → 10 s) and after startup recovery;</li>
+<li>every 60 s;</li>
+<li>3 s after a Docker <code>die</code>, <code>oom</code> or <code>destroy</code> event for a DokWalt container (bursts are
+coalesced; the event stream reconnects on its own), and after <code>dokwalt start</code>.</li>
+</ul>
+<p><strong>What each pass does:</strong></p>
+<ol>
+<li>If an operation (deploy, rollback, config change, stop…) holds the server-wide lock, it skips
+the pass: that operation owns the state right now.</li>
+<li>Ensures the Caddy project <code>dokwalt-system</code> runs; the container is recreated only if it isn't
+running or its compose definition changed.</li>
+<li>For each stage with a current release: ensures network <code>dw-&lt;app&gt;-&lt;stage&gt;</code> exists and attaches
+<code>dokwalt-caddy</code> to it. Stopped stages are skipped from here on.</li>
+<li>For the data project (<code>dw-&lt;app&gt;-&lt;stage&gt;-data</code>) and the active color project
+(<code>dw-&lt;app&gt;-&lt;stage&gt;-blue</code> or <code>-green</code>): if any service other than a one-shot job has no running
+container, it creates the volumes, writes the compose file and runs
+<code>docker compose up -d --remove-orphans</code> for that project. On error it alerts
+&quot;Self-healing failed&quot;; the alert resolves when a later pass succeeds.</li>
+<li>Removes color projects of known stages that are neither active nor still draining.</li>
+<li>Re-applies the Caddy config if the desired one differs from the file or the loaded config.</li>
+</ol>
+<p>It never removes volumes and only touches projects of stages it knows. It is cheap when nothing
+is wrong: a few Docker API calls, no compose invocation. A crash-looping container counts as
+running: the reconciler doesn't fight it; the crash-loop alert and <code>doctor</code> report it. One-shot
+jobs (migrations) are never restarted by it.</p>
+<h2 id="caddy-and-certificates">Caddy and certificates</h2>
+<ul>
+<li>The daemon writes the full Caddy config to <code>/var/lib/dokwalt/caddy/config/caddy.json</code> on every
+change (temp file + rename, then loaded through the admin socket). Caddy (<code>restart: always</code>)
+starts from that file at boot, <strong>before the daemon is even up</strong>, and routes to container names
+(e.g. <code>dw-blog-production-green-web-1:3000</code>) that resolve as soon as the containers run.</li>
+<li>Certificates and the ACME account live in the Docker volume <code>dokwalt-caddy-data</code> (Caddy's
+<code>/data</code>), so a reboot needs no contact with Let's Encrypt. Renewals continue as usual.</li>
+</ul>
+<h2 id="docker-live-restore">Docker live-restore</h2>
+<p><code>live-restore: true</code> in <code>/etc/docker/daemon.json</code> keeps containers running while <code>dockerd</code>
+itself restarts (package upgrades, crashes). It does not apply across a machine reboot: there,
+restart policies start the containers and the reconciler checks and repairs the result.</p>
+<h2 id="half-finished-deploys">Half-finished deploys</h2>
+<p>At startup, once Docker answers and before the first reconcile pass, every release still
+<code>deploying</code> is marked <code>failed</code> (&quot;interrupted (daemon restart or reboot during deploy)&quot;) and its
+color project is brought down if it isn't the active color. The stage keeps its previous current
+release, which keeps serving; deploy again when ready. An old color whose drain was interrupted is
+removed by the reconciler.</p>
+<h2 id="stopped-apps-stay-stopped">Stopped apps stay stopped</h2>
+<p><code>dokwalt stop</code> records the stage as stopped and runs <code>docker compose stop</code>; with
+<code>restart: unless-stopped</code> those containers don't start at boot, and the reconciler skips the
+stage. Its domains answer 503 <code>&lt;app&gt; is temporarily unavailable for maintenance.</code> and site-down
+alerts skip it. <code>dokwalt start</code> brings it back.</p>
+<h2 id="boot-sequence">Boot sequence</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Event</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>systemd starts <code>docker.service</code>; containers with <code>unless-stopped</code>/<code>always</code> start, <strong>Caddy included, with its last config</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>dokwalt.service</code> starts; the API socket listens (<code>READY=1</code>)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>The daemon waits for the Docker API, recovers interrupted deploys, reconciles</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Sites answer over HTTPS with the persisted certificates as soon as their containers are up</td>
+</tr>
+</tbody>
+</table>
+<p>Apps must retry their database connection at startup: after a reboot all containers start at
+once, so a web container may briefly come up before Postgres accepts connections.</p>
+<h2 id="the-hard-reboot-test">The hard-reboot test</h2>
+<p>Run it once after installation and after any big change. From the Mac:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">ssh</span> <span class="t-flag">-t</span> pi.home sudo reboot; <span class="t-cmd">date</span>
+<span class="t-cmd">until</span> curl <span class="t-flag">-sfo</span> /dev/null https://blog.example.com; <span class="t-cmd">do</span> sleep 2; <span class="t-cmd">done</span>; <span class="t-cmd">date</span>
+<span class="t-cmd">dokwalt</span> doctor</code></pre></div>
+<p><strong>Pass:</strong> every site returns 200 over valid HTTPS within 2 minutes, with no command sent to the
+server; <code>doctor</code> exits 0; <code>dokwalt releases</code> is unchanged.</p>
+<h2 id="the-power-cut-test">The power-cut test</h2>
+<ol>
+<li>Load a site in a browser and pull the power plug (on a VPS: hard reset from the provider panel).</li>
+<li>Wait 10 seconds, plug back in, run the same <code>until</code> loop.</li>
+<li>Check <code>dokwalt doctor</code>, <code>dokwalt releases</code> (a deploy running at the cut must show <code>failed</code> with
+the previous release live), and on the server:</li>
+</ol>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">sudo</span> <span class="t-cmd">sqlite3</span> /var/lib/dokwalt/dokwalt.db <span class="t-str">&#39;PRAGMA integrity_check&#39;</span>    <span class="t-com"># ok</span></code></pre></div>
+<p>The project's own <code>make e2e</code> runs both scenarios on every change: the throwaway server is a
+privileged Debian container running systemd, Docker and sshd; a reboot is <code>docker restart</code> of that
+container, a power cut is <code>docker kill</code> then <code>docker start</code>. Each time the site must answer again
+with the latest release, with no command sent, and the script prints how long it took.</p>
+<h2 id="after-a-reboot-what-to-check">After a reboot: what to check</h2>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> doctor
+<span class="t-cmd">◆</span> Doctor
+
+<span class="t-ok">✓</span> Local Docker             Docker 28.4.0 (builds run here)
+<span class="t-ok">✓</span> Connection               pi (dd@pi.home), daemon 0.1.0 on linux/arm64
+<span class="t-ok">✓</span> Docker                   Docker 28.4.0 (API 1.51), 4 CPUs, 7.9 GiB RAM
+<span class="t-ok">✓</span> Docker live-restore      containers keep running while dockerd restarts or upgrades
+<span class="t-ok">✓</span> Memory cgroup            cgroup 2 (systemd driver)
+<span class="t-ok">✓</span> Compose plugin           docker compose 2.39.1
+<span class="t-ok">✓</span> Start on boot: docker    docker starts at boot
+<span class="t-ok">✓</span> Start on boot: dokwalt   dokwalt starts at boot
+<span class="t-ok">✓</span> Disk                     18% used (42.1 GiB of 234.2 GiB)
+<span class="t-ok">✓</span> Memory                   24% used (1.9 GiB of 7.9 GiB)
+<span class="t-ok">✓</span> Temperature              48°C
+<span class="t-ok">✓</span> Clock                    synchronized with NTP
+<span class="t-ok">✓</span> DokWalt daemon           build 0.1.0, 27.3 MiB RSS
+<span class="t-ok">✓</span> Proxy (Caddy)            running, 46.1 MiB RSS, config loaded
+<span class="t-ok">✓</span> App blog                 running, v12
+<span class="t-ok">✓</span> Domain blog.example.com  ok
+
+  16 ok</code></pre></div>
+<p>A warning (<code>!</code>) or failure (<code>✗</code>) comes with a <code>→</code> hint. A failed last deploy adds an
+<code>App &lt;name&gt; last deploy</code> warning; a stopped app shows <code>stopped</code>. If something is not green:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">systemctl</span> status docker dokwalt           <span class="t-com"># both active (running)?</span>
+<span class="t-cmd">journalctl</span> <span class="t-flag">-u</span> dokwalt <span class="t-flag">-b</span> <span class="t-flag">--no-pager</span>       <span class="t-com"># this boot&#39;s daemon log</span>
+<span class="t-cmd">journalctl</span> <span class="t-flag">-b</span> <span class="t-flag">-1</span> <span class="t-flag">-p</span> warning <span class="t-flag">--no-pager</span>    <span class="t-com"># previous boot&#39;s warnings (needs persistent journal)</span>
+<span class="t-cmd">docker</span> ps <span class="t-flag">-a</span> <span class="t-flag">--filter</span> label=dokwalt.app   <span class="t-com"># what actually runs</span></code></pre></div>
+<p>See also: <a class="xref" href="/docs/troubleshooting/"><code>dokwalt docs troubleshooting</code></a>, <a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>, <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>,
+<a class="xref" href="/docs/monitoring/"><code>dokwalt docs monitoring</code></a>.</p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <a class="pager-prev" href="/docs/vps/"><small>← Previous</small><b>VPS</b></a>
+          <a class="pager-next" href="/docs/security/"><small>Next →</small><b>Security</b></a>
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#why-sites-break-elsewhere">Why sites break elsewhere</a></li><li class="toc-2"><a href="#the-systemd-unit">The systemd unit</a></li><li class="toc-2"><a href="#the-reconciler">The reconciler</a></li><li class="toc-2"><a href="#caddy-and-certificates">Caddy and certificates</a></li><li class="toc-2"><a href="#docker-live-restore">Docker live-restore</a></li><li class="toc-2"><a href="#half-finished-deploys">Half-finished deploys</a></li><li class="toc-2"><a href="#stopped-apps-stay-stopped">Stopped apps stay stopped</a></li><li class="toc-2"><a href="#boot-sequence">Boot sequence</a></li><li class="toc-2"><a href="#the-hard-reboot-test">The hard-reboot test</a></li><li class="toc-2"><a href="#the-power-cut-test">The power-cut test</a></li><li class="toc-2"><a href="#after-a-reboot-what-to-check">After a reboot: what to check</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

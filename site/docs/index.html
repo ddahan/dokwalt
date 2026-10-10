@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Documentation · DokWalt</title>
+  <meta name="description" content="DokWalt documentation: deploys, compose files, config, domains, databases, backups, monitoring, server setup and every command.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="docs-home">
+    <section class="dh-hero">
+      <div class="aurora" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span></div>
+      <div class="docs-wrap">
+        <p class="eyebrow"><span>◆</span> Documentation · v0.3.0</p>
+        <h1>Everything DokWalt does,<br><span class="gradient-text">written down.</span></h1>
+        <p class="dh-lead">How deploys work, every command, and step-by-step server setups. The same guides ship inside the binary: <code>dokwalt docs</code>.</p>
+        <button class="dh-search" type="button" data-search>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+        </button>
+      </div>
+    </section>
+    <div class="docs-wrap dh-groups">
+      
+        <section class="dh-group dh-first">
+          <h2><span class="dh-num">01</span>Start here</h2>
+          <div class="dh-cards">
+            
+              <a class="dh-card" href="/docs/getting-started/">
+                <h3>Getting started</h3>
+                <p>From an empty server to a site served over HTTPS in about ten minutes.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+              <a class="dh-card" href="/docs/concepts/">
+                <h3>Concepts</h3>
+                <p>The handful of ideas DokWalt is built on: servers, apps, releases, config and the reconciler.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+          </div>
+        </section>
+      
+        <section class="dh-group">
+          <h2><span class="dh-num">02</span>Deploy &amp; ship</h2>
+          <div class="dh-cards">
+            
+              <a class="dh-card" href="/docs/deploy/">
+                <h3>Deploying</h3>
+                <p>How <code>dokwalt deploy</code> builds on your Mac, ships only changed images and swaps versions with zero downtime.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+              <a class="dh-card" href="/docs/compose/">
+                <h3>Docker Compose apps</h3>
+                <p>How DokWalt reads your existing compose file and turns it into safe, zero-downtime projects.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+              <a class="dh-card" href="/docs/config/">
+                <h3>Config and secrets</h3>
+                <p>Environment variables stored encrypted on the server, versioned with every release (12-factor).</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+              <a class="dh-card" href="/docs/domains/">
+                <h3>Domains &amp; HTTPS</h3>
+                <p>Point DNS at your server, attach a domain to a service, and HTTPS is set up automatically.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+              <a class="dh-card" href="/docs/releases/">
+                <h3>Releases &amp; rollback</h3>
+                <p>Every deploy, config change, promote and rollback creates an immutable, numbered release you can return to.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+              <a class="dh-card" href="/docs/pipelines/">
+                <h3>Pipelines: staging and promote</h3>
+                <p>Optional per-app staging stage, with instant promotion of the exact images you tested.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+          </div>
+        </section>
+      
+        <section class="dh-group">
+          <h2><span class="dh-num">03</span>Data</h2>
+          <div class="dh-cards">
+            
+              <a class="dh-card" href="/docs/databases/">
+                <h3>Databases</h3>
+                <p>Databases are ordinary compose services: kept in one stable place, never exposed, reachable through an SSH tunnel.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+              <a class="dh-card" href="/docs/backups/">
+                <h3>Backups</h3>
+                <p>Every night, every database and DokWalt's own state go to Cloudflare R2 (or any S3 storage), off the server.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+          </div>
+        </section>
+      
+        <section class="dh-group">
+          <h2><span class="dh-num">04</span>Operate</h2>
+          <div class="dh-cards">
+            
+              <a class="dh-card" href="/docs/logs/">
+                <h3>Logs</h3>
+                <p>Stream, filter and search your app's logs from the Mac, and know where every other log lives.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+              <a class="dh-card" href="/docs/monitoring/">
+                <h3>Monitoring</h3>
+                <p>Live and 7-day CPU, memory, network and HTTP metrics for every app, at almost no cost.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+              <a class="dh-card" href="/docs/alerts/">
+                <h3>Alerts</h3>
+                <p>Get a Discord or Slack message when a site goes down, a deploy fails or the server runs hot.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+              <a class="dh-card" href="/docs/troubleshooting/">
+                <h3>Troubleshooting</h3>
+                <p>Symptom → cause → fix for the problems you are most likely to hit, with the exact commands.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+          </div>
+        </section>
+      
+        <section class="dh-group">
+          <h2><span class="dh-num">05</span>Servers</h2>
+          <div class="dh-cards">
+            
+              <a class="dh-card" href="/docs/raspberry-pi/">
+                <h3>Raspberry Pi 5</h3>
+                <p>From a bare Raspberry Pi 5 to a hardened, reboot-proof DokWalt server, step by step.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+              <a class="dh-card" href="/docs/vps/">
+                <h3>VPS</h3>
+                <p>Running DokWalt on a Debian or Ubuntu VPS: only what differs from the Raspberry Pi guide.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+              <a class="dh-card" href="/docs/reboot-recovery/">
+                <h3>Reboot recovery</h3>
+                <p>Why sites break after a reboot on other setups, and how DokWalt brings every site back on its own.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+              <a class="dh-card" href="/docs/security/">
+                <h3>Security</h3>
+                <p>DokWalt's threat model and how access, secrets, network exposure and containers are protected.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+          </div>
+        </section>
+      
+        <section class="dh-group">
+          <h2><span class="dh-num">06</span>Reference</h2>
+          <div class="dh-cards">
+            
+              <a class="dh-card" href="/docs/commands/">
+                <h3>Command reference</h3>
+                <p>Every DokWalt command and flag, with a one-line description and an example.</p>
+                <span class="dh-go" aria-hidden="true">→</span>
+              </a>
+            
+          </div>
+        </section>
+      
+      <section class="dh-cli">
+        <div>
+          <h2>Offline? It's all in the binary.</h2>
+          <p>Every page here is also a topic of <code>dokwalt docs</code>, rendered in your terminal, searchable, and always matching the version you run.</p>
+        </div>
+        <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span></div><pre><code><span class="t-cmd">dokwalt</span> docs                    <span class="t-com"># every topic</span>
+<span class="t-cmd">dokwalt</span> docs deploy             <span class="t-com"># one topic</span>
+<span class="t-cmd">dokwalt</span> docs <span class="t-flag">--search</span> tunnel    <span class="t-com"># full-text search</span></code></pre></div>
+      </section>
+    </div>
+  </main>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

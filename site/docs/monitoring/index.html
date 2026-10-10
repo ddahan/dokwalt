@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Monitoring · DokWalt docs</title>
+  <meta name="description" content="Live and 7-day CPU, memory, network and HTTP metrics for every app, at almost no cost.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Monitoring</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/">Deploying</a></li><li><a href="/docs/compose/">Docker Compose apps</a></li><li><a href="/docs/config/">Config and secrets</a></li><li><a href="/docs/domains/">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/">Databases</a></li><li><a href="/docs/backups/">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/">Logs</a></li><li><a href="/docs/monitoring/" class="active" aria-current="page">Monitoring</a></li><li><a href="/docs/alerts/">Alerts</a></li><li><a href="/docs/troubleshooting/">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Operate</p>
+          <h1>Monitoring</h1>
+          <p class="doc-lead">Live and 7-day CPU, memory, network and HTTP metrics for every app, at almost no cost.</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs monitoring</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/monitoring.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<p>The daemon collects metrics itself: no Prometheus, no agent containers, no
+extra database. Three ways to look at them:</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What you get</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dokwalt top</code></td>
+<td>live view of the server and every app, all apps at once</td>
+</tr>
+<tr>
+<td><code>dokwalt metrics</code></td>
+<td>history as sparklines, including HTTP metrics</td>
+</tr>
+<tr>
+<td><code>dokwalt</code></td>
+<td>the full-screen dashboard</td>
+</tr>
+</tbody>
+</table>
+<h2 id="live-dokwalt-top">Live: <code>dokwalt top</code></h2>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> top
+<span class="t-cmd">◆</span> pi  10:42:07
+
+CPU  ███░░░░░░░░░░░░░░░░░░░░░  11.4%  load 0.42 · 4 cores
+MEM  ██████░░░░░░░░░░░░░░░░░░  26.9%  2.1 GiB / 7.9 GiB
+DISK █████████░░░░░░░░░░░░░░░  38.0%  89.2 GiB / 234.0 GiB
+TEMP 52°C
+
+APP   SERVICE    CPU    MEMORY      NETWORK                   CPU (10 MIN)
+blog  web ×2     3.1%   84.2 MiB    ↓12.0 KiB/s ↑40.1 KiB/s   ▂▂▃▂▂▅▃▂▂▂▃▂
+      worker ×1  0.4%   61.0 MiB    ↓1.0 KiB/s ↑1.0 KiB/s
+      db ×1      0.8%   112.5 MiB   ↓3.0 KiB/s ↑9.0 KiB/s
+shop  web ×1     1.2%   190.3 MiB   ↓4.0 KiB/s ↑8.0 KiB/s     ▁▁▂▁▁▁▂▁▁▁▁▁
+
+DOMAIN             REQ/S  REQ (LAST MIN)  P50    P95    5XX
+blog.example.com   1.8    108             12 ms  48 ms  0
+
+  q quit · refreshes every 2s</code></pre></div>
+<ul>
+<li>Always shows the whole server. <code>-a</code> doesn't filter it.</li>
+<li>Memory shows <code>used / limit</code> when the container has a memory limit.</li>
+<li>The <code>TEMP</code> line appears on hosts that report a temperature, with the
+Raspberry Pi throttling state in red when <code>vcgencmd</code> reports any.</li>
+<li>Without a terminal, or with <code>--json</code>, it prints one snapshot and exits.</li>
+</ul>
+<h2 id="history-dokwalt-metrics">History: <code>dokwalt metrics</code></h2>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> metrics <span class="t-flag">--since</span> 24h
+<span class="t-cmd">◆</span> blog  last 24h
+
+  web
+    CPU                        ▁▁▁▂▂▃▅▇▅▃▂▂▂▃▃▂▂▁▁▁▁▁▂▂▃▂▂▁▁▁▁▂▃▅▃▂▁▁▁▁▁▁▂▂▁▁▁▁  now 2.1% · max 18.0%
+    memory                     ▅▅▅▅▅▅▆▆▆▆▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅▆▆▆▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅  now 84.2 MiB · max 96.0 MiB
+
+  blog.example.com
+    requests / bucket          ▁▁▂▂▃▄▆▇▅▃▂▂▃▃▂▂▁▁▁▁▁▁▂▃▄▃▂▁▁▁▁▂▃▄▅▄▃▂▁▁▁▁▂▂▁▁▁▁  now 41 · max 512
+    p95 latency                ▁▁▁▁▂▂▃▇▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁  now 48ms · max 410ms
+    5xx errors                 ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁  now 0 · max 0</code></pre></div>
+<ul>
+<li>In a linked folder (or with <code>-a</code>), you see that app's services and
+domains. Elsewhere you get the whole server: host CPU and memory, then
+every service.</li>
+<li><code>--since</code> defaults to <code>24h</code>. It takes a duration (<code>30m</code>, <code>1h</code>, <code>24h</code>) or
+whole days (<code>7d</code>). The range is split into about 60 buckets of at least
+1 minute. History goes back <code>metrics_retention_days</code> (default 7 days).</li>
+<li><code>--json</code> returns the raw points, including 2xx/3xx/4xx/5xx counts and
+p50/p95/p99, for your own graphs.</li>
+</ul>
+<h2 id="the-dashboard">The dashboard</h2>
+<p>Run <code>dokwalt</code> with no arguments in a terminal. It refreshes every 2
+seconds. Keys:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>↑↓</code> / <code>j k</code></td>
+<td>select an app (or a release when that list is focused)</td>
+</tr>
+<tr>
+<td><code>tab</code></td>
+<td>switch focus between the list and the detail pane</td>
+</tr>
+<tr>
+<td><code>1 2 3</code> / <code>← →</code></td>
+<td>overview · logs · releases</td>
+</tr>
+<tr>
+<td><code>l</code></td>
+<td>live logs</td>
+</tr>
+<tr>
+<td><code>r</code></td>
+<td>roll back (to the selected release in Releases, else the previous one)</td>
+</tr>
+<tr>
+<td><code>p</code></td>
+<td>promote staging to production</td>
+</tr>
+<tr>
+<td><code>R</code></td>
+<td>restart</td>
+</tr>
+<tr>
+<td><code>o</code></td>
+<td>open the site in the browser</td>
+</tr>
+<tr>
+<td><code>?</code> / <code>q</code></td>
+<td>help / quit</td>
+</tr>
+</tbody>
+</table>
+<p>Rollback, promote and restart ask for confirmation with <code>y</code>. You can't
+deploy from the dashboard: use <code>dokwalt deploy</code>.</p>
+<h2 id="what-is-collected">What is collected</h2>
+<p><strong>Containers, every 10 seconds</strong>, read directly from cgroup v2 files. That
+is cheaper than the Docker stats API, which is only a fallback:</p>
+<ul>
+<li>CPU from <code>cpu.stat</code>, memory from <code>memory.current</code>/<code>memory.stat</code></li>
+<li>disk read/write from <code>io.stat</code></li>
+<li>network in/out from <code>/proc/&lt;pid&gt;/net/dev</code></li>
+<li>restarts and OOM kills from Docker events</li>
+</ul>
+<p><strong>Host, every 10 seconds</strong>: CPU, memory and load from <code>/proc</code>, disk usage
+via <code>statfs</code>, and the temperature from <code>/sys/class/thermal</code>. On a
+Raspberry Pi, <code>vcgencmd get_throttled</code> runs every 60 seconds and reports
+under-voltage, frequency capping, throttling and the soft temperature limit,
+both now and since boot.</p>
+<p><strong>HTTP, per domain, per minute</strong>: Caddy writes its JSON access log to a Unix
+socket read by the daemon, with nothing on disk. The daemon counts
+requests and 2xx/3xx/4xx/5xx, and computes p50/p95/p99 latency from
+histogram buckets.</p>
+<p>Memory metrics need the cgroup memory controller. If it is disabled (older
+Raspberry Pi OS images), <code>dokwalt doctor</code> says so and how to enable it:
+append <code>cgroup_enable=memory cgroup_memory=1</code> to
+<code>/boot/firmware/cmdline.txt</code> and reboot.</p>
+<h2 id="storage-and-retention">Storage and retention</h2>
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Where</th>
+<th>Kept</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>live 10 s samples</td>
+<td>daemon memory</td>
+<td>recent minutes</td>
+</tr>
+<tr>
+<td>1-minute aggregates</td>
+<td>SQLite <code>/var/lib/dokwalt/dokwalt.db</code></td>
+<td>7 days (pruned hourly)</td>
+</tr>
+<tr>
+<td>individual requests</td>
+<td>not stored</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>The retention is the server setting <code>metrics_retention_days</code> (default 7).
+There is no CLI command for it yet.</p>
+<h2 id="overhead">Overhead</h2>
+<p>Measured on a test server: the daemon uses about <strong>27 MiB RSS</strong>, of which
+about 9 MiB is heap (the rest is shared binary code). Caddy uses about
+<strong>46 MiB RSS</strong>, with about 12 MiB of heap. That makes about 73 MiB in
+total, under the 100 MB target. Check your own numbers:</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> server info
+<span class="t-cmd">◆</span> pi  dd@pi.home
+
+Host            pi (linux/arm64), up 12d
+DokWalt         0.1.0 (API 1.0) · CLI 0.1.0
+Docker          28.4.0 · compose 2.39.1
+Apps            2
+Resources       4 CPUs · 2.1 GiB / 7.9 GiB RAM · 89.2 GiB / 234.0 GiB disk · 52°C
+Footprint       daemon 27.1 MiB · proxy 46.3 MiB  (heap 9.2 MiB + 12.0 MiB; the rest is shared binary code)
+Let&#39;s Encrypt   you@example.com</code></pre></div>
+<p>How it stays small:</p>
+<ul>
+<li><strong>Transparent huge pages off.</strong> With THP set to <code>always</code> (a common
+default), the kernel backs the Go heap with 2 MiB pages, which inflates
+RSS several times. The daemon disables THP for itself at startup
+(<code>prctl PR_SET_THP_DISABLE</code>, then re-exec). Caddy runs with
+<code>GODEBUG=disablethp=1</code>.</li>
+<li><strong>Memory limits for the Go runtime</strong>: <code>GOMEMLIMIT=40MiB</code> for the daemon
+(systemd unit), <code>GOMEMLIMIT=96MiB</code> for Caddy.</li>
+</ul>
+<p><code>dokwalt doctor</code> shows the daemon's RSS and warns above 60 MiB.</p>
+<h2 id="turning-metrics-into-alerts">Turning metrics into alerts</h2>
+<p>Disk, memory, temperature and crash-loop thresholds can notify Discord or
+Slack. Site down, deploy failed, certificate errors, out of memory,
+self-healing failed and Pi throttling are always on:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> alerts:add discord https://discord.com/api/webhooks/…
+<span class="t-cmd">dokwalt</span> alerts:set disk=85 temperature=75</code></pre></div>
+<h2 id="quick-recipes">Quick recipes</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> top                                  <span class="t-com"># everything, live</span>
+<span class="t-cmd">dokwalt</span> metrics <span class="t-flag">--since</span> 1h                   <span class="t-com"># this app, the last hour</span>
+<span class="t-cmd">dokwalt</span> <span class="t-flag">-a</span> shop metrics <span class="t-flag">--since</span> 7d <span class="t-flag">--json</span> &gt; week.json
+<span class="t-cmd">dokwalt</span> metrics <span class="t-flag">-s</span> staging <span class="t-flag">--since</span> 24h       <span class="t-com"># staging (pipeline apps)</span></code></pre></div>
+<p>See also: <a class="xref" href="/docs/alerts/"><code>dokwalt docs alerts</code></a>, <a class="xref" href="/docs/logs/"><code>dokwalt docs logs</code></a>,
+<a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>, <a class="xref" href="/docs/troubleshooting/"><code>dokwalt docs troubleshooting</code></a></p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <a class="pager-prev" href="/docs/logs/"><small>← Previous</small><b>Logs</b></a>
+          <a class="pager-next" href="/docs/alerts/"><small>Next →</small><b>Alerts</b></a>
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#live-dokwalt-top">Live: dokwalt top</a></li><li class="toc-2"><a href="#history-dokwalt-metrics">History: dokwalt metrics</a></li><li class="toc-2"><a href="#the-dashboard">The dashboard</a></li><li class="toc-2"><a href="#what-is-collected">What is collected</a></li><li class="toc-2"><a href="#storage-and-retention">Storage and retention</a></li><li class="toc-2"><a href="#overhead">Overhead</a></li><li class="toc-2"><a href="#turning-metrics-into-alerts">Turning metrics into alerts</a></li><li class="toc-2"><a href="#quick-recipes">Quick recipes</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

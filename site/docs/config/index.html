@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Config and secrets · DokWalt docs</title>
+  <meta name="description" content="Environment variables stored encrypted on the server, versioned with every release (12-factor).">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Config and secrets</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/">Deploying</a></li><li><a href="/docs/compose/">Docker Compose apps</a></li><li><a href="/docs/config/" class="active" aria-current="page">Config and secrets</a></li><li><a href="/docs/domains/">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/">Databases</a></li><li><a href="/docs/backups/">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/">Logs</a></li><li><a href="/docs/monitoring/">Monitoring</a></li><li><a href="/docs/alerts/">Alerts</a></li><li><a href="/docs/troubleshooting/">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Deploy &amp; ship</p>
+          <h1>Config and secrets</h1>
+          <p class="doc-lead">Environment variables stored encrypted on the server, versioned with every release (12-factor).</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs config</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/config.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<h2 id="the-rule">The rule</h2>
+<p>Anything that varies between deploys (secrets, API keys, <code>NODE_ENV</code>,
+database URLs) lives <strong>only on the server</strong>, managed with the CLI. Your
+repository keeps the structure (Dockerfile, compose file) and no values.
+Your local <code>.env</code> is never read during a deploy.</p>
+<h2 id="commands">Commands</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> config                        <span class="t-com"># list, values masked</span>
+<span class="t-cmd">dokwalt</span> config <span class="t-flag">--reveal</span>               <span class="t-com"># list with values in clear text</span>
+<span class="t-cmd">dokwalt</span> config <span class="t-flag">--shell</span>                <span class="t-com"># KEY=&#34;value&#34; lines, clear text</span>
+<span class="t-cmd">dokwalt</span> config:get DATABASE_URL       <span class="t-com"># print one raw value</span>
+<span class="t-cmd">dokwalt</span> config:set NODE_ENV=production LOG_LEVEL=info
+<span class="t-cmd">dokwalt</span> config:set SMTP_HOST=smtp.example.com <span class="t-flag">--no-restart</span>
+<span class="t-cmd">dokwalt</span> config:unset LOG_LEVEL DEBUG
+<span class="t-cmd">dokwalt</span> config:import .env            <span class="t-com"># load a dotenv file</span></code></pre></div>
+<p>Add <code>-a blog</code> outside a linked folder, <code>-s staging</code> for a pipeline app's
+staging stage, <code>--json</code> for scripts. Keys must match
+<code>[A-Za-z_][A-Za-z0-9_]*</code>.</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> config
+<span class="t-cmd">◆</span> Config of blog
+KEY            VALUE
+DATABASE_URL   po••••••••••••
+DB_PASSWORD    9f••••••••••••
+NODE_ENV       pr••••••••
+SMTP_HOST      sm••••••••••••
+
+<span class="t-com">$</span> <span class="t-cmd">dokwalt</span> config <span class="t-flag">--reveal</span>
+<span class="t-cmd">◆</span> Config of blog
+KEY            VALUE
+DATABASE_URL   postgres://blog:9f2c41d07ab3e5c8@db:5432/blog
+DB_PASSWORD    9f2c41d07ab3e5c8
+NODE_ENV       production
+SMTP_HOST      smtp.example.com</code></pre></div>
+<p>Masked values show the first 2 characters followed by <code>•</code> (values of 4
+characters or fewer are fully masked). <code>config:get</code> and <code>--shell</code> print
+clear text, handy in scripts:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">export</span> DATABASE_URL=$(dokwalt config:get DATABASE_URL)
+<span class="t-cmd">dokwalt</span> config <span class="t-flag">--shell</span> &gt; .env.production.local    <span class="t-com"># keep it out of git</span></code></pre></div>
+<h2 id="every-change-is-a-release">Every change is a release</h2>
+<p><code>config:set</code>, <code>config:unset</code> and <code>config:import</code> each create a new config
+version (<code>c&lt;N&gt;</code>) and, if the stage is deployed, a new release with the
+<strong>same images and compose model</strong>, rolled out with the usual zero-downtime
+blue/green switch (one-shot jobs run again). Several keys in one command
+make one release, described <code>Set K1, K2</code> or <code>Unset K</code>.</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> config:set LOG_LEVEL=debug SMTP_HOST=smtp.example.com
+<span class="t-ok">✓</span> Config updated: Set LOG_LEVEL, SMTP_HOST
+<span class="t-ok">✓</span> Services — db: keeps its data (named volume pgdata), web: zero-downtime swap, worker: zero-downtime swap
+<span class="t-ok">✓</span> Created release v9
+<span class="t-ok">✓</span> Stateful services ready
+<span class="t-ok">✓</span> Containers running
+<span class="t-ok">✓</span> web is healthy
+<span class="t-ok">✓</span> v9 is live
+<span class="t-ok">✓</span> Previous version stops in 10s (in-flight requests finish)
+<span class="t-ok">✓</span> Config updated — blog restarted as v9 with zero downtime</code></pre></div>
+<ul>
+<li><code>--no-restart</code> (on <code>config:set</code>) only stores the values: &quot;applies on
+next deploy&quot;.</li>
+<li>Before the first deploy, changes are just stored: &quot;applies on first
+deploy&quot;.</li>
+<li>If the new config breaks the app (a health check fails), the release is
+marked failed and the previous one keeps serving.</li>
+<li>Config changes wait for any running operation (one server-wide lock).</li>
+</ul>
+<h2 id="importing-a-env-file">Importing a .env file</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> config:import .env
+<span class="t-cmd">dokwalt</span> config:import .env.production <span class="t-flag">-s</span> staging</code></pre></div>
+<p>Dotenv syntax: <code>KEY=value</code>, an optional <code>export </code> prefix, <code># comments</code>,
+blank lines, single- or double-quoted values, and <code> # comment</code> after an
+unquoted value. Double-quoted values understand escapes such as <code>\n</code>.
+Each line is one variable. Imported keys are added or overwritten; keys
+not in the file are kept. Delete the file afterwards if it holds
+production secrets you do not need locally.</p>
+<h2 id="multi-line-values">Multi-line values</h2>
+<p>Certificates, private keys and JSON blobs work. Let the shell read the
+file and quote the whole argument:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> config:set <span class="t-str">&#34;JWT_PRIVATE_KEY=$(cat jwt.pem)&#34;</span>
+<span class="t-cmd">dokwalt</span> config:set <span class="t-str">&#34;GOOGLE_CREDENTIALS=$(cat service-account.json)&#34;</span></code></pre></div>
+<p>In a dotenv file, keep the value on one line and write line breaks as
+<code>\n</code> inside double quotes.</p>
+<h2 id="how-config-reaches-containers">How config reaches containers</h2>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Where</th>
+<th>Services</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Interpolation</td>
+<td><code>${VAR}</code> anywhere in the compose file</td>
+<td>all services</td>
+</tr>
+<tr>
+<td>Pass-through</td>
+<td>every key added as <code>KEY: null</code></td>
+<td>stateless services</td>
+</tr>
+</tbody>
+</table>
+<div class="code" data-lang="yaml"><div class="code-bar"><span>yaml</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-key">services</span>:
+  <span class="t-key">web</span>:
+    <span class="t-key">build</span>: .                     <span class="t-com"># gets every key: DATABASE_URL, ...</span>
+  <span class="t-key">db</span>:
+    <span class="t-key">image</span>: postgres:17           <span class="t-com"># stateful: no pass-through</span>
+    <span class="t-key">environment</span>:
+      <span class="t-key">POSTGRES_PASSWORD</span>: ${DB_PASSWORD}   <span class="t-com"># interpolated on the server</span></code></pre></div>
+<p><strong>Values are never written to disk.</strong> The rendered compose files under
+<code>/var/lib/dokwalt/apps/</code> only hold <code>KEY: null</code> entries and literal
+<code>${VAR}</code> references. The daemon runs <code>docker compose</code> with the decrypted
+values in that process's environment, and compose reads both the
+pass-through entries and the interpolation from there.</p>
+<p>Consequences:</p>
+<ul>
+<li><strong>A stateful service only sees what you interpolate.</strong> Pass database
+settings through <code>${VAR}</code> in its <code>environment:</code>.</li>
+<li><strong>Config changes do not restart databases.</strong> The data project is only
+recreated when its definition changes.</li>
+<li><strong>Changing a variable used in a stateful definition does recreate
+that container</strong> at the next release (for <code>db</code> above: <code>DB_PASSWORD</code>).
+Expect a short database interruption.</li>
+<li>A config key <strong>overrides</strong> an <code>environment:</code> entry of the same name in
+stateless services.</li>
+<li>Postgres, MySQL and similar images only read <code>POSTGRES_*</code> or <code>MYSQL_*</code>
+when the volume is first initialized. Changing <code>DB_PASSWORD</code> later does
+not change the real password: change it inside the database first
+(<code>dokwalt db:connect</code>), then update config.</li>
+<li><code>${VAR}</code> is resolved on the server, never from your Mac. Defaults such
+as <code>${LOG_LEVEL:-info}</code> work as in Compose; a missing variable without
+default warns during deploy and becomes empty.</li>
+</ul>
+<h2 id="encryption-at-rest">Encryption at rest</h2>
+<p>Values are encrypted with XChaCha20-Poly1305 in the daemon's SQLite
+database. The key is <code>/var/lib/dokwalt/secret.key</code> (32 random bytes, mode
+0600, created by the daemon at first start). Values are masked in output
+unless you pass <code>--reveal</code> or <code>--shell</code>.</p>
+<p>Back up <code>secret.key</code> together with <code>dokwalt.db</code>: without the key the
+config cannot be decrypted. See <a class="xref" href="/docs/security/"><code>dokwalt docs security</code></a>.</p>
+<p>Containers still receive plain environment variables; anyone with root
+or <code>docker</code> group access on the server can read them (<code>docker inspect</code>).
+That is inherent to env-var config.</p>
+<h2 id="config-versions-and-releases">Config versions and releases</h2>
+<p>Each release records the config version it ran with:</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> releases
+RELEASE   STATUS         DESCRIPTION                COMMIT    CONFIG   CREATED
+▶ v9      ● live         Set LOG_LEVEL, SMTP_HOST   3f2c1ab   c6       1m ago
+  v8      ● superseded   new homepage               3f2c1ab   c5       2h ago
+  v7      ● superseded   deploy                     d41e0b2   c4       1d ago</code></pre></div>
+<p>Rollback keeps the <strong>current</strong> config by default, so it never resurrects
+an old secret you rotated:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> rollback v7                 <span class="t-com"># v7 images, config c6</span>
+<span class="t-cmd">dokwalt</span> rollback v7 <span class="t-flag">--with-config</span>   <span class="t-com"># v7 images, v7&#39;s config restored as c7</span></code></pre></div>
+<p>Use <code>--with-config</code> when the config change itself was the problem.</p>
+<h2 id="exporting-config">Exporting config</h2>
+<p><code>dokwalt apps:export blog.json</code> writes the app's server-side settings,
+including all config <strong>in clear text</strong>, to a file with mode 0600 and
+prints a warning. Without a file name it prints the JSON to stdout. Keep
+it out of git and delete it once you have run
+<code>dokwalt apps:import blog.json</code> on the new server.</p>
+<h2 id="pipelines">Pipelines</h2>
+<p>With a pipeline enabled, staging and production have fully separate
+config. Promotion uses production's config, never staging's:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> config <span class="t-flag">-s</span> staging
+<span class="t-cmd">dokwalt</span> config:set <span class="t-flag">-s</span> staging NODE_ENV=staging</code></pre></div>
+<p>See also: <a class="xref" href="/docs/compose/"><code>dokwalt docs compose</code></a>, <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>,
+<a class="xref" href="/docs/releases/"><code>dokwalt docs releases</code></a>, <a class="xref" href="/docs/pipelines/"><code>dokwalt docs pipelines</code></a>,
+<a class="xref" href="/docs/security/"><code>dokwalt docs security</code></a>, <a class="xref" href="/docs/databases/"><code>dokwalt docs databases</code></a>.</p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <a class="pager-prev" href="/docs/compose/"><small>← Previous</small><b>Docker Compose apps</b></a>
+          <a class="pager-next" href="/docs/domains/"><small>Next →</small><b>Domains &amp; HTTPS</b></a>
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#the-rule">The rule</a></li><li class="toc-2"><a href="#commands">Commands</a></li><li class="toc-2"><a href="#every-change-is-a-release">Every change is a release</a></li><li class="toc-2"><a href="#importing-a-env-file">Importing a .env file</a></li><li class="toc-2"><a href="#multi-line-values">Multi-line values</a></li><li class="toc-2"><a href="#how-config-reaches-containers">How config reaches containers</a></li><li class="toc-2"><a href="#encryption-at-rest">Encryption at rest</a></li><li class="toc-2"><a href="#config-versions-and-releases">Config versions and releases</a></li><li class="toc-2"><a href="#exporting-config">Exporting config</a></li><li class="toc-2"><a href="#pipelines">Pipelines</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

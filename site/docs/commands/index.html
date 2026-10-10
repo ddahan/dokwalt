@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Command reference · DokWalt docs</title>
+  <meta name="description" content="Every DokWalt command and flag, with a one-line description and an example.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Command reference</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/">Deploying</a></li><li><a href="/docs/compose/">Docker Compose apps</a></li><li><a href="/docs/config/">Config and secrets</a></li><li><a href="/docs/domains/">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/">Databases</a></li><li><a href="/docs/backups/">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/">Logs</a></li><li><a href="/docs/monitoring/">Monitoring</a></li><li><a href="/docs/alerts/">Alerts</a></li><li><a href="/docs/troubleshooting/">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/" class="active" aria-current="page">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Reference</p>
+          <h1>Command reference</h1>
+          <p class="doc-lead">Every DokWalt command and flag, with a one-line description and an example.</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs commands</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/commands.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<p>Run <code>dokwalt &lt;command&gt; --help</code> for details. In the examples, the current
+folder is linked to the app <code>blog</code>, so <code>-a</code> is omitted.</p>
+<h2 id="global-flags">Global flags</h2>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-a, --app &lt;name&gt;</code></td>
+<td>app to act on (default: the app linked to this folder)</td>
+</tr>
+<tr>
+<td><code>-s, --stage &lt;st&gt;</code></td>
+<td><code>staging</code> or <code>production</code> (pipeline apps only; default <code>production</code>)</td>
+</tr>
+<tr>
+<td><code>--server &lt;name&gt;</code></td>
+<td>server context to use (default: see below)</td>
+</tr>
+<tr>
+<td><code>--json</code></td>
+<td>machine-readable JSON output</td>
+</tr>
+</tbody>
+</table>
+<h2 id="how-the-app-and-server-are-chosen">How the app and server are chosen</h2>
+<p><strong>App</strong>: <code>-a</code> → the folder link (current folder or nearest parent) →
+otherwise the error <code>which app? pass -a &lt;app&gt;, or run dokwalt link &lt;app&gt;</code>.</p>
+<p><strong>Server</strong>: <code>--server</code> → the server recorded with the folder link → the
+current server (<code>dokwalt server use</code>) → the only configured server.</p>
+<p><strong>Server targets</strong> (<code>server init</code>, <code>server add</code>): <code>user@host</code>,
+<code>user@host:port</code>, or any alias from <code>~/.ssh/config</code>. The SSH settings are
+resolved with <code>ssh -G</code>, <code>ProxyJump</code> works, and agent keys are tried before
+identity files.</p>
+<h2 id="environment-variables">Environment variables</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DOKWALT_CONFIG</code></td>
+<td>local config file (default <code>~/.config/dokwalt/config.json</code>: servers, current server, folder links)</td>
+</tr>
+<tr>
+<td><code>DOKWALT_SSH_CONFIG</code></td>
+<td>SSH config file passed to <code>ssh -G</code> instead of <code>~/.ssh/config</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="output-modes">Output modes</h2>
+<ul>
+<li>On a terminal: colors, symbols (✓ ! ✗ ◆ →), live progress, and a
+typed-name confirmation for <code>apps:destroy</code> and <code>pipeline:disable</code>.
+<code>rollback</code> and <code>promote</code> don't ask.</li>
+<li>Not a TTY (pipes, scripts, cron): plain text, one line per step.</li>
+<li><code>--json</code>: read commands print JSON. <code>logs --json</code> prints NDJSON, one
+object per line.</li>
+</ul>
+<h2 id="servers">Servers</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Install Docker, the daemon (systemd) and Caddy over SSH; asks for sudo</span>
+<span class="t-cmd">dokwalt</span> server init dd@pi.home <span class="t-flag">--email</span> you@example.com
+<span class="t-com"># Register an already-initialized server under a name</span>
+<span class="t-cmd">dokwalt</span> server add vps deploy@203.0.113.10
+<span class="t-com"># List server contexts</span>
+<span class="t-cmd">dokwalt</span> server list
+<span class="t-com"># Switch the current server</span>
+<span class="t-cmd">dokwalt</span> server use pi
+<span class="t-com"># Forget a server context (nothing is changed on the server)</span>
+<span class="t-cmd">dokwalt</span> server remove vps
+<span class="t-com"># Versions, resources, daemon and Caddy memory (RSS and heap)</span>
+<span class="t-cmd">dokwalt</span> server info
+<span class="t-cmd">dokwalt</span> server settings [key=value...]   <span class="t-com"># acme_email, keep_releases, drain, metrics_retention_days</span>
+<span class="t-com"># Re-run the idempotent install with this CLI&#39;s version; apps keep serving</span>
+<span class="t-cmd">dokwalt</span> server upgrade</code></pre></div>
+<p><code>server init</code> flags: <code>--name</code> (context name, default: the host's first
+label, or <code>default</code> for an IP), <code>--email</code> (Let's Encrypt), <code>--binary</code>
+(local linux binary). Without <code>--binary</code>, the CLI uses
+<code>dokwalt_linux_&lt;arch&gt;</code> next to itself or in <code>dist/</code>, or downloads it from
+GitHub releases and checks it against <code>checksums.txt</code>. The new server
+becomes current if none is set. <code>server upgrade --binary &lt;path&gt;</code> works the
+same way.</p>
+<h2 id="apps">Apps</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># List apps with stage, status, release, domains</span>
+<span class="t-cmd">dokwalt</span> apps
+<span class="t-com"># Create an app on the current server and link this folder to it</span>
+<span class="t-cmd">dokwalt</span> apps:create blog
+<span class="t-cmd">dokwalt</span> apps:create blog <span class="t-flag">--no-link</span>        <span class="t-com"># don&#39;t link the folder</span>
+<span class="t-com"># Stages, services, domains, releases of an app</span>
+<span class="t-cmd">dokwalt</span> apps:info
+<span class="t-com"># Delete an app with its containers, volumes and data (type the name)</span>
+<span class="t-cmd">dokwalt</span> apps:destroy blog
+<span class="t-cmd">dokwalt</span> apps:destroy blog <span class="t-flag">--confirm</span> blog  <span class="t-com"># no prompt, for scripts</span>
+<span class="t-com"># Export config (clear text!), domains, overrides; stdout without a file</span>
+<span class="t-cmd">dokwalt</span> apps:export blog.json
+<span class="t-com"># Recreate an app from an export on the current server (-a renames it)</span>
+<span class="t-cmd">dokwalt</span> apps:import blog.json
+<span class="t-com"># Link this folder to an app (stored in the local config, not the repo)</span>
+<span class="t-cmd">dokwalt</span> link blog
+<span class="t-com"># Remove this folder&#39;s link</span>
+<span class="t-cmd">dokwalt</span> unlink</code></pre></div>
+<p><code>apps:export &lt;file&gt;</code> writes mode 0600. Images and volume data aren't included.</p>
+<h2 id="deploy--releases">Deploy &amp; releases</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Build on the Mac, upload changed images, roll out with zero downtime</span>
+<span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-m</span> <span class="t-str">&#34;fix feed&#34;</span>
+<span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-f</span> compose.yaml <span class="t-flag">-f</span> compose.prod.yaml
+<span class="t-com"># List releases, newest first</span>
+<span class="t-cmd">dokwalt</span> releases <span class="t-flag">-n</span> 30
+<span class="t-com"># Roll back to the previous successful release, or to vN (no prompt)</span>
+<span class="t-cmd">dokwalt</span> rollback v12</code></pre></div>
+<ul>
+<li><code>deploy</code>: <code>-m, --message</code> (default: last commit subject), <code>--no-cache</code>,
+<code>-f, --file</code> (repeatable; default <code>compose.yaml</code> / <code>docker-compose.yml</code>).</li>
+<li><code>releases</code>: <code>-n, --limit</code> (default 15).</li>
+<li><code>rollback [vN]</code>: <code>--with-config</code> also restores that release's config.</li>
+</ul>
+<h2 id="config">Config</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># List config vars, masked (first 2 characters + •••)</span>
+<span class="t-cmd">dokwalt</span> config
+<span class="t-cmd">dokwalt</span> config <span class="t-flag">--reveal</span>                   <span class="t-com"># clear text</span>
+<span class="t-cmd">dokwalt</span> config <span class="t-flag">--shell</span> &gt; .env.backup      <span class="t-com"># KEY=&#34;value&#34; lines, clear text</span>
+<span class="t-com"># Print one value</span>
+<span class="t-cmd">dokwalt</span> config:get DATABASE_URL
+<span class="t-com"># Set vars: new config version + new release (zero downtime)</span>
+<span class="t-cmd">dokwalt</span> config:set SMTP_HOST=smtp.example.com SMTP_PORT=587
+<span class="t-cmd">dokwalt</span> config:set FEATURE_X=on <span class="t-flag">--no-restart</span>   <span class="t-com"># applies on next deploy</span>
+<span class="t-com"># Remove vars (new release)</span>
+<span class="t-cmd">dokwalt</span> config:unset DEBUG
+<span class="t-com"># Import a .env file (comments, export, quotes): one release</span>
+<span class="t-cmd">dokwalt</span> config:import .env.production</code></pre></div>
+<h2 id="domains--health">Domains &amp; health</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># List domains, targets and reachability</span>
+<span class="t-cmd">dokwalt</span> domains
+<span class="t-cmd">dokwalt</span> domains <span class="t-flag">--no-check</span>                <span class="t-com"># skip the probes</span>
+<span class="t-com"># Route a domain to a service (always added; prints reachability)</span>
+<span class="t-cmd">dokwalt</span> domains:add blog.example.com <span class="t-flag">--service</span> web <span class="t-flag">--port</span> 3000
+<span class="t-com"># Remove a domain or a redirect</span>
+<span class="t-cmd">dokwalt</span> domains:remove blog.example.org
+<span class="t-com"># Redirect one domain to another (308, path and query kept)</span>
+<span class="t-cmd">dokwalt</span> domains:redirect www.blog.example.com blog.example.com
+<span class="t-com"># Stricter HTTP check during deploys: GET path must be 2xx/3xx</span>
+<span class="t-cmd">dokwalt</span> healthcheck:set <span class="t-flag">--service</span> web <span class="t-flag">--path</span> /healthz <span class="t-flag">--timeout</span> 90s
+<span class="t-com"># Back to the default check (any answer below 500 on /)</span>
+<span class="t-cmd">dokwalt</span> healthcheck:unset <span class="t-flag">--service</span> web</code></pre></div>
+<p><code>domains:add</code>: <code>--service</code> defaults to the only stateless service that
+declares a port. <code>--port</code> defaults to its first declared port, or 80 with a
+warning. <code>healthcheck:set --timeout</code> defaults to <code>60s</code>.</p>
+<h2 id="services--runtime">Services &amp; runtime</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Deploy mode (stateful or blue/green), why, health check per service</span>
+<span class="t-cmd">dokwalt</span> services
+<span class="t-com"># Override stateful detection; redeploys the current release right away</span>
+<span class="t-cmd">dokwalt</span> services:set cache <span class="t-flag">--stateful=false</span>
+<span class="t-com"># Containers with state, health, restarts</span>
+<span class="t-cmd">dokwalt</span> ps
+<span class="t-com"># Restart active containers one at a time (no new release, jobs skipped)</span>
+<span class="t-cmd">dokwalt</span> restart <span class="t-flag">--service</span> worker
+<span class="t-com"># Stop the stage; domains show a maintenance page; survives reboots</span>
+<span class="t-cmd">dokwalt</span> stop
+<span class="t-com"># Start a stopped stage again</span>
+<span class="t-cmd">dokwalt</span> start
+<span class="t-com"># Merged logs</span>
+<span class="t-cmd">dokwalt</span> logs <span class="t-flag">-f</span> <span class="t-flag">--service</span> web <span class="t-flag">--since</span> 10m <span class="t-flag">--grep</span> error <span class="t-flag">-n</span> 200
+<span class="t-com"># Shell or command in a running container, over SSH</span>
+<span class="t-cmd">dokwalt</span> exec <span class="t-flag">--service</span> web <span class="t-flag">--</span> sh</code></pre></div>
+<ul>
+<li><code>logs</code>: <code>-f, --follow</code>, <code>--service</code>, <code>--grep &lt;text&gt;</code> (case-insensitive
+substring), <code>-n, --lines</code> (default 100), <code>--since &lt;duration&gt;</code> (<code>30m</code>,
+<code>2h</code>).</li>
+<li><code>exec [--service] [-- &lt;cmd&gt;]</code>: default service is the first stateless
+service that isn't a one-shot job, and the default command is <code>sh</code>.</li>
+</ul>
+<h2 id="databases">Databases</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Tunnel to the database and open psql / mysql / mongosh / redis-cli</span>
+<span class="t-cmd">dokwalt</span> db:connect
+<span class="t-com"># Keep a tunnel open on a fixed local port for a GUI tool</span>
+<span class="t-cmd">dokwalt</span> db:connect <span class="t-flag">--tunnel-only</span> <span class="t-flag">--port</span> 5433</code></pre></div>
+<p>Flags: <code>--service</code> (default: the first recognised database image, SQL
+preferred), <code>--tunnel-only</code> (print the URL and wait), <code>--port</code> (local port,
+default random), <code>--remote-port</code> (container port, default: the database's
+standard port or the first declared port).</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Download a Postgres dump (pg_dump -Fc) to this folder</span>
+<span class="t-cmd">dokwalt</span> db:backup
+<span class="t-cmd">dokwalt</span> db:backup <span class="t-flag">-o</span> ~/Backups/blog.dump</code></pre></div>
+<p>Flags: <code>-o, --output</code> (default <code>&lt;database&gt;-&lt;stage&gt;-&lt;time&gt;.dump</code>),
+<code>--service</code>, <code>--database</code>. Both commands also work from an app that uses a
+shared database (<code>x-dokwalt.uses</code>): see <a class="xref" href="/docs/databases/"><code>dokwalt docs databases</code></a>.</p>
+<h2 id="backups">Backups</h2>
+<p>Server-wide: no app needed. Details: <a class="xref" href="/docs/backups/"><code>dokwalt docs backups</code></a>.</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Nightly backups to R2: every Postgres database, their roles, dokwalt.db</span>
+<span class="t-cmd">dokwalt</span> backup:setup <span class="t-flag">--r2-account</span> &lt;id&gt; <span class="t-flag">--bucket</span> backups <span class="t-flag">--access-key</span> &lt;key&gt;
+<span class="t-cmd">dokwalt</span> backup:setup <span class="t-flag">--time</span> 04:30 <span class="t-flag">--keep-daily</span> 14   <span class="t-com"># change one setting</span>
+<span class="t-cmd">dokwalt</span> backup:now                                   <span class="t-com"># one now</span>
+<span class="t-cmd">dokwalt</span> backups                                      <span class="t-com"># setup, last run, backups in the bucket</span>
+<span class="t-cmd">dokwalt</span> backups latest                               <span class="t-com"># files of one backup</span>
+<span class="t-cmd">dokwalt</span> backup:download latest [file] [-o folder]
+<span class="t-cmd">dokwalt</span> backup:restore latest <span class="t-flag">--database</span> blog        <span class="t-com"># or a file path; --confirm blog</span>
+<span class="t-cmd">dokwalt</span> backup:disable</code></pre></div>
+<p><code>backup:setup</code> flags: <code>--r2-account</code> or <code>--endpoint</code> + <code>--region</code>, <code>--bucket</code>,
+<code>--access-key</code>, <code>--secret-key-stdin</code> (else a prompt or
+<code>DOKWALT_BACKUP_SECRET_KEY</code>), <code>--prefix</code> (default <code>dokwalt/&lt;hostname&gt;</code>),
+<code>--time</code> (default <code>03:00</code>, server local time), <code>--keep-daily</code> (7),
+<code>--keep-weekly</code> (4).</p>
+<h2 id="pipelines">Pipelines</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Add a staging stage next to production</span>
+<span class="t-cmd">dokwalt</span> pipeline:enable
+<span class="t-com"># Delete staging: containers, volumes, config, domains (type the name)</span>
+<span class="t-cmd">dokwalt</span> pipeline:disable
+<span class="t-cmd">dokwalt</span> pipeline:disable <span class="t-flag">--confirm</span> blog
+<span class="t-com"># Release staging&#39;s current images to production (no build, no prompt)</span>
+<span class="t-cmd">dokwalt</span> promote</code></pre></div>
+<h2 id="monitoring--alerts">Monitoring &amp; alerts</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Live CPU, memory, network per app and service, HTTP per domain</span>
+<span class="t-cmd">dokwalt</span> top
+<span class="t-com"># History as sparklines (default 24h; e.g. 1h, 24h, 7d)</span>
+<span class="t-cmd">dokwalt</span> metrics <span class="t-flag">--since</span> 7d
+<span class="t-com"># Channels, thresholds, what is firing</span>
+<span class="t-cmd">dokwalt</span> alerts
+<span class="t-com"># Add a Discord or Slack webhook</span>
+<span class="t-cmd">dokwalt</span> alerts:add slack https://hooks.slack.com/services/T0/B0/xyz
+<span class="t-com"># Remove a channel by id</span>
+<span class="t-cmd">dokwalt</span> alerts:remove 2
+<span class="t-com"># Send a test message to every channel</span>
+<span class="t-cmd">dokwalt</span> alerts:test
+<span class="t-com"># Thresholds: disk, memory (%), temperature (°C), restarts (per 10 min)</span>
+<span class="t-cmd">dokwalt</span> alerts:set disk=85 temperature=75 restarts=5
+<span class="t-com"># Diagnose this Mac, the server, Caddy, apps and domains</span>
+<span class="t-cmd">dokwalt</span> doctor</code></pre></div>
+<h2 id="help">Help</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Full-screen dashboard (without a terminal: prints help)</span>
+<span class="t-cmd">dokwalt</span>
+<span class="t-com"># Built-in docs; without a topic, list topics</span>
+<span class="t-cmd">dokwalt</span> docs domains
+<span class="t-cmd">dokwalt</span> docs <span class="t-flag">--search</span> rollback            <span class="t-com"># topics containing these words</span>
+<span class="t-cmd">dokwalt</span> docs releases <span class="t-flag">--no-pager</span>          <span class="t-com"># print without a pager</span>
+<span class="t-com"># CLI version: dokwalt &lt;build&gt; (API &lt;v&gt;, os/arch)</span>
+<span class="t-cmd">dokwalt</span> version</code></pre></div>
+<h2 id="common-combinations">Common combinations</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> <span class="t-flag">-a</span> shop <span class="t-flag">--server</span> vps logs <span class="t-flag">-f</span>
+<span class="t-cmd">dokwalt</span> <span class="t-flag">-s</span> staging releases <span class="t-flag">--json</span> | <span class="t-cmd">jq</span> <span class="t-str">&#39;.[0].status&#39;</span></code></pre></div>
+<p>See also: <a class="xref" href="/docs/getting-started/"><code>dokwalt docs getting-started</code></a>, <a class="xref" href="/docs/concepts/"><code>dokwalt docs concepts</code></a>, <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>, <a class="xref" href="/docs/troubleshooting/"><code>dokwalt docs troubleshooting</code></a></p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <a class="pager-prev" href="/docs/security/"><small>← Previous</small><b>Security</b></a>
+          
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#global-flags">Global flags</a></li><li class="toc-2"><a href="#how-the-app-and-server-are-chosen">How the app and server are chosen</a></li><li class="toc-2"><a href="#environment-variables">Environment variables</a></li><li class="toc-2"><a href="#output-modes">Output modes</a></li><li class="toc-2"><a href="#servers">Servers</a></li><li class="toc-2"><a href="#apps">Apps</a></li><li class="toc-2"><a href="#deploy--releases">Deploy &amp; releases</a></li><li class="toc-2"><a href="#config">Config</a></li><li class="toc-2"><a href="#domains--health">Domains &amp; health</a></li><li class="toc-2"><a href="#services--runtime">Services &amp; runtime</a></li><li class="toc-2"><a href="#databases">Databases</a></li><li class="toc-2"><a href="#backups">Backups</a></li><li class="toc-2"><a href="#pipelines">Pipelines</a></li><li class="toc-2"><a href="#monitoring--alerts">Monitoring &amp; alerts</a></li><li class="toc-2"><a href="#help">Help</a></li><li class="toc-2"><a href="#common-combinations">Common combinations</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

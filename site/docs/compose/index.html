@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Docker Compose apps · DokWalt docs</title>
+  <meta name="description" content="How DokWalt reads your existing compose file and turns it into safe, zero-downtime projects.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Docker Compose apps</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/">Deploying</a></li><li><a href="/docs/compose/" class="active" aria-current="page">Docker Compose apps</a></li><li><a href="/docs/config/">Config and secrets</a></li><li><a href="/docs/domains/">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/">Databases</a></li><li><a href="/docs/backups/">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/">Logs</a></li><li><a href="/docs/monitoring/">Monitoring</a></li><li><a href="/docs/alerts/">Alerts</a></li><li><a href="/docs/troubleshooting/">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Deploy &amp; ship</p>
+          <h1>Docker Compose apps</h1>
+          <p class="doc-lead">How DokWalt reads your existing compose file and turns it into safe, zero-downtime projects.</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs compose</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/compose.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<h2 id="your-compose-file-is-the-app-definition">Your compose file is the app definition</h2>
+<p>DokWalt uses the compose file already in your repository (<code>compose.yaml</code>
+or <code>docker-compose.yml</code>, or the files given with <code>deploy -f</code>). There is
+no DokWalt file and nothing to rewrite. Everything that varies between
+deploys (config, domains, health checks, overrides) lives on the server.</p>
+<p>On each deploy the CLI runs, in your project folder:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">docker</span> compose config <span class="t-flag">--no-interpolate</span> <span class="t-flag">--format</span> json</code></pre></div>
+<p>Compose normalizes <code>extends</code>, profiles, short syntax and relative paths,
+but <code>--no-interpolate</code> keeps <code>${VAR}</code> references as they are: your Mac's
+environment and <code>.env</code> never leak into production. The CLI sends this
+model unchanged; the release stores it as-is and the daemon transforms
+it for the target stage at deploy time. Your file is never modified.</p>
+<h2 id="a-typical-app">A typical app</h2>
+<div class="code" data-lang="yaml"><div class="code-bar"><span>yaml</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-key">services</span>:
+  <span class="t-key">migrate</span>:
+    <span class="t-key">build</span>: .
+    <span class="t-key">command</span>: [<span class="t-str">&#34;./bin/migrate&#34;</span>, <span class="t-str">&#34;up&#34;</span>]
+    <span class="t-key">depends_on</span>:
+      <span class="t-key">db</span>: { condition: service_healthy }
+  <span class="t-key">web</span>:
+    <span class="t-key">build</span>: .
+    <span class="t-key">command</span>: [<span class="t-str">&#34;./bin/server&#34;</span>]
+    <span class="t-key">environment</span>:
+      <span class="t-key">PORT</span>: <span class="t-str">&#34;3000&#34;</span>
+      <span class="t-key">DATABASE_URL</span>: postgres://blog:${DB_PASSWORD}@db:5432/blog
+    <span class="t-key">ports</span>: [<span class="t-str">&#34;3000:3000&#34;</span>]            <span class="t-com"># removed on the server, port remembered</span>
+    <span class="t-key">depends_on</span>:
+      <span class="t-key">migrate</span>: { condition: service_completed_successfully }
+    <span class="t-key">healthcheck</span>:
+      <span class="t-key">test</span>: [<span class="t-str">&#34;CMD&#34;</span>, <span class="t-str">&#34;wget&#34;</span>, <span class="t-str">&#34;-qO-&#34;</span>, <span class="t-str">&#34;http://localhost:3000/healthz&#34;</span>]
+      <span class="t-key">interval</span>: 5s
+      <span class="t-key">retries</span>: 10
+  <span class="t-key">worker</span>:
+    <span class="t-key">build</span>: .
+    <span class="t-key">command</span>: [<span class="t-str">&#34;./bin/worker&#34;</span>]
+  <span class="t-key">db</span>:
+    <span class="t-key">image</span>: postgres:17-alpine
+    <span class="t-key">environment</span>:
+      <span class="t-key">POSTGRES_USER</span>: blog
+      <span class="t-key">POSTGRES_DB</span>: blog
+      <span class="t-key">POSTGRES_PASSWORD</span>: ${DB_PASSWORD}
+    <span class="t-key">volumes</span>:
+      - pgdata:/var/lib/postgresql/data
+    <span class="t-key">healthcheck</span>:
+      <span class="t-key">test</span>: [<span class="t-str">&#34;CMD-SHELL&#34;</span>, <span class="t-str">&#34;pg_isready -U blog&#34;</span>]
+      <span class="t-key">interval</span>: 5s
+<span class="t-key">volumes</span>:
+  <span class="t-key">pgdata</span>:</code></pre></div>
+<p>Complete it on the server:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> config:set DB_PASSWORD=s3cret
+<span class="t-cmd">dokwalt</span> deploy
+<span class="t-cmd">dokwalt</span> domains:add blog.example.com          <span class="t-com"># web is the only service with a port</span></code></pre></div>
+<p><code>migrate</code>, <code>web</code> and <code>worker</code> build from the same Dockerfile, so they
+share one image, uploaded once. Services reach each other by service
+name (<code>db:5432</code>) on the stage network.</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> services
+SERVICE   ON EACH DEPLOY                                                                WHY                                     HEALTH CHECK
+db        keeps its data (never duplicated; restarted only if its definition changes)   named volume pgdata                     default
+migrate   zero-downtime swap (a new copy starts, then replaces the old one)             no named volume, not a database image   default
+web       zero-downtime swap (a new copy starts, then replaces the old one)             no named volume, not a database image   default
+worker    zero-downtime swap (a new copy starts, then replaces the old one)             no named volume, not a database image   default
+Override: dokwalt services:set &lt;service&gt; --stateful=false</code></pre></div>
+<h2 id="one-shot-jobs-migrations-and-release-tasks">One-shot jobs: migrations and release tasks</h2>
+<p>A service that another service depends on with
+<code>condition: service_completed_successfully</code> is a <strong>one-shot job</strong>
+(<code>migrate</code> above). DokWalt sets <code>restart: &#34;no&#34;</code> and the label
+<code>dokwalt.oneshot=true</code>, and:</p>
+<ul>
+<li>runs it in the <strong>new color</strong> on every release (deploy, config change,
+rollback, promote), after the data project is ready and before its
+dependents start;</li>
+<li>requires exit code 0: otherwise the deploy fails and the old version
+keeps serving;</li>
+<li>never restarts it (reconciler, <code>dokwalt restart</code>) and excludes it from
+crash-loop alerts; <code>dokwalt exec</code> never picks it by default.</li>
+</ul>
+<p>Old code keeps serving until the switch, so migrations must be backward
+compatible (expand/contract). <code>migrate → db</code> crosses the data/color split
+and is dropped: the data project is always started and ready first.</p>
+<h2 id="transformation-rules">Transformation rules</h2>
+<table>
+<thead>
+<tr>
+<th>Compose key</th>
+<th>What DokWalt does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>build:</code></td>
+<td>Removed; <code>image</code> = uploaded <code>dokwalt/&lt;app&gt;-&lt;svc&gt;:&lt;id12&gt;</code></td>
+</tr>
+<tr>
+<td><code>image:</code> without <code>build:</code></td>
+<td>Kept, <code>pull_policy: missing</code>; not pinned by digest</td>
+</tr>
+<tr>
+<td><code>ports:</code></td>
+<td>Removed ⚠; container ports kept as defaults for <code>domains:add</code>, <code>db:connect</code></td>
+</tr>
+<tr>
+<td><code>expose:</code></td>
+<td>Kept; also counts as declared ports</td>
+</tr>
+<tr>
+<td><code>container_name:</code></td>
+<td>Removed ⚠ (would collide between blue and green)</td>
+</tr>
+<tr>
+<td><code>env_file:</code></td>
+<td>Removed ⚠; use <code>dokwalt config:import .env</code></td>
+</tr>
+<tr>
+<td><code>links:</code>, <code>external_links:</code></td>
+<td>Removed ⚠; services reach each other by name</td>
+</tr>
+<tr>
+<td><code>network_mode:</code> other than <code>bridge</code></td>
+<td>Rejected ✗</td>
+</tr>
+<tr>
+<td>service-level <code>secrets:</code>, <code>configs:</code></td>
+<td>Rejected ✗; use <code>dokwalt config:set</code></td>
+</tr>
+<tr>
+<td>bind mount inside the project folder</td>
+<td>Rejected ✗ (<code>./initdb:/docker-entrypoint-initdb.d</code>)</td>
+</tr>
+<tr>
+<td>other absolute host bind mount</td>
+<td>Allowed ⚠ &quot;host path must exist on the server&quot;</td>
+</tr>
+<tr>
+<td>named volume</td>
+<td>External volume <code>dw-&lt;app&gt;-&lt;stage&gt;-&lt;vol&gt;</code>, created by the daemon</td>
+</tr>
+<tr>
+<td><code>external: true</code> volume</td>
+<td>Kept as-is</td>
+</tr>
+<tr>
+<td><code>networks:</code></td>
+<td>Replaced by the stage network, service name as alias</td>
+</tr>
+<tr>
+<td>top-level <code>x-dokwalt: {uses: [app]}</code></td>
+<td>Those apps' stateful services join the stage network, by app name</td>
+</tr>
+<tr>
+<td><code>depends_on</code> across data/color split</td>
+<td>Dropped, both directions</td>
+</tr>
+<tr>
+<td><code>restart:</code></td>
+<td>Default <code>unless-stopped</code> (<code>&#34;no&#34;</code> for one-shot jobs)</td>
+</tr>
+<tr>
+<td><code>logging:</code></td>
+<td>Default <code>local</code>, 10m × 3 if unset</td>
+</tr>
+<tr>
+<td><code>labels:</code></td>
+<td>Kept; <code>dokwalt.*</code> labels set (overwritten) by DokWalt</td>
+</tr>
+<tr>
+<td><code>environment:</code></td>
+<td>Kept; stateless services also get each config key as <code>KEY: null</code></td>
+</tr>
+<tr>
+<td><code>healthcheck:</code></td>
+<td>Kept, gates the switch (<code>disable: true</code> counts as none)</td>
+</tr>
+<tr>
+<td>everything else</td>
+<td>Kept verbatim (<code>command</code>, <code>user</code>, <code>mem_limit</code>, ...)</td>
+</tr>
+</tbody>
+</table>
+<p>Warnings (⚠) are shown during deploy and do not stop it. Rejections (✗)
+stop the deploy before a release is created; nothing changes:</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-err">✗</span> service web: bind mount of a project file (uploads) is not possible on the server — bake it into the image or use a named volume</code></pre></div>
+<p>A <code>${VAR}</code> without default that is not in config warns
+<code>${X} is used in the compose file but not set</code> and becomes empty.</p>
+<p>Why remove <code>ports:</code>? Ports published by Docker bypass <code>ufw</code>. With DokWalt
+nothing but Caddy is reachable from outside; databases are never exposed.</p>
+<h2 id="stateful-or-stateless">Stateful or stateless</h2>
+<p>Detection, in order: a <code>services:set</code> override; a named volume; a
+well-known image (base name or <code>&lt;name&gt;-*</code> variant): postgres, postgis,
+timescaledb, mysql, mariadb, percona, mongo, redis, valkey, keydb,
+dragonfly, memcached, rabbitmq, elasticsearch, opensearch, clickhouse,
+influxdb, minio, cassandra, couchdb, neo4j, nats, meilisearch, typesense,
+qdrant. Absolute bind mounts do not make a service stateful.</p>
+<table>
+<thead>
+<tr>
+<th>Stateful services</th>
+<th>Stateless services</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>run in <code>dw-blog-production-data</code></td>
+<td>run in <code>-blue</code> / <code>-green</code></td>
+</tr>
+<tr>
+<td>never duplicated</td>
+<td>new color on every release</td>
+</tr>
+<tr>
+<td>recreated only if definition changed</td>
+<td>replaced on every release</td>
+</tr>
+<tr>
+<td>see only <code>${VAR}</code> config</td>
+<td>every config key passed through</td>
+</tr>
+</tbody>
+</table>
+<p>Fix a wrong guess with an override stored on the server. It redeploys the
+current release immediately:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> services:set cache <span class="t-flag">--stateful=false</span>   <span class="t-com"># throwaway cache: blue/green</span>
+<span class="t-cmd">dokwalt</span> services:set web <span class="t-flag">--stateful=true</span>      <span class="t-com"># SQLite app that must never run twice</span></code></pre></div>
+<h2 id="names-on-the-server">Names on the server</h2>
+<table>
+<thead>
+<tr>
+<th>Thing</th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data project</td>
+<td><code>dw-blog-production-data</code></td>
+</tr>
+<tr>
+<td>Stateless projects</td>
+<td><code>dw-blog-production-blue</code>, <code>-green</code></td>
+</tr>
+<tr>
+<td>Stage network</td>
+<td><code>dw-blog-production</code> (Caddy attached, no other app)</td>
+</tr>
+<tr>
+<td>Volume <code>pgdata</code></td>
+<td><code>dw-blog-production-pgdata</code></td>
+</tr>
+<tr>
+<td>Built image</td>
+<td><code>dokwalt/blog-web:3f9c2a1b7d0e</code></td>
+</tr>
+<tr>
+<td>Rendered compose files</td>
+<td><code>/var/lib/dokwalt/apps/blog/production/dw-blog-production-{data,blue,green}.json</code></td>
+</tr>
+</tbody>
+</table>
+<p>Labels: <code>dokwalt.app</code>, <code>dokwalt.stage</code>, <code>dokwalt.service</code>, <code>dokwalt.role</code>
+(<code>data</code>/<code>app</code>), <code>dokwalt.color</code> and <code>dokwalt.release</code> (stateless only),
+<code>dokwalt.oneshot=true</code> (jobs).</p>
+<h2 id="config-interpolation-and-pass-through">Config: interpolation and pass-through</h2>
+<ul>
+<li><strong>Interpolation</strong>: <code>${VAR}</code> anywhere in the compose file is resolved on
+the server. Works for every service, stateful included.</li>
+<li><strong>Pass-through</strong>: every config key is added to each <strong>stateless</strong>
+service as <code>KEY: null</code>; a config key wins over an <code>environment:</code> entry
+of the same name.</li>
+</ul>
+<p>Both read the environment of the <code>docker compose</code> process the daemon
+runs, so rendered files never contain values. Stateful services only see
+what you interpolate: <code>db</code> above uses <code>POSTGRES_PASSWORD: ${DB_PASSWORD}</code>.
+A config change recreates the database only if it changes a variable its
+definition uses. See <a class="xref" href="/docs/config/"><code>dokwalt docs config</code></a>.</p>
+<h2 id="shared-services-x-dokwalt">Shared services: <code>x-dokwalt</code></h2>
+<p>The only DokWalt-specific key, at the top level of the compose file. It lets
+an app reach another app's stateful services, typically one Postgres for
+every app on the server:</p>
+<div class="code" data-lang="yaml"><div class="code-bar"><span>yaml</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-key">x-dokwalt</span>:
+  <span class="t-key">uses</span>: [postgres]   <span class="t-com"># then connect to postgres:5432</span></code></pre></div>
+<p>Compose ignores <code>x-</code> keys, so the file still works with
+<code>docker compose up</code> locally. Details: <a class="xref" href="/docs/databases/"><code>dokwalt docs databases</code></a>.</p>
+<h2 id="checklist-things-to-fix-in-your-compose">Checklist: things to fix in your compose</h2>
+<ul>
+<li><strong>Project bind mounts</strong> (<code>./data:/data</code>): use a named volume, or <code>COPY</code>
+the files into the image.</li>
+<li><strong><code>ports:</code></strong>: harmless, removed. Expose the app with <code>domains:add</code>.</li>
+<li><strong><code>env_file:</code></strong>: run <code>dokwalt config:import .env</code> once instead.</li>
+<li><strong>Migrations in <code>command:</code></strong>: move them to a one-shot job.</li>
+<li><strong>Local-only services</strong> (mailhog, adminer): keep them in a separate
+compose file or profile you do not deploy.</li>
+<li><strong>Listen on 0.0.0.0</strong>, not <code>localhost</code>, inside the container, or Caddy
+and health checks cannot reach it.</li>
+<li><strong>arm64 images</strong> for a Raspberry Pi: check with
+<code>docker manifest inspect postgres:17 | grep arm64</code>, or add <code>build:</code>.</li>
+</ul>
+<p>See also: <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>, <a class="xref" href="/docs/config/"><code>dokwalt docs config</code></a>,
+<a class="xref" href="/docs/concepts/"><code>dokwalt docs concepts</code></a>, <a class="xref" href="/docs/domains/"><code>dokwalt docs domains</code></a>, <a class="xref" href="/docs/databases/"><code>dokwalt docs databases</code></a>,
+<a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>.</p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <a class="pager-prev" href="/docs/deploy/"><small>← Previous</small><b>Deploying</b></a>
+          <a class="pager-next" href="/docs/config/"><small>Next →</small><b>Config and secrets</b></a>
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#your-compose-file-is-the-app-definition">Your compose file is the app definition</a></li><li class="toc-2"><a href="#a-typical-app">A typical app</a></li><li class="toc-2"><a href="#one-shot-jobs-migrations-and-release-tasks">One-shot jobs: migrations and release tasks</a></li><li class="toc-2"><a href="#transformation-rules">Transformation rules</a></li><li class="toc-2"><a href="#stateful-or-stateless">Stateful or stateless</a></li><li class="toc-2"><a href="#names-on-the-server">Names on the server</a></li><li class="toc-2"><a href="#config-interpolation-and-pass-through">Config: interpolation and pass-through</a></li><li class="toc-2"><a href="#shared-services-x-dokwalt">Shared services: x-dokwalt</a></li><li class="toc-2"><a href="#checklist-things-to-fix-in-your-compose">Checklist: things to fix in your compose</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

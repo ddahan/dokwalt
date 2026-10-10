@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Backups · DokWalt docs</title>
+  <meta name="description" content="Every night, every database and DokWalt&#39;s own state go to Cloudflare R2 (or any S3 storage), off the server.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Backups</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/">Deploying</a></li><li><a href="/docs/compose/">Docker Compose apps</a></li><li><a href="/docs/config/">Config and secrets</a></li><li><a href="/docs/domains/">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/">Databases</a></li><li><a href="/docs/backups/" class="active" aria-current="page">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/">Logs</a></li><li><a href="/docs/monitoring/">Monitoring</a></li><li><a href="/docs/alerts/">Alerts</a></li><li><a href="/docs/troubleshooting/">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Data</p>
+          <h1>Backups</h1>
+          <p class="doc-lead">Every night, every database and DokWalt's own state go to Cloudflare R2 (or any S3 storage), off the server.</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs backups</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/backups.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<p>The daemon runs the backup on the server, so it works while your laptop is
+closed. Each night it makes one backup containing:</p>
+<ul>
+<li><strong>Every database of every Postgres service</strong>, of every app and stage:
+<code>pg_dump --format=custom</code>, run inside the database container. A shared
+server (<code>x-dokwalt.uses</code>) gives one dump per app database.</li>
+<li><strong>The roles of each Postgres server</strong> (<code>pg_dumpall --globals-only</code>), with
+their password hashes, so a fresh server can get the apps' roles back.</li>
+<li><strong>DokWalt's state</strong> (<code>dokwalt.db</code>): apps, domains, releases, config. Config
+values stay encrypted with <code>secret.key</code>, which is <strong>not</strong> uploaded: keep a
+copy of it somewhere safe, apart from the bucket.</li>
+</ul>
+<p>Other stateful services (Redis, MySQL, uploaded files in volumes…) aren't
+included: see <a class="xref" href="/docs/databases/"><code>dokwalt docs databases</code></a>.</p>
+<h2 id="1-create-a-bucket-and-a-token-on-cloudflare">1. Create a bucket and a token on Cloudflare</h2>
+<ol>
+<li>In the Cloudflare dashboard → <strong>R2</strong> → <strong>Create bucket</strong>, e.g. <code>backups</code>.
+Keep the default location and storage class.</li>
+<li><strong>R2</strong> → <strong>Manage API tokens</strong> → <strong>Create API token</strong>:
+<ul>
+<li>Permissions: <strong>Object Read &amp; Write</strong>.</li>
+<li>Apply to: <strong>specific bucket only</strong> → <code>backups</code>.</li>
+</ul>
+</li>
+<li>Copy the <strong>Access Key ID</strong>, the <strong>Secret Access Key</strong> and your
+<strong>Account ID</strong> (also on the R2 overview page). The secret is shown once.</li>
+</ol>
+<p>R2's free tier covers 10 GB of storage, and downloads are free.</p>
+<h2 id="2-set-up-dokwalt">2. Set up DokWalt</h2>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> backup:setup <span class="t-flag">--r2-account</span> 1a2b3c4d… <span class="t-flag">--bucket</span> backups <span class="t-flag">--access-key</span> 7f8e…
+? Secret access key: ••••••••
+<span class="t-ok">✓</span> Backups set up on pi
+
+Storage     backups/dokwalt/pi  https://1a2b3c4d….r2.cloudflarestorage.com
+Schedule    every day at 03:00 CEST · next Sun 11 Oct 03:00
+Retention   the newest backup of the last 7 days and 4 weeks
+Last run    never
+
+  Make the first one now: dokwalt backup:now</code></pre></div>
+<ul>
+<li>Setup checks the bucket by writing, listing and deleting a test object,
+and refuses settings that don't work.</li>
+<li>The secret key is asked at a prompt, or read from <code>--secret-key-stdin</code> or
+<code>DOKWALT_BACKUP_SECRET_KEY</code>, never from a flag (shell history). It's stored
+encrypted on the server, like config values, and never shown again.</li>
+<li><code>--time 04:30</code> changes the time (server local time), <code>--keep-daily</code> and
+<code>--keep-weekly</code> the retention, <code>--prefix</code> the folder in the bucket
+(default <code>dokwalt/&lt;server hostname&gt;</code>, so several servers can share a
+bucket).</li>
+<li>Run <code>backup:setup</code> again to change a setting: flags you leave out keep
+their value. A new <code>--access-key</code> asks for its secret.</li>
+<li>Other S3 providers: <code>--endpoint https://… --region …</code> instead of
+<code>--r2-account</code> (AWS S3, Backblaze B2, MinIO…).</li>
+<li><code>dokwalt backup:disable</code> stops the nightly run and forgets the settings.
+Backups already in the bucket stay.</li>
+</ul>
+<h2 id="schedule-failures-and-retention">Schedule, failures and retention</h2>
+<ul>
+<li><strong>Once a day</strong>, at the set time. A server that was off at that time
+catches up when it comes back, the same day. A failed run isn't retried:
+you get a <strong>&quot;Backup failed&quot; alert</strong> (see <a class="xref" href="/docs/alerts/"><code>dokwalt docs alerts</code></a>), and a
+&quot;resolved&quot; one after the next good backup. <code>dokwalt backup:now</code> retries
+right away.</li>
+<li><strong>Incomplete backups.</strong> When one database can't be dumped (a stopped
+service, an error), the others are still uploaded, and the backup is
+marked incomplete. Stopped stages (<code>dokwalt stop</code>) are skipped on purpose.</li>
+<li><strong>Retention</strong> runs after each complete backup: DokWalt keeps the newest
+backup of each of the last 7 days that have one, and of each of the last 4
+weeks (the two overlap), and deletes the others. An incomplete backup
+never deletes anything, so a run of bad nights can't remove your good
+backups. Interrupted uploads are removed after a day.</li>
+<li><strong>One dump at a time</strong> is written to the server's disk
+(<code>/var/lib/dokwalt/backup-tmp</code>) and deleted once uploaded, so the server
+needs free space for its largest database, not for all of them.</li>
+</ul>
+<h2 id="see-whats-there">See what's there</h2>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> backups
+…
+ID                 STARTED           TRIGGER    SIZE     FILES  STATUS
+20261011T010000Z   Sun 11 Oct 03:00  schedule   18.2 MB  6      complete
+20261010T143012Z   Sat 10 Oct 16:30  manual     18.1 MB  6      complete
+
+<span class="t-com">$</span> <span class="t-cmd">dokwalt</span> backups latest
+FILE                                 CONTENT            FROM                    SIZE
+dokwalt.db                           DokWalt state                              412 kB
+postgres-production-db/globals.sql   roles              postgres/production db  2.1 kB
+postgres-production-db/blog.dump     database blog      postgres/production db  9.8 MB
+…</code></pre></div>
+<p>IDs are the start time in UTC. <code>latest</code> means the newest backup.
+<code>dokwalt server info</code> shows the last run too.</p>
+<h2 id="download">Download</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> backup:download latest                                     <span class="t-com"># the whole backup, in &lt;host&gt;-&lt;id&gt;/</span>
+<span class="t-cmd">dokwalt</span> backup:download latest postgres-production-db/blog.dump    <span class="t-com"># one file, here</span></code></pre></div>
+<p>Files come through the server (the bucket's credentials stay there) and are
+checked against the checksum recorded at backup time. A dump restores
+anywhere with <code>pg_restore</code>.</p>
+<h2 id="restore-a-database">Restore a database</h2>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> backup:restore latest <span class="t-flag">--database</span> blog
+! This replaces database blog in postgres/production (service db) with its copy from 20261011T010000Z (Sun 11 Oct 03:00).
+  Type blog to confirm: blog
+<span class="t-ok">✓</span> Restored postgres-production-db/blog.dump from backup 20261011T010000Z</code></pre></div>
+<ul>
+<li>The server downloads the dump, checks its checksum, and runs <code>pg_restore</code>
+in the service it came from, as that server's superuser: objects are
+replaced (<code>--clean --if-exists</code>) and get back their original owner. A
+database that no longer exists is created.</li>
+<li>The app keeps running during the restore. If it writes a lot, stop it
+first (<code>dokwalt stop -a blog</code>, then <code>dokwalt start -a blog</code>).</li>
+<li>Pass a file path instead of <code>--database</code> when several services have a
+database with the same name. <code>--confirm &lt;database&gt;</code> skips the question
+(scripts).</li>
+</ul>
+<h2 id="rebuild-a-lost-server">Rebuild a lost server</h2>
+<ol>
+<li>Prepare the new server and run <code>dokwalt server init</code> (<a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a> or <a class="xref" href="/docs/vps/"><code>dokwalt docs vps</code></a>).</li>
+<li>Point the new server at the old backups:
+<code>dokwalt backup:setup … --prefix dokwalt/&lt;old hostname&gt;</code>, then
+<code>dokwalt backup:download latest dokwalt.db</code> (or download it from the R2
+dashboard).</li>
+<li>Restore DokWalt's state: copy <code>dokwalt.db</code> and your copy of <code>secret.key</code>
+to the server, then <code>sudo systemctl stop dokwalt</code>, put both in
+<code>/var/lib/dokwalt/</code> (owned by root, mode 0600; delete any
+<code>dokwalt.db-wal</code> and <code>dokwalt.db-shm</code> there), and
+<code>sudo systemctl start dokwalt</code>. Every app, domain and config var is back,
+and so are the backup settings.</li>
+<li><code>dokwalt deploy</code> from each app folder (images aren't in the backup),
+providers like the shared Postgres first.</li>
+<li>For each Postgres server: <code>dokwalt backup:restore &lt;id&gt; &lt;dir&gt;/globals.sql</code>
+(roles first), then each database with <code>--database</code>.</li>
+</ol>
+<p>See also: <a class="xref" href="/docs/databases/"><code>dokwalt docs databases</code></a>, <a class="xref" href="/docs/alerts/"><code>dokwalt docs alerts</code></a>, <a class="xref" href="/docs/security/"><code>dokwalt docs security</code></a></p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <a class="pager-prev" href="/docs/databases/"><small>← Previous</small><b>Databases</b></a>
+          <a class="pager-next" href="/docs/logs/"><small>Next →</small><b>Logs</b></a>
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#1-create-a-bucket-and-a-token-on-cloudflare">1. Create a bucket and a token on Cloudflare</a></li><li class="toc-2"><a href="#2-set-up-dokwalt">2. Set up DokWalt</a></li><li class="toc-2"><a href="#schedule-failures-and-retention">Schedule, failures and retention</a></li><li class="toc-2"><a href="#see-whats-there">See what&#39;s there</a></li><li class="toc-2"><a href="#download">Download</a></li><li class="toc-2"><a href="#restore-a-database">Restore a database</a></li><li class="toc-2"><a href="#rebuild-a-lost-server">Rebuild a lost server</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

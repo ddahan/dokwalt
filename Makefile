@@ -2,7 +2,7 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 LDFLAGS := -s -w -X github.com/ddahan/dokwalt/internal/cli.Build=$(VERSION)
 GO      := CGO_ENABLED=0 go
 
-.PHONY: build dist test e2e lint clean
+.PHONY: build dist test e2e lint clean docs-site
 
 # CLI for this machine + server binaries next to it (used by `server init`).
 build:
@@ -21,6 +21,11 @@ dist:
 
 test:
 	go test ./...
+
+# Website docs (site/docs) from internal/docs/topics, for the latest release tag.
+# `make test` fails while they are out of date.
+docs-site:
+	go run ./internal/docs/sitegen -out site/docs
 
 lint:
 	go vet ./...

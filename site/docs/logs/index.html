@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Logs · DokWalt docs</title>
+  <meta name="description" content="Stream, filter and search your app&#39;s logs from the Mac, and know where every other log lives.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Logs</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/">Deploying</a></li><li><a href="/docs/compose/">Docker Compose apps</a></li><li><a href="/docs/config/">Config and secrets</a></li><li><a href="/docs/domains/">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/">Databases</a></li><li><a href="/docs/backups/">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/" class="active" aria-current="page">Logs</a></li><li><a href="/docs/monitoring/">Monitoring</a></li><li><a href="/docs/alerts/">Alerts</a></li><li><a href="/docs/troubleshooting/">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Operate</p>
+          <h1>Logs</h1>
+          <p class="doc-lead">Stream, filter and search your app's logs from the Mac, and know where every other log lives.</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs logs</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/logs.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<p>Your services log to stdout/stderr (12-factor). DokWalt reads container logs
+through the Docker API on the server and streams them to your terminal,
+merged across all services of the app stage.</p>
+<h2 id="basics">Basics</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> logs              <span class="t-com"># last 100 lines, all services, merged by time</span>
+<span class="t-cmd">dokwalt</span> logs <span class="t-flag">-f</span>           <span class="t-com"># then keep following (Ctrl+C to stop)</span>
+<span class="t-cmd">dokwalt</span> logs <span class="t-flag">-a</span> blog <span class="t-flag">-f</span>   <span class="t-com"># outside a linked folder</span></code></pre></div>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> logs <span class="t-flag">-f</span>
+10:42:01 web    │ GET /posts/hello 200 12ms
+10:42:02 web.2  │ GET /feed.xml 200 4ms
+10:42:05 worker │ sent newsletter batch 3/10
+10:42:07 db     │ LOG:  checkpoint complete: wrote 42 buffers
+10:42:09 web    │ GET /admin 302 1ms</code></pre></div>
+<p>Each line shows the local time, the service (<code>web.2</code> for the second
+replica) and the line. Each service gets its own color, stable across runs.
+Colors are dropped when output isn't a terminal (pipes, files).</p>
+<p><strong>Which containers</strong>: without <code>-f</code>, the stage's active containers (the
+data project and the live color). With <code>-f</code>, DokWalt also attaches to new
+containers as they appear, so during a deploy you see the new color start.</p>
+<h2 id="flags">Flags</h2>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-f, --follow</code></td>
+<td>keep streaming new lines</td>
+</tr>
+<tr>
+<td><code>--service &lt;svc&gt;</code></td>
+<td>only this service</td>
+</tr>
+<tr>
+<td><code>--grep &lt;text&gt;</code></td>
+<td>only lines containing the text (case-insensitive)</td>
+</tr>
+<tr>
+<td><code>-n, --lines &lt;n&gt;</code></td>
+<td>number of past lines, across all services (default 100)</td>
+</tr>
+<tr>
+<td><code>--since &lt;duration&gt;</code></td>
+<td>every line since that long ago, e.g. <code>30m</code>, <code>2h</code>, <code>36h</code></td>
+</tr>
+<tr>
+<td><code>-s staging</code></td>
+<td>the staging stage (pipeline apps only)</td>
+</tr>
+<tr>
+<td><code>--json</code></td>
+<td>one JSON object per line (NDJSON)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>--grep</code> is a plain <strong>substring</strong>, not a regex, matched case-insensitively
+on the server, so filtered-out lines never cross the network. Matches are
+highlighted.</li>
+<li><code>--since</code> takes a <strong>duration</strong> only: <code>s</code>, <code>m</code>, <code>h</code> units, combinable
+(<code>1h30m</code>). No dates or RFC3339 timestamps, and no <code>d</code> unit: use <code>48h</code>.
+With <code>--since</code>, all lines in that window are shown and <code>-n</code> is ignored.</li>
+</ul>
+<h2 id="examples">Examples</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># only the web service, following</span>
+<span class="t-cmd">dokwalt</span> logs <span class="t-flag">--service</span> web <span class="t-flag">-f</span>
+
+<span class="t-com"># errors in the last 2 hours (matches error, Error, ERROR…)</span>
+<span class="t-cmd">dokwalt</span> logs <span class="t-flag">--since</span> 2h <span class="t-flag">--grep</span> error
+
+<span class="t-com"># a longer history for the worker</span>
+<span class="t-cmd">dokwalt</span> logs <span class="t-flag">--service</span> worker <span class="t-flag">-n</span> 1000
+
+<span class="t-com"># staging, following 5xx responses</span>
+<span class="t-cmd">dokwalt</span> logs <span class="t-flag">-s</span> staging <span class="t-flag">--service</span> web <span class="t-flag">--grep</span> <span class="t-str">&#34; 50&#34;</span> <span class="t-flag">-f</span>
+
+<span class="t-com"># regex or counting: pipe into local tools</span>
+<span class="t-cmd">dokwalt</span> logs <span class="t-flag">--since</span> 168h <span class="t-flag">--service</span> web | <span class="t-cmd">grep</span> <span class="t-flag">-cE</span> <span class="t-str">&#34;POST /(login|signup)&#34;</span></code></pre></div>
+<h2 id="json-output">JSON output</h2>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> logs <span class="t-flag">--service</span> web <span class="t-flag">-n</span> 2 <span class="t-flag">--json</span>
+{&#34;time&#34;:&#34;2026-09-27T10:42:01Z&#34;,&#34;service&#34;:&#34;web&#34;,&#34;replica&#34;:1,&#34;stream&#34;:&#34;stdout&#34;,&#34;line&#34;:&#34;GET /posts/hello 200 12ms&#34;}
+{&#34;time&#34;:&#34;2026-09-27T10:42:02Z&#34;,&#34;service&#34;:&#34;web&#34;,&#34;replica&#34;:2,&#34;stream&#34;:&#34;stdout&#34;,&#34;line&#34;:&#34;GET /feed.xml 200 4ms&#34;}</code></pre></div>
+<p>Pipe it into <code>jq</code>:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> logs <span class="t-flag">--since</span> 1h <span class="t-flag">--json</span> | <span class="t-cmd">jq</span> <span class="t-flag">-r</span> <span class="t-str">&#39;select(.stream==&#34;stderr&#34;) | .line&#39;</span></code></pre></div>
+<h2 id="deploy-logs">Deploy logs</h2>
+<p><code>dokwalt deploy</code> streams its progress live: the local build, the image
+upload, then each step on the server.</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-m</span> <span class="t-str">&#34;fix feed&#34;</span>
+<span class="t-cmd">◆</span> Deploying blog  to pi (linux/arm64)
+<span class="t-ok">✓</span> Built migrate, web for linux/arm64
+<span class="t-ok">✓</span> Uploaded 16.6 MiB in 0.6s
+<span class="t-ok">✓</span> Services — db: keeps its data (named volume pgdata), migrate: runs once per deploy, web: zero-downtime swap
+<span class="t-ok">✓</span> Created release v14
+<span class="t-ok">✓</span> Stateful services unchanged
+<span class="t-ok">✓</span> Starting v14 next to the current version · containers running
+<span class="t-ok">✓</span> web is healthy
+<span class="t-ok">✓</span> v14 is live
+<span class="t-ok">✓</span> Previous version stops in 10s (in-flight requests finish)
+<span class="t-ok">✓</span> blog is live at https://blog.example.com</code></pre></div>
+<p>When a deploy fails, the last 30 log lines of the failing container are
+streamed (<code>Last log lines of &lt;svc&gt;:</code>), and the error is kept on the release
+(<code>dokwalt releases</code>). <code>promote</code> and <code>rollback</code> stream the same way. Without
+a terminal the steps print as plain lines. If you close the laptop after
+the upload, the deploy continues on the server.</p>
+<h2 id="rotation-and-retention">Rotation and retention</h2>
+<ul>
+<li>DokWalt sets the Docker <code>local</code> log driver with <strong>10 MB × 3 files per
+container</strong>, unless the service defines its own <code>logging:</code> in compose.</li>
+<li>A container's logs live as long as the container. After a deploy the
+previous color's containers are removed, and their logs with them.
+Stateful services keep their logs across deploys unless their definition
+changes and the container is recreated.</li>
+<li>To keep logs longer, ship them from your app to an external service.</li>
+</ul>
+<h2 id="other-logs">Other logs</h2>
+<p><strong>HTTP access logs.</strong> Caddy sends its access and TLS logs to a Unix socket
+read by the DokWalt daemon. Nothing is written to disk. The daemon turns
+them into per-host, per-minute metrics: requests, status classes and
+latency percentiles. Individual requests aren't stored: see
+<code>dokwalt metrics</code> and <a class="xref" href="/docs/monitoring/"><code>dokwalt docs monitoring</code></a>. Log requests in your app
+if you need each one.</p>
+<p><strong>Caddy errors</strong> (certificates, config loads), on the server:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">ssh</span> pi.home docker logs <span class="t-flag">--since</span> 1h dokwalt-caddy</code></pre></div>
+<p><strong>The DokWalt daemon</strong> runs under systemd, so its log is in the journal:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">ssh</span> pi.home journalctl <span class="t-flag">-u</span> dokwalt <span class="t-flag">-f</span>
+<span class="t-cmd">ssh</span> pi.home journalctl <span class="t-flag">-u</span> dokwalt <span class="t-flag">--since</span> <span class="t-str">&#34;1 hour ago&#34;</span>
+<span class="t-cmd">ssh</span> pi.home journalctl <span class="t-flag">-u</span> dokwalt <span class="t-flag">-b</span>     <span class="t-com"># since the last boot</span></code></pre></div>
+<p>The daemon logs reconciliation (what it repaired after a reboot), deploy
+steps, pruned images, alerts (also when no channel is configured), failed
+alert deliveries and errors.</p>
+<h2 id="debugging-a-crashing-service">Debugging a crashing service</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> ps                                     <span class="t-com"># state, health, restarts</span>
+<span class="t-cmd">dokwalt</span> logs <span class="t-flag">--service</span> worker <span class="t-flag">--since</span> 15m      <span class="t-com"># what happened before it died</span>
+<span class="t-cmd">dokwalt</span> doctor                                 <span class="t-com"># stage status, disk, memory</span></code></pre></div>
+<p>See also: <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>, <a class="xref" href="/docs/monitoring/"><code>dokwalt docs monitoring</code></a>,
+<a class="xref" href="/docs/troubleshooting/"><code>dokwalt docs troubleshooting</code></a>, <a class="xref" href="/docs/reboot-recovery/"><code>dokwalt docs reboot-recovery</code></a></p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <a class="pager-prev" href="/docs/backups/"><small>← Previous</small><b>Backups</b></a>
+          <a class="pager-next" href="/docs/monitoring/"><small>Next →</small><b>Monitoring</b></a>
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#basics">Basics</a></li><li class="toc-2"><a href="#flags">Flags</a></li><li class="toc-2"><a href="#examples">Examples</a></li><li class="toc-2"><a href="#json-output">JSON output</a></li><li class="toc-2"><a href="#deploy-logs">Deploy logs</a></li><li class="toc-2"><a href="#rotation-and-retention">Rotation and retention</a></li><li class="toc-2"><a href="#other-logs">Other logs</a></li><li class="toc-2"><a href="#debugging-a-crashing-service">Debugging a crashing service</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

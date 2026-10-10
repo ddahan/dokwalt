@@ -57,7 +57,8 @@ a container crash-loops, a certificate can't be issued, or the disk, memory or C
 temperature crosses your threshold — and another one when it's resolved.
 
 🖥️ **Gorgeous CLI & dashboard** — live progress, colors, and a full-screen dashboard
-(just type `dokwalt`). Built-in docs with `dokwalt docs`.
+(just type `dokwalt`). Built-in docs with `dokwalt docs`, also
+[online](https://dokwalt.w3lt.org/docs/).
 
 🪶 **Small & private** — no web UI, no Swarm/Kubernetes, no Redis. SQLite for state,
 ~27 MB of RAM. Nothing exposed: you talk to the server over SSH, and only the proxy
@@ -228,6 +229,7 @@ make build   # bin/dokwalt + linux server binaries (used by `server init`)
 make test    # unit tests
 make e2e     # full end-to-end run against a throwaway systemd + Docker server container
 make dist    # release binaries + checksums
+make docs-site  # website docs (site/docs) from internal/docs/topics
 ```
 
 The e2e suite installs DokWalt on a privileged Debian container and checks deploys
