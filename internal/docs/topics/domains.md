@@ -63,10 +63,17 @@ the domain actually reaches this server and tells you.
 ### The reachability check
 
 The daemon fetches
-`http://<domain>/.well-known/dokwalt-check/probe` (6 s timeout). Caddy
+`http://<domain>/.well-known/dokwalt-check/probe` (8 s timeout). Caddy
 answers that path on port 80 for any host with the server's own check
 token. Getting the token back proves that DNS, your router or provider
 firewall, and Caddy are all right, so the certificate request will succeed.
+
+The domain is resolved through **public resolvers** (1.1.1.1, then 8.8.8.8),
+like Let's Encrypt and your visitors see it. The server's own resolver would
+cache "no such name" for a while when you run `domains:add` before creating
+the record, and keep reporting it after the record is live. If no public
+resolver answers (outbound DNS blocked, or a name that only exists on your
+network), the check uses the server's resolver.
 
 ```text
 $ dokwalt domains:add blog.example.com --service web --port 3000

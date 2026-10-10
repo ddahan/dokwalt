@@ -1183,8 +1183,9 @@ Then, for each **public stateless** service (it has a non-redirect domain), each
 3. **D** applies routes. The new host gets a Let's Encrypt certificate, or an internal-CA one for local names (§11.2).
 4. **D** runs the reachability check and returns it with the domain:
    - Local names → `ok (local name, internal certificate)`.
-   - Otherwise `GET http://<host>/.well-known/dokwalt-check/probe` (6 s timeout). If the body equals the server's `check_token`, served by Caddy on `:80` for any host → `ok`.
-   - Otherwise a DNS lookup explains: no record → "create an A/AAAA record"; a record → "DNS points to <ips> but this server's proxy didn't answer on port 80 — check IP, firewall, port forwarding (or hairpin NAT)".
+   - Otherwise `GET http://<host>/.well-known/dokwalt-check/probe` (8 s timeout). If the body equals the server's `check_token`, served by Caddy on `:80` for any host → `ok`.
+   - Names are resolved through public resolvers (`1.1.1.1`, then `8.8.8.8`, queried directly, 2 s each), then the system resolver if none returns an address. Reason: the system resolver caches negative answers for the zone's SOA minimum, so a record created after `domains:add` stayed reported as missing long after it was live. The fallback keeps LAN-only names and hosts that block outbound DNS working.
+   - Otherwise a DNS lookup (same resolution) explains: no record → "create an A/AAAA record"; a record → "DNS points to <ips> but this server's proxy didn't answer on port 80 — check IP, firewall, port forwarding (or hairpin NAT)".
 5. **CLI** prints the target and the result; a failed check is a warning, and the domain stays configured. Caddy keeps retrying certificate issuance on its own schedule.
 
 `dokwalt domains` re-runs the check for every domain.

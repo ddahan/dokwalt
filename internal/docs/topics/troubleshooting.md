@@ -135,6 +135,8 @@ curl -I http://blog.example.com        # from a phone on mobile data, not home W
 ```
 
 - `no DNS record yet`: create the A (and/or AAAA) record, then check again with `dokwalt domains`.
+  The check asks public resolvers (1.1.1.1, 8.8.8.8), so a new record shows up within
+  seconds. If your own machine still can't open the site, flush its DNS cache.
 - `DNS points to … but this server's proxy didn't answer on port 80`: wrong IP, or ports
   80/443 not forwarded (home) or blocked (VPS firewall). Port 80 is required for HTTP-01.
 - A broken AAAA record: Let's Encrypt prefers IPv6. Fix it or delete it.

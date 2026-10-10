@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -20,14 +19,19 @@ import (
 
 // checkDomain proves end to end that the domain reaches this server's proxy
 // by fetching a token Caddy serves over plain HTTP. Falls back to DNS to
-// explain what's wrong.
+// explain what's wrong. Names are resolved through public resolvers first
+// (lookupHost), so a record created a minute ago is seen even when the
+// server's resolver still caches "no such name".
 func (d *Daemon) checkDomain(ctx context.Context, host string) string {
 	if proxy.IsLocalName(host) {
 		return "ok (local name, internal certificate)"
 	}
-	ctx, cancel := context.WithTimeout(ctx, 6*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 8*time.Second)
 	defer cancel()
-	client := &http.Client{CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+	client := &http.Client{
+		Transport:     &http.Transport{DialContext: dialResolved, DisableKeepAlives: true},
+		CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
+	}
 	req, _ := http.NewRequestWithContext(ctx, "GET", "http://"+host+proxy.CheckPrefix+"probe", nil)
 	if resp, err := client.Do(req); err == nil {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 256))
@@ -36,7 +40,7 @@ func (d *Daemon) checkDomain(ctx context.Context, host string) string {
 			return "ok"
 		}
 	}
-	ips, err := net.DefaultResolver.LookupHost(ctx, host)
+	ips, err := lookupHost(ctx, host)
 	if err != nil || len(ips) == 0 {
 		return "no DNS record yet — create an A (and/or AAAA) record pointing to this server"
 	}
