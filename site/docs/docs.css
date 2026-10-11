@@ -41,13 +41,7 @@ kbd {
 .docs-main article { max-width: 780px; }
 
 /* Sidebar */
-.side-home {
-  display: flex; align-items: center; justify-content: space-between; padding: 9px 12px;
-  border-radius: 10px; border: 1px solid var(--line); background: var(--ghost);
-  font-size: 14px; font-weight: 550; color: var(--muted); transition: border-color .2s, color .2s;
-}
-.side-home:hover, .side-home.active { color: var(--text); border-color: rgba(167,139,250,.4); }
-.ver { font: 500 11.5px var(--mono); color: var(--violet-2); background: rgba(167,139,250,.12); padding: 2px 8px; border-radius: 999px; }
+.side-group:first-child { margin-top: 0; }
 .side-group { margin: 26px 0 8px; font: 500 11.5px var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--faint); }
 .side-nav ul { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--line); }
 .side-nav li a {
@@ -154,6 +148,13 @@ kbd {
 .t-num { color: var(--tk-num); }
 .t-ok { color: var(--tk-str); }
 .t-err { color: var(--tk-err); }
+
+/* Diagrams (inline SVG from internal/docs/sitegen/diagrams): theme colors, scroll on narrow screens. */
+.diagram {
+  margin: 10px 0 30px; padding: 20px; border-radius: 16px; overflow-x: auto;
+  background: var(--card-bg); border: 1px solid var(--line); box-shadow: var(--card-shadow);
+}
+.diagram svg { display: block; width: 100%; min-width: 640px; height: auto; }
 
 /* Previous / next */
 .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 72px; }

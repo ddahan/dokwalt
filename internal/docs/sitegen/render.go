@@ -21,6 +21,14 @@ import (
 //go:embed templates.html
 var templatesFS embed.FS
 
+// Diagrams replace text diagrams on the website. A topic marks one with an info string,
+// ```text diagram=architecture```: the terminal shows the text, the page this SVG, inlined so
+// it follows the page's theme colors (CSS variables). Prefix every class inside an SVG with
+// "dg-": page styles such as .card or .chip would otherwise restyle, even move, its shapes.
+//
+//go:embed diagrams/*.svg
+var diagramsFS embed.FS
+
 var tmpl = template.Must(template.New("").Funcs(template.FuncMap{
 	"inc": func(i int) int { return i + 1 },
 }).ParseFS(templatesFS, "templates.html"))
@@ -241,6 +249,18 @@ func (r *codeRenderer) block(w util.BufWriter, src []byte, n ast.Node, entering 
 	lang := ""
 	if f, ok := n.(*ast.FencedCodeBlock); ok {
 		lang = string(f.Language(src))
+		if f.Info != nil {
+			for _, field := range strings.Fields(string(f.Info.Segment.Value(src))) {
+				if name, ok := strings.CutPrefix(field, "diagram="); ok {
+					svg, err := diagramsFS.ReadFile("diagrams/" + name + ".svg")
+					if err != nil {
+						return ast.WalkStop, fmt.Errorf("unknown diagram %q: add internal/docs/sitegen/diagrams/%s.svg", name, name)
+					}
+					fmt.Fprintf(w, "<figure class=\"diagram\">\n%s</figure>\n", svg)
+					return ast.WalkSkipChildren, nil
+				}
+			}
+		}
 	}
 	var lines []string
 	l := n.Lines()

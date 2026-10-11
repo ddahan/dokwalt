@@ -1,0 +1,117 @@
+<svg class="dg" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dg-arch-title dg-arch-desc">
+  <title id="dg-arch-title">DokWalt architecture</title>
+  <desc id="dg-arch-desc">Your computer runs the dokwalt CLI and builds images with Docker. One SSH connection carries images, API calls, logs and tunnels to the server, where dokwalt dial-stdio forwards them to the dokwalt daemon over a Unix socket. The daemon keeps its state in SQLite and drives Docker. Visitors reach dokwalt-caddy on ports 80 and 443, which routes to each app on its own private network.</desc>
+  <style>
+    .dg text { font-family: var(--sans); }
+    .dg .dg-mono { font-family: var(--mono); }
+    .dg .dg-label { font: 500 12.5px var(--mono); letter-spacing: .08em; fill: var(--faint); }
+    .dg .dg-t { font-size: 16px; font-weight: 600; fill: var(--text); }
+    .dg .dg-m { font-size: 15px; font-weight: 500; fill: var(--text); }
+    .dg .dg-s { font-size: 13px; fill: var(--muted); }
+    .dg .dg-sm { font-size: 12.5px; fill: var(--muted); }
+    .dg .dg-card { fill: var(--panel); stroke: var(--line-2); }
+    .dg .dg-row { fill: var(--hover); stroke: var(--line); }
+    .dg .dg-server { fill: var(--violet); fill-opacity: .04; stroke: var(--line-2); }
+    .dg .dg-node { fill: var(--panel); stroke: var(--line-2); }
+    .dg .dg-accent { fill: var(--panel); stroke: var(--violet); stroke-width: 1.5; filter: drop-shadow(0 0 10px rgba(167,139,250,.35)); }
+    .dg .dg-caddy { fill: var(--panel); stroke: var(--green); stroke-width: 1.5; }
+    .dg .dg-docker { fill: var(--blue); fill-opacity: .04; stroke: var(--blue); stroke-opacity: .4; stroke-dasharray: 5 5; }
+    .dg .dg-net { fill: var(--panel); stroke: var(--blue); stroke-opacity: .45; }
+    .dg .dg-store { fill: var(--panel); stroke: var(--line-2); }
+    .dg .dg-chip { fill: var(--blue); fill-opacity: .13; }
+    .dg .dg-chip-t { font-size: 12.5px; fill: var(--blue); }
+    .dg .dg-chip-data { fill: var(--green); fill-opacity: .14; }
+    .dg .dg-chip-data-t { font-size: 12.5px; fill: var(--green); }
+    .dg .dg-line { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+    .dg .dg-ssh { fill: none; stroke: var(--violet); stroke-width: 2; }
+    .dg .dg-web { fill: none; stroke: var(--green); stroke-width: 2; }
+    .dg .dg-flow { stroke-dasharray: 6 6; animation: dg-dash 1.2s linear infinite; }
+    .dg .dg-head-muted { fill: var(--muted); }
+    .dg .dg-head-violet { fill: var(--violet); }
+    .dg .dg-head-green { fill: var(--green); }
+    .dg .dg-icon { fill: none; stroke: var(--green); stroke-width: 1.6; }
+    @keyframes dg-dash { to { stroke-dashoffset: -12; } }
+    @media (prefers-reduced-motion: reduce) { .dg .dg-flow { animation: none; } }
+  </style>
+  <defs>
+    <marker id="dg-arch-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-muted" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="dg-arch-violet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-violet" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="dg-arch-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-green" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <!-- Your computer -->
+  <text class="dg-label" x="22" y="34">YOUR COMPUTER</text>
+  <rect class="dg-card" x="20" y="48" width="250" height="196" rx="14"/>
+  <rect class="dg-row" x="36" y="64" width="218" height="46" rx="10"/>
+  <text class="dg-m dg-mono" x="50" y="84">dokwalt</text>
+  <text class="dg-s" x="50" y="101">commands · live dashboard</text>
+  <rect class="dg-row" x="36" y="120" width="218" height="46" rx="10"/>
+  <text class="dg-t" x="50" y="140">Docker</text>
+  <text class="dg-s" x="50" y="157">builds images for the server</text>
+  <rect class="dg-row" x="36" y="176" width="218" height="46" rx="10"/>
+  <text class="dg-m dg-mono" x="50" y="196">~/.config/dokwalt</text>
+  <text class="dg-s" x="50" y="213">servers · folder links</text>
+
+  <!-- The SSH link -->
+  <path class="dg-ssh dg-flow" d="M272 110 H 428" marker-start="url(#dg-arch-violet)" marker-end="url(#dg-arch-violet)"/>
+  <text class="dg-t" x="350" y="96" text-anchor="middle" style="font-size: 14px">one SSH connection</text>
+  <text class="dg-s" x="350" y="131" text-anchor="middle">images · API</text>
+  <text class="dg-s" x="350" y="148" text-anchor="middle">logs · tunnels</text>
+
+  <!-- Server -->
+  <text class="dg-label" x="402" y="34">SERVER · A VPS OR YOUR OWN MACHINE</text>
+  <rect class="dg-server" x="400" y="48" width="540" height="470" rx="18"/>
+
+  <rect class="dg-node" x="430" y="86" width="250" height="48" rx="10"/>
+  <text class="dg-m dg-mono" x="446" y="115">dokwalt dial-stdio</text>
+
+  <path class="dg-line" d="M555 134 V 174" marker-end="url(#dg-arch-muted)"/>
+  <text class="dg-sm dg-mono" x="566" y="159">/run/dokwalt/dokwalt.sock</text>
+
+  <rect class="dg-accent" x="430" y="178" width="250" height="62" rx="10"/>
+  <text class="dg-t" x="446" y="203">dokwalt daemon (systemd)</text>
+  <text class="dg-s" x="446" y="224">reconciler · metrics · alerts</text>
+
+  <path class="dg-line" d="M682 209 H 738" marker-start="url(#dg-arch-muted)" marker-end="url(#dg-arch-muted)"/>
+  <path class="dg-store" d="M740 186 a80 12 0 0 1 160 0 v46 a80 12 0 0 1 -160 0 z"/>
+  <path class="dg-store" d="M740 186 a80 12 0 0 0 160 0"/>
+  <text class="dg-m dg-mono" x="820" y="218" text-anchor="middle">dokwalt.db</text>
+  <text class="dg-s" x="820" y="236" text-anchor="middle">SQLite state</text>
+
+  <path class="dg-line" d="M555 240 V 298" marker-end="url(#dg-arch-muted)"/>
+  <text class="dg-sm dg-mono" x="566" y="274">Docker Engine API</text>
+
+  <!-- Docker -->
+  <rect class="dg-docker" x="420" y="302" width="500" height="196" rx="14"/>
+  <text class="dg-label" x="436" y="324">DOCKER</text>
+
+  <rect class="dg-caddy" x="440" y="356" width="170" height="64" rx="10"/>
+  <text class="dg-m dg-mono" x="456" y="382">dokwalt-caddy</text>
+  <text class="dg-s" x="456" y="403">HTTPS · Let's Encrypt</text>
+  <text class="dg-s" x="440" y="482">only Caddy is public</text>
+
+  <path class="dg-line" d="M612 388 C 646 388, 646 365, 678 365" marker-end="url(#dg-arch-muted)"/>
+  <path class="dg-line" d="M612 388 C 646 388, 646 449, 678 449" marker-end="url(#dg-arch-muted)"/>
+
+  <rect class="dg-net" x="680" y="330" width="220" height="70" rx="10"/>
+  <text class="dg-m dg-mono" x="696" y="352">dw-blog-production</text>
+  <rect class="dg-chip" x="696" y="364" width="44" height="22" rx="11"/><text class="dg-chip-t dg-mono" x="718" y="379" text-anchor="middle">web</text>
+  <rect class="dg-chip" x="746" y="364" width="62" height="22" rx="11"/><text class="dg-chip-t dg-mono" x="777" y="379" text-anchor="middle">worker</text>
+  <rect class="dg-chip-data" x="814" y="364" width="34" height="22" rx="11"/><text class="dg-chip-data-t dg-mono" x="831" y="379" text-anchor="middle">db</text>
+
+  <rect class="dg-net" x="680" y="414" width="220" height="70" rx="10"/>
+  <text class="dg-m dg-mono" x="696" y="436">dw-shop-production</text>
+  <rect class="dg-chip" x="696" y="448" width="44" height="22" rx="11"/><text class="dg-chip-t dg-mono" x="718" y="463" text-anchor="middle">web</text>
+  <rect class="dg-chip-data" x="746" y="448" width="54" height="22" rx="11"/><text class="dg-chip-data-t dg-mono" x="773" y="463" text-anchor="middle">redis</text>
+
+  <!-- Visitors -->
+  <rect class="dg-node" x="40" y="356" width="200" height="64" rx="32"/>
+  <circle class="dg-icon" cx="76" cy="388" r="12"/>
+  <path class="dg-icon" d="M64 388 H 88 M76 376 C 70 382, 70 394, 76 400 M76 376 C 82 382, 82 394, 76 400"/>
+  <text class="dg-t" x="98" y="384">Visitors</text>
+  <text class="dg-s" x="98" y="404">the internet</text>
+
+  <path class="dg-web dg-flow" d="M242 388 H 438" marker-end="url(#dg-arch-green)"/>
+  <text class="dg-m dg-mono" x="330" y="376" text-anchor="middle">80 / 443</text>
+  <text class="dg-s" x="330" y="408" text-anchor="middle">HTTPS</text>
+</svg>

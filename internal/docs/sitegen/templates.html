@@ -51,9 +51,6 @@
 
 {{define "sidebar"}}
   <nav class="side-nav" aria-label="Documentation">
-    <a class="side-home{{if not $.Page}} active{{end}}" href="/docs/">
-      <span>Overview</span><span class="ver">{{$.Version}}</span>
-    </a>
     {{range .Groups}}
       <p class="side-group">{{.Title}}</p>
       <ul>

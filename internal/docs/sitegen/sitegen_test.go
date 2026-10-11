@@ -58,6 +58,21 @@ func TestShellHighlight(t *testing.T) {
 	}
 }
 
+func TestDiagram(t *testing.T) {
+	src := "# T\n\n*S.*\n\n```text diagram=architecture\n+--+\n```\n"
+	p, err := renderTopic("t", []byte(src), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := string(p.Body)
+	if !strings.Contains(body, `<figure class="diagram">`) || strings.Contains(body, "+--+") {
+		t.Errorf("text diagram not replaced by its SVG:\n%.300s", body)
+	}
+	if _, err := renderTopic("t", []byte(strings.Replace(src, "architecture", "nope", 1)), nil); err == nil {
+		t.Error("an unknown diagram must fail generation")
+	}
+}
+
 func TestTopicPage(t *testing.T) {
 	src := "# Deploying\n\n*How `dokwalt deploy` works.*\n\n## Usage\n\nSee `dokwalt docs config` and `dokwalt docs deploy`.\n\n```bash\ndokwalt deploy\n```\n"
 	p, err := renderTopic("deploy", []byte(src), map[string]bool{"deploy": true, "config": true})

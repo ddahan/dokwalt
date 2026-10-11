@@ -4,7 +4,7 @@
 
 ## Architecture
 
-```text
+```text diagram=architecture
  Your computer                          Server (a VPS or your own machine)
 ┌────────────────────┐   one SSH      ┌──────────────────────────────────────┐
 │ dokwalt (CLI, TUI) │  connection    │ dokwalt dial-stdio                   │

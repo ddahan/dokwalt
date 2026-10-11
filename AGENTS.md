@@ -35,6 +35,7 @@ Documentation is part of every change, never a follow-up. Each fact lives in one
 | `README.md`              | Overview, requirements, install, first deploy, everyday commands, development   |
 | `internal/docs/topics/`  | The user documentation: what every command and feature does. One source for `dokwalt docs` and the website |
 | `site/docs/`             | Generated from the topics: never edit the HTML by hand. `docs.css` and `docs.js` are hand-written |
+| `internal/docs/sitegen/diagrams/` | Schemas as SVG, never ASCII art on the website. A topic keeps a text version for the terminal in a ` ```text diagram=<name> ` block; the website shows `<name>.svg` instead |
 | `docs/SPEC.md`           | How DokWalt is built. When it disagrees with the code, the code wins and the spec gets fixed |
 | `site/index.html`        | The landing page: features, version, commands shown                              |
 
