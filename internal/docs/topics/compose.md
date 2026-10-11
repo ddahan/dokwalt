@@ -16,7 +16,7 @@ docker compose config --no-interpolate --format json
 ```
 
 Compose normalizes `extends`, profiles, short syntax and relative paths,
-but `--no-interpolate` keeps `${VAR}` references as they are: your Mac's
+but `--no-interpolate` keeps `${VAR}` references as they are: your computer's
 environment and `.env` never leak into production. The CLI sends this
 model unchanged; the release stores it as-is and the daemon transforms
 it for the target stage at deploy time. Your file is never modified.
@@ -220,9 +220,9 @@ Compose ignores `x-` keys, so the file still works with
   compose file or profile you do not deploy.
 - **Listen on 0.0.0.0**, not `localhost`, inside the container, or Caddy
   and health checks cannot reach it.
-- **arm64 images** for a Raspberry Pi: check with
+- **arm64 images** for an arm64 server: check with
   `docker manifest inspect postgres:17 | grep arm64`, or add `build:`.
 
 See also: `dokwalt docs deploy`, `dokwalt docs config`,
 `dokwalt docs concepts`, `dokwalt docs domains`, `dokwalt docs databases`,
-`dokwalt docs raspberry-pi`.
+`dokwalt docs server`.

@@ -5,7 +5,7 @@
 ## Architecture
 
 ```text
- Your Mac                               Server (VPS or Raspberry Pi)
+ Your computer                          Server (a VPS or your own machine)
 ┌────────────────────┐   one SSH      ┌──────────────────────────────────────┐
 │ dokwalt (CLI, TUI) │  connection    │ dokwalt dial-stdio                   │
 │ docker compose     │ ─────────────→ │   ↓ /run/dokwalt/dokwalt.sock        │
@@ -19,7 +19,7 @@
                                       └──────────────────────────────────────┘
 ```
 
-- The **CLI** builds images on your Mac and talks to the daemon over SSH.
+- The **CLI** builds images on your computer and talks to the daemon over SSH.
   There is no public control-plane port and no DokWalt password: access
   is your SSH key.
 - The **daemon** runs natively under systemd (never in a container). It
@@ -30,13 +30,13 @@
 ## Server (context)
 
 A server context is a name for a target (`user@host`, `user@host:port`
-or an ssh alias), stored on your Mac in `~/.config/dokwalt/config.json`
+or an ssh alias), stored on your computer in `~/.config/dokwalt/config.json`
 (override the path with `DOKWALT_CONFIG`):
 
 ```json
-{"current":"pi",
- "servers":{"pi":{"target":"dd@pi.home"}},
- "links":{"/Users/dd/Code/blog":{"server":"pi","app":"blog"}}}
+{"current":"prod",
+ "servers":{"prod":{"target":"deploy@203.0.113.10"}},
+ "links":{"/home/you/code/blog":{"server":"prod","app":"blog"}}}
 ```
 
 Manage them with `server init`, `server add`, `server list`, `server use`

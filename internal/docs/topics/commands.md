@@ -47,13 +47,13 @@ identity files.
 
 ```bash
 # Install Docker, the daemon (systemd) and Caddy over SSH; asks for sudo
-dokwalt server init dd@pi.home --email you@example.com
+dokwalt server init deploy@203.0.113.10 --name prod --email you@example.com
 # Register an already-initialized server under a name
 dokwalt server add vps deploy@203.0.113.10
 # List server contexts
 dokwalt server list
 # Switch the current server
-dokwalt server use pi
+dokwalt server use prod
 # Forget a server context (nothing is changed on the server)
 dokwalt server remove vps
 # Versions, resources, daemon and Caddy memory (RSS and heap)
@@ -99,7 +99,7 @@ dokwalt unlink
 ## Deploy & releases
 
 ```bash
-# Build on the Mac, upload changed images, roll out with zero downtime
+# Build on your computer, upload changed images, roll out with zero downtime
 dokwalt deploy -m "fix feed"
 dokwalt deploy -f compose.yaml -f compose.prod.yaml
 # List releases, newest first
@@ -255,7 +255,7 @@ dokwalt alerts:remove 2
 dokwalt alerts:test
 # Thresholds: disk, memory (%), temperature (°C), restarts (per 10 min)
 dokwalt alerts:set disk=85 temperature=75 restarts=5
-# Diagnose this Mac, the server, Caddy, apps and domains
+# Diagnose this computer, the server, Caddy, apps and domains
 dokwalt doctor
 ```
 

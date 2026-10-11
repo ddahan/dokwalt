@@ -86,7 +86,7 @@
     
       <p class="side-group">Servers</p>
       <ul>
-        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+        <li><a href="/docs/server/">Setting up a server</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
       </ul>
     
       <p class="side-group">Reference</p>
@@ -109,17 +109,17 @@
         </header>
         <div class="prose">
 <p>Start with <code>dokwalt doctor</code>: most failures show up there with a <code>→</code> hint. Commands marked
-<code># on the server</code> run over <code>ssh</code>; everything else runs on your Mac.</p>
+<code># on the server</code> run over <code>ssh</code>; everything else runs on your computer.</p>
 <h2 id="connecting">Connecting</h2>
 <h3 id="host-key-mismatch-host-key--not-trusted-or-authentication-fails"><code>HOST KEY MISMATCH</code>, <code>host key … not trusted</code>, or authentication fails</h3>
-<p>DokWalt uses your SSH settings, so first make plain <code>ssh</code> work: <code>ssh -v dd@pi.home true</code>.</p>
+<p>DokWalt uses your SSH settings, so first make plain <code>ssh</code> work: <code>ssh -v deploy@203.0.113.10 true</code>.</p>
 <ul>
-<li><strong>Host key changed</strong> (reinstalled server): always refused; <code>ssh-keygen -R pi.home</code>, reconnect.</li>
+<li><strong>Host key changed</strong> (reinstalled server): always refused; <code>ssh-keygen -R 203.0.113.10</code>, reconnect.</li>
 <li><strong>Unknown host:</strong> DokWalt shows the fingerprint and asks. <code>StrictHostKeyChecking accept-new</code> (or
 <code>no</code>) accepts it without asking; <code>StrictHostKeyChecking yes</code> refuses it: add it with <code>ssh</code> first.</li>
 <li><strong>No key offered:</strong> <code>ssh-add -l</code> lists agent keys; <code>ssh-add ~/.ssh/id_ed25519</code> adds one.</li>
 <li><strong>Wrong host/user/port/jump host:</strong> DokWalt reads <code>ssh -G</code>; check what it will use with
-<code>ssh -G pi.home | grep -E &#39;^(hostname|user|port|identityfile|proxyjump|stricthostkeychecking) &#39;</code>.
+<code>ssh -G prod | grep -E &#39;^(hostname|user|port|identityfile|proxyjump|stricthostkeychecking) &#39;</code>.
 A non-default config file must be exported as <code>DOKWALT_SSH_CONFIG=/path/to/config</code>.</li>
 </ul>
 <h3 id="permission-denied-on-rundokwaltdokwaltsock"><code>permission denied</code> on <code>/run/dokwalt/dokwalt.sock</code></h3>
@@ -131,7 +131,7 @@ Group membership only applies to new logins.</p>
 <span class="t-cmd">sudo</span> <span class="t-cmd">usermod</span> <span class="t-flag">-aG</span> dokwalt,docker $USER   <span class="t-com"># if missing; then log out and back in</span></code></pre></div>
 <h3 id="dokwalt-command-not-found-on-the-server-or-daemon-unreachable"><code>dokwalt: command not found</code> on the server, or daemon unreachable</h3>
 <p><code>server init</code> did not finish (it prints the daemon's last 30 journal lines if it failed to start),
-or the service is down: <code>ssh pi.home systemctl status dokwalt</code>. Re-running <code>server init</code> is safe.</p>
+or the service is down: <code>ssh prod systemctl status dokwalt</code>. Re-running <code>server init</code> is safe.</p>
 <h3 id="version-mismatch-between-cli-and-daemon">Version mismatch between CLI and daemon</h3>
 <p><code>dokwalt version</code> prints the CLI's build; <code>dokwalt doctor</code> shows the daemon's and warns
 (<code>Versions</code>) when they differ. <code>dokwalt server upgrade</code> installs the CLI's own version on the
@@ -146,13 +146,13 @@ RUN curl -fsSL -o /usr/local/bin/tool https://example.com/tool-linux-${TARGETARC
 <h3 id="registry-image-has-no-arm64-variant-no-matching-manifest">Registry image has no arm64 variant (<code>no matching manifest</code>)</h3>
 <p>The server's <code>docker compose up</code> fails and the release is <code>failed</code>. Check with
 <code>docker manifest inspect image:tag | grep -c arm64</code>. Pick another tag or image, or build it from
-source with <code>build:</code> (native arm64 on Apple Silicon). Avoid QEMU on the Pi.</p>
+source with <code>build:</code>. Avoid running amd64 images under QEMU on the server.</p>
 <h3 id="private-registry-pull-access-denied--unauthorized">Private registry: <code>pull access denied</code> / <code>unauthorized</code></h3>
 <p>Registry images are pulled on the server (only if absent). Log in there, as root:
-<code>ssh -t pi.home sudo docker login registry.example.com</code>. The daemon runs with <code>HOME=/root</code>,
+<code>ssh -t prod sudo docker login registry.example.com</code>. The daemon runs with <code>HOME=/root</code>,
 so it uses root's Docker credentials.</p>
-<h3 id="docker-save-failed---update-docker-desktop-to-28-for---platform-support"><code>docker save failed (…) — update Docker Desktop to 28+ for --platform support</code></h3>
-<p>Uploads use <code>docker save --platform linux/&lt;arch&gt;</code>: update Docker on the Mac to 28 or newer.</p>
+<h3 id="docker-save-failed---update-docker-to-28-for---platform-support"><code>docker save failed (…) — update Docker to 28+ for --platform support</code></h3>
+<p>Uploads use <code>docker save --platform linux/&lt;arch&gt;</code>: update Docker on your computer to 28 or newer.</p>
 <h3 id="transfer-interrupted-or-a-deploy-waits-before-starting">Transfer interrupted, or a deploy waits before starting</h3>
 <p>Laptop sleep or Wi-Fi drop during the upload: no release is created; deploy again (images already
 on the server are skipped). After the upload the daemon finishes the deploy even if you disconnect.
@@ -284,8 +284,8 @@ Fix the underlying DNS or port problem so the next attempt succeeds.</p>
 <h2 id="runtime">Runtime</h2>
 <h3 id="site-down-after-a-reboot">Site down after a reboot</h3>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> doctor
-<span class="t-cmd">ssh</span> pi.home <span class="t-str">&#39;systemctl status docker dokwalt; journalctl -u dokwalt -b --no-pager | tail -50&#39;</span>
-<span class="t-cmd">ssh</span> pi.home <span class="t-str">&#39;docker ps -a --filter label=dokwalt.app&#39;</span></code></pre></div>
+<span class="t-cmd">ssh</span> prod <span class="t-str">&#39;systemctl status docker dokwalt; journalctl -u dokwalt -b --no-pager | tail -50&#39;</span>
+<span class="t-cmd">ssh</span> prod <span class="t-str">&#39;docker ps -a --filter label=dokwalt.app&#39;</span></code></pre></div>
 <ul>
 <li>503 <code>&lt;app&gt; is temporarily unavailable for maintenance.</code>: stopped on purpose, which survives
 reboots: <code>dokwalt start</code>. 503 <code>&lt;app&gt; is not running yet.</code>: never deployed.</li>
@@ -298,7 +298,7 @@ new server, built images are missing: <code>dokwalt deploy</code> once from each
 <p><code>dokwalt ps</code> shows the restart count. A &quot;Crash loop&quot; alert fires at 3 deaths in 10 minutes (tune:
 <code>dokwalt alerts:set restarts=5</code>; one-shot jobs excluded) and resolves after 10 quiet minutes.</p>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> logs <span class="t-flag">--service</span> worker <span class="t-flag">-n</span> 100
-<span class="t-cmd">ssh</span> pi.home <span class="t-str">&#34;docker inspect --format &#39;{{.State.OOMKilled}} {{.State.ExitCode}}&#39; &lt;container&gt;&#34;</span></code></pre></div>
+<span class="t-cmd">ssh</span> prod <span class="t-str">&#34;docker inspect --format &#39;{{.State.OOMKilled}} {{.State.ExitCode}}&#39; &lt;container&gt;&#34;</span></code></pre></div>
 <p>Usual causes: a missing config variable, the database not ready yet after a reboot (make the app
 retry its connection), or an out-of-memory kill (see below). Fix and <code>dokwalt deploy</code>, or roll
 back with <code>dokwalt rollback</code>.</p>
@@ -312,34 +312,38 @@ rollbacks, the second can delete app data. Container logs are capped by the <cod
 (10 MB × 3 per container). The &quot;Disk almost full&quot; alert fires at 90 % (<code>alerts:set disk=85</code>).</p>
 <h3 id="memory-pressure-or-oom-kills">Memory pressure or OOM kills</h3>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> top                            <span class="t-com"># which service uses what</span>
-<span class="t-cmd">ssh</span> pi.home <span class="t-str">&#39;free -h; journalctl -k -b | grep -i -e oom -e &#34;killed process&#34;&#39;</span></code></pre></div>
+<span class="t-cmd">ssh</span> prod <span class="t-str">&#39;free -h; journalctl -k -b | grep -i -e oom -e &#34;killed process&#34;&#39;</span></code></pre></div>
 <p>Set limits in compose (<code>mem_limit: 256m</code>), reduce workers (e.g. Gunicorn/Puma processes), add zram
 (Pi) or a swap file (VPS), and remember that during a deploy the old and new stateless services
 run side by side for a few seconds. An &quot;Out of memory&quot; alert fires on OOM kills.</p>
 <h3 id="dbconnect-client-not-found"><code>db:connect</code>: client not found</h3>
 <p>The local client is missing. Install it, or use <code>--tunnel-only</code> with a GUI tool:</p>
-<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">brew</span> install libpq &amp;&amp; <span class="t-cmd">brew</span> link <span class="t-flag">--force</span> libpq    <span class="t-com"># psql</span>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># macOS (Homebrew)</span>
+<span class="t-cmd">brew</span> install libpq &amp;&amp; <span class="t-cmd">brew</span> link <span class="t-flag">--force</span> libpq    <span class="t-com"># psql</span>
 <span class="t-cmd">brew</span> install mysql-client mongosh redis           <span class="t-com"># mysql, mongosh, redis-cli</span>
+<span class="t-com"># Debian / Ubuntu / WSL (mongosh: from MongoDB&#39;s repository)</span>
+<span class="t-cmd">sudo</span> <span class="t-cmd">apt</span> install postgresql-client default-mysql-client redis-tools
 <span class="t-cmd">dokwalt</span> db:connect <span class="t-flag">--tunnel-only</span> <span class="t-flag">--port</span> 5433</code></pre></div>
-<h3 id="pi-throttling-or-high-temperature">Pi: throttling or high temperature</h3>
-<p><code>vcgencmd get_throttled</code>: <code>0x50000</code> = under-voltage since boot (official 27 W PSU and cable),
-<code>0x80008</code> = heat (Active Cooler, fan, airflow). The throttling alert is always on; tune the
+<h3 id="throttling-or-high-temperature">Throttling or high temperature</h3>
+<p>Check cooling and airflow first. On boards whose firmware reports throttling
+(<code>vcgencmd get_throttled</code>): <code>0x50000</code> = under-voltage since boot (power supply or cable),
+<code>0x80008</code> = heat (cooler, fan, airflow). The throttling alert is always on; tune the
 temperature one with <code>dokwalt alerts:set temperature=75</code>.</p>
 <h2 id="collecting-information-for-a-bug-report">Collecting information for a bug report</h2>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> version
 <span class="t-cmd">dokwalt</span> doctor <span class="t-flag">--json</span> &gt; doctor.json
 <span class="t-cmd">dokwalt</span> server info <span class="t-flag">--json</span> &gt; server-info.json
-<span class="t-cmd">ssh</span> pi.home <span class="t-str">&#39;journalctl -u dokwalt -b --no-pager -n 500&#39;</span> &gt; dokwalt.log
-<span class="t-cmd">ssh</span> pi.home <span class="t-str">&#39;docker logs --tail 200 dokwalt-caddy&#39;</span> &gt; caddy.log 2&gt;&amp;<span class="t-cmd">1</span></code></pre></div>
+<span class="t-cmd">ssh</span> prod <span class="t-str">&#39;journalctl -u dokwalt -b --no-pager -n 500&#39;</span> &gt; dokwalt.log
+<span class="t-cmd">ssh</span> prod <span class="t-str">&#39;docker logs --tail 200 dokwalt-caddy&#39;</span> &gt; caddy.log 2&gt;&amp;<span class="t-cmd">1</span></code></pre></div>
 <p>Include the command you ran and its full output. Review the files first: they contain domain
 names. Config values are masked; never attach <code>config --reveal</code> output or <code>apps:export</code> files.</p>
 <p>See also: <a class="xref" href="/docs/reboot-recovery/"><code>dokwalt docs reboot-recovery</code></a>, <a class="xref" href="/docs/domains/"><code>dokwalt docs domains</code></a>, <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>,
-<a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>, <a class="xref" href="/docs/commands/"><code>dokwalt docs commands</code></a>.</p>
+<a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a>, <a class="xref" href="/docs/commands/"><code>dokwalt docs commands</code></a>.</p>
 
         </div>
         <nav class="pager" aria-label="Previous and next pages">
           <a class="pager-prev" href="/docs/alerts/"><small>← Previous</small><b>Alerts</b></a>
-          <a class="pager-next" href="/docs/raspberry-pi/"><small>Next →</small><b>Raspberry Pi 5</b></a>
+          <a class="pager-next" href="/docs/server/"><small>Next →</small><b>Setting up a server</b></a>
         </nav>
       </article>
     </main>
@@ -347,7 +351,7 @@ names. Config values are masked; never attach <code>config --reveal</code> outpu
       
         <p>On this page</p>
         <ul>
-          <li class="toc-2"><a href="#connecting">Connecting</a></li><li class="toc-3"><a href="#host-key-mismatch-host-key--not-trusted-or-authentication-fails">HOST KEY MISMATCH, host key … not trusted, or authentication fails</a></li><li class="toc-3"><a href="#permission-denied-on-rundokwaltdokwaltsock">permission denied on /run/dokwalt/dokwalt.sock</a></li><li class="toc-3"><a href="#dokwalt-command-not-found-on-the-server-or-daemon-unreachable">dokwalt: command not found on the server, or daemon unreachable</a></li><li class="toc-3"><a href="#version-mismatch-between-cli-and-daemon">Version mismatch between CLI and daemon</a></li><li class="toc-2"><a href="#building-and-images">Building and images</a></li><li class="toc-3"><a href="#exec-format-error">exec format error</a></li><li class="toc-3"><a href="#registry-image-has-no-arm64-variant-no-matching-manifest">Registry image has no arm64 variant (no matching manifest)</a></li><li class="toc-3"><a href="#private-registry-pull-access-denied--unauthorized">Private registry: pull access denied / unauthorized</a></li><li class="toc-3"><a href="#docker-save-failed---update-docker-desktop-to-28-for---platform-support">docker save failed (…) — update Docker Desktop to 28&#43; for --platform support</a></li><li class="toc-3"><a href="#transfer-interrupted-or-a-deploy-waits-before-starting">Transfer interrupted, or a deploy waits before starting</a></li><li class="toc-2"><a href="#deploys">Deploys</a></li><li class="toc-3"><a href="#deploy-failed-health-check-readiness-or-a-job">Deploy failed: health check, readiness or a job</a></li><li class="toc-3"><a href="#compose-warnings-and-errors">Compose warnings and errors</a></li><li class="toc-3"><a href="#rollback-fails-images-pruned">Rollback fails: images pruned</a></li><li class="toc-2"><a href="#domains-and-certificates">Domains and certificates</a></li><li class="toc-3"><a href="#domain-check-fails-or-no-certificate-is-issued">Domain check fails, or no certificate is issued</a></li><li class="toc-3"><a href="#rate-limited">Rate limited</a></li><li class="toc-3"><a href="#tls-errors-certificate-not-yet-valid-acme-failures-clock-wrong">TLS errors, &#34;certificate not yet valid&#34;, ACME failures: clock wrong</a></li><li class="toc-2"><a href="#runtime">Runtime</a></li><li class="toc-3"><a href="#site-down-after-a-reboot">Site down after a reboot</a></li><li class="toc-3"><a href="#container-restart-loop">Container restart loop</a></li><li class="toc-3"><a href="#disk-full">Disk full</a></li><li class="toc-3"><a href="#memory-pressure-or-oom-kills">Memory pressure or OOM kills</a></li><li class="toc-3"><a href="#dbconnect-client-not-found">db:connect: client not found</a></li><li class="toc-3"><a href="#pi-throttling-or-high-temperature">Pi: throttling or high temperature</a></li><li class="toc-2"><a href="#collecting-information-for-a-bug-report">Collecting information for a bug report</a></li>
+          <li class="toc-2"><a href="#connecting">Connecting</a></li><li class="toc-3"><a href="#host-key-mismatch-host-key--not-trusted-or-authentication-fails">HOST KEY MISMATCH, host key … not trusted, or authentication fails</a></li><li class="toc-3"><a href="#permission-denied-on-rundokwaltdokwaltsock">permission denied on /run/dokwalt/dokwalt.sock</a></li><li class="toc-3"><a href="#dokwalt-command-not-found-on-the-server-or-daemon-unreachable">dokwalt: command not found on the server, or daemon unreachable</a></li><li class="toc-3"><a href="#version-mismatch-between-cli-and-daemon">Version mismatch between CLI and daemon</a></li><li class="toc-2"><a href="#building-and-images">Building and images</a></li><li class="toc-3"><a href="#exec-format-error">exec format error</a></li><li class="toc-3"><a href="#registry-image-has-no-arm64-variant-no-matching-manifest">Registry image has no arm64 variant (no matching manifest)</a></li><li class="toc-3"><a href="#private-registry-pull-access-denied--unauthorized">Private registry: pull access denied / unauthorized</a></li><li class="toc-3"><a href="#docker-save-failed---update-docker-to-28-for---platform-support">docker save failed (…) — update Docker to 28&#43; for --platform support</a></li><li class="toc-3"><a href="#transfer-interrupted-or-a-deploy-waits-before-starting">Transfer interrupted, or a deploy waits before starting</a></li><li class="toc-2"><a href="#deploys">Deploys</a></li><li class="toc-3"><a href="#deploy-failed-health-check-readiness-or-a-job">Deploy failed: health check, readiness or a job</a></li><li class="toc-3"><a href="#compose-warnings-and-errors">Compose warnings and errors</a></li><li class="toc-3"><a href="#rollback-fails-images-pruned">Rollback fails: images pruned</a></li><li class="toc-2"><a href="#domains-and-certificates">Domains and certificates</a></li><li class="toc-3"><a href="#domain-check-fails-or-no-certificate-is-issued">Domain check fails, or no certificate is issued</a></li><li class="toc-3"><a href="#rate-limited">Rate limited</a></li><li class="toc-3"><a href="#tls-errors-certificate-not-yet-valid-acme-failures-clock-wrong">TLS errors, &#34;certificate not yet valid&#34;, ACME failures: clock wrong</a></li><li class="toc-2"><a href="#runtime">Runtime</a></li><li class="toc-3"><a href="#site-down-after-a-reboot">Site down after a reboot</a></li><li class="toc-3"><a href="#container-restart-loop">Container restart loop</a></li><li class="toc-3"><a href="#disk-full">Disk full</a></li><li class="toc-3"><a href="#memory-pressure-or-oom-kills">Memory pressure or OOM kills</a></li><li class="toc-3"><a href="#dbconnect-client-not-found">db:connect: client not found</a></li><li class="toc-3"><a href="#throttling-or-high-temperature">Throttling or high temperature</a></li><li class="toc-2"><a href="#collecting-information-for-a-bug-report">Collecting information for a bug report</a></li>
         </ul>
       
     </aside>

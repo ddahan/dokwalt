@@ -86,7 +86,7 @@
     
       <p class="side-group">Servers</p>
       <ul>
-        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+        <li><a href="/docs/server/">Setting up a server</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
       </ul>
     
       <p class="side-group">Reference</p>
@@ -109,12 +109,14 @@
         </header>
         <div class="prose">
 <h2 id="what-you-need">What you need</h2>
-<p>On your Mac:</p>
+<p>On your computer (macOS or Linux; on Windows, inside WSL):</p>
 <ul>
-<li><strong>Docker Desktop (Docker 28+) or OrbStack</strong> with the Compose v2 plugin.
-DokWalt builds your images locally, so <code>docker compose version</code> must
-work. Docker 28+ is needed for <code>docker save --platform</code>.</li>
-<li>An <strong>SSH key</strong> that can log in to the server (<code>ssh dd@pi.home</code> works).
+<li><strong>Docker 28+</strong> with the Compose v2 plugin: Docker Engine on Linux,
+Docker Desktop or OrbStack on macOS, Docker Desktop with the WSL 2
+backend on Windows. DokWalt builds your images locally, so
+<code>docker compose version</code> must work. Docker 28+ is needed for
+<code>docker save --platform</code>.</li>
+<li>An <strong>SSH key</strong> that can log in to the server (<code>ssh deploy@203.0.113.10</code> works).
 Agent keys are tried first, then identity files. <code>~/.ssh/config</code>
 aliases and <code>ProxyJump</code> are honoured.</li>
 <li>A project folder with a <code>Dockerfile</code> and a compose file
@@ -122,8 +124,9 @@ aliases and <code>ProxyJump</code> are honoured.</li>
 </ul>
 <p>On the server:</p>
 <ul>
-<li>A 64-bit Linux with systemd (Debian, Ubuntu, Raspberry Pi OS), amd64
-or arm64. 32-bit Raspberry Pi OS is refused.</li>
+<li>A 64-bit Linux with systemd (Debian or Ubuntu), amd64 or arm64: a VPS
+or your own machine. 32-bit systems are refused. Step-by-step setup and
+hardening: <a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a>.</li>
 <li>A user with <code>sudo</code> (or root). You type the sudo password yourself.</li>
 <li>Ports <strong>80 and 443</strong> reachable from the internet (router port forwarding
 at home, firewall rules on a VPS).</li>
@@ -140,29 +143,29 @@ it in a folder on your <code>PATH</code> (using sudo only if it has to). Run it 
 to upgrade. <code>server init</code> later downloads the Linux binary for the server,
 for the same version, and verifies it the same way.</p>
 <h2 id="2-set-up-the-server">2. Set up the server</h2>
-<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> server init dd@pi.home <span class="t-flag">--name</span> pi <span class="t-flag">--email</span> you@example.com</code></pre></div>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> server init deploy@203.0.113.10 <span class="t-flag">--name</span> prod <span class="t-flag">--email</span> you@example.com</code></pre></div>
 <p>The target is <code>user@host</code>, <code>user@host:port</code> or any <code>~/.ssh/config</code>
 alias. <code>--email</code> is the Let's Encrypt account email. <code>--name</code> sets the
 context name (default: the host's first label, <code>default</code> for an IP). The
 first server you add becomes the current one.</p>
-<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">◆</span> Installing DokWalt on dd@pi.home
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">◆</span> Installing DokWalt on deploy@203.0.113.10
 <span class="t-ok">✓</span> Connecting over SSH
 <span class="t-ok">✓</span> Uploading dokwalt for linux/arm64 (14.2 MiB)
 <span class="t-cmd">◆</span> Running the installer with sudo on the server (you may be asked for your password)
-[sudo] password for dd:
+[sudo] password for deploy:
 <span class="t-cmd">◆</span> Installing DokWalt  arm64
 → Installing Docker (official get.docker.com script)
 <span class="t-ok">✓</span> Docker 28.4.0
 <span class="t-ok">✓</span> Docker Compose 2.39.2
 → Configuring Docker: live-restore (containers survive Docker restarts), bounded logs
 <span class="t-ok">✓</span> Docker configured
-<span class="t-ok">✓</span> User dd can manage DokWalt (groups dokwalt, docker)
+<span class="t-ok">✓</span> User deploy can manage DokWalt (groups dokwalt, docker)
 <span class="t-ok">✓</span> Installed /usr/local/bin/dokwalt
 → Waiting for the daemon
 <span class="t-ok">✓</span> Daemon running (systemd unit dokwalt.service, starts at boot)
 <span class="t-ok">✓</span> Let&#39;s Encrypt account email: you@example.com
 
-<span class="t-ok">✓</span> dd@pi.home is ready — saved as server pi</code></pre></div>
+<span class="t-ok">✓</span> deploy@203.0.113.10 is ready — saved as server prod</code></pre></div>
 <p>What init did: upload the Linux binary, install Docker if missing (and
 the compose plugin), merge <code>live-restore: true</code> and <code>log-driver: local</code>
 into <code>/etc/docker/daemon.json</code>, create the <code>dokwalt</code> group and add you to
@@ -174,12 +177,12 @@ always talks to the daemon through SSH.</p>
 <h2 id="3-create-the-app">3. Create the app</h2>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">cd</span> ~/Code/blog
 <span class="t-cmd">dokwalt</span> apps:create blog</code></pre></div>
-<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-ok">✓</span> Created blog on pi
-  Linked to /Users/dd/Code/blog
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-ok">✓</span> Created blog on prod
+  Linked to /home/you/code/blog
   Next: dokwalt deploy then dokwalt domains:add example.com --service web</code></pre></div>
 <p><code>apps:create</code> links the current folder by default (<code>--no-link</code> to skip;
 <code>dokwalt link blog</code> links another folder later). The link lives in
-<code>~/.config/dokwalt/config.json</code> on your Mac; nothing is written to the
+<code>~/.config/dokwalt/config.json</code> on your computer; nothing is written to the
 repository. From this folder (or any subfolder) you can omit <code>-a blog</code>.</p>
 <h2 id="4-set-config">4. Set config</h2>
 <p>Config lives on the server, encrypted. Import your <code>.env</code> and add values:</p>
@@ -197,7 +200,7 @@ variable; <code>${VAR}</code> in the compose file is interpolated on the server.
 See <a class="xref" href="/docs/config/"><code>dokwalt docs config</code></a>.</p>
 <h2 id="5-deploy">5. Deploy</h2>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-m</span> <span class="t-str">&#34;first deploy&#34;</span></code></pre></div>
-<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">◆</span> Deploying blog  to pi (linux/arm64)
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">◆</span> Deploying blog  to prod (linux/arm64)
 <span class="t-ok">✓</span> Built migrate, web, worker
 <span class="t-ok">✓</span> Uploaded 41.3 MiB in 7.2s
 ! web: published ports removed — traffic reaches services only through the proxy (use `dokwalt domains:add` or `dokwalt db:connect`)
@@ -249,8 +252,7 @@ domain.</p>
 <li>Open a database shell: <code>dokwalt db:connect</code>.</li>
 </ul>
 <p>See also: <a class="xref" href="/docs/concepts/"><code>dokwalt docs concepts</code></a>, <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>,
-<a class="xref" href="/docs/compose/"><code>dokwalt docs compose</code></a>, <a class="xref" href="/docs/domains/"><code>dokwalt docs domains</code></a>, <a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>,
-<a class="xref" href="/docs/vps/"><code>dokwalt docs vps</code></a>.</p>
+<a class="xref" href="/docs/compose/"><code>dokwalt docs compose</code></a>, <a class="xref" href="/docs/domains/"><code>dokwalt docs domains</code></a>, <a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a>.</p>
 
         </div>
         <nav class="pager" aria-label="Previous and next pages">

@@ -18,8 +18,8 @@ type Topic struct {
 
 // Order in which topics are listed.
 var order = []string{
-	"getting-started", "concepts", "deploy", "compose", "config", "domains", "databases", "backups", "releases",
-	"pipelines", "logs", "monitoring", "alerts", "reboot-recovery", "raspberry-pi", "vps", "security",
+	"getting-started", "server", "concepts", "deploy", "compose", "config", "domains", "databases", "backups",
+	"releases", "pipelines", "logs", "monitoring", "alerts", "reboot-recovery", "security",
 	"troubleshooting", "commands",
 }
 

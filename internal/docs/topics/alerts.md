@@ -56,7 +56,7 @@ dokwalt alerts:add slack https://hooks.slack.com/services/T0/B0/xyz
 
 ```text
 $ dokwalt alerts
-◆ Alerts on pi
+◆ Alerts on prod
 
 ID  CHANNEL  WEBHOOK
 1   discord  https://discord.com/•••
@@ -108,7 +108,7 @@ without a sensor). Otherwise a rule fires when the value is **≥** the threshol
 | Disk                | disk usage ≥ `disk` %                                           | below the threshold          |
 | Memory              | memory usage ≥ `memory` %                                       | below the threshold          |
 | Temperature         | CPU temperature ≥ `temperature` °C                              | below the threshold          |
-| CPU throttling      | the Pi reports under-voltage or throttling **now**              | the condition clears         |
+| CPU throttling      | the board reports under-voltage or throttling **now**           | the condition clears         |
 
 Site down, deploy failed, certificate error, out of memory, self-healing
 failed and throttling are **always on**. Disk, memory and temperature are
@@ -150,38 +150,38 @@ Slack:
 Examples as they appear in the channel:
 
 ```text
-🔴 Site down — pi
+🔴 Site down — prod
 blog.example.com is not answering: HTTP 502
 
-✅ Resolved: Site down — pi
+✅ Resolved: Site down — prod
 blog.example.com answers again
 
-🔴 Deploy failed — pi
+🔴 Deploy failed — prod
 blog/production v15 failed: web did not pass its health check
 
-🔴 Crash loop — pi
+🔴 Crash loop — prod
 blog/production/worker restarted 4 times in 10 minutes (exit code 1). `dokwalt logs -a blog`
 
-🔴 Out of memory — pi
+🔴 Out of memory — prod
 blog/production/worker was killed: out of memory
 
-🔴 Certificate error — pi
+🔴 Certificate error — prod
 Could not get a certificate for api.example.com: …
 Run `dokwalt doctor` to check DNS and ports.
 
-🔴 Self-healing failed — pi
+🔴 Self-healing failed — prod
 blog/production: …
 
-🔴 Disk almost full — pi
+🔴 Disk almost full — prod
 Disk is 91% full (threshold 90%). Try `docker system prune` or remove old apps.
 
-🔴 Memory pressure — pi
+🔴 Memory pressure — prod
 Memory is 93% used (threshold 90%).
 
-🔴 CPU temperature high — pi
+🔴 CPU temperature high — prod
 CPU at 81°C (threshold 80°C). Check cooling.
 
-🔴 CPU throttling — pi
+🔴 CPU throttling — prod
 Raspberry Pi reports: now: under-voltage. Check power supply and cooling.
 ```
 
@@ -204,9 +204,9 @@ kept.
   incomplete. Create a new one, `alerts:remove` the old id, then
   `alerts:add` the new one.
 - No messages at all: check the server can reach the internet
-  (`ssh pi.home curl -I https://discord.com`) and read the daemon log, where
+  (`ssh prod curl -I https://discord.com`) and read the daemon log, where
   failed deliveries are logged:
-  `ssh pi.home journalctl -u dokwalt --since "1 hour ago"`.
+  `ssh prod journalctl -u dokwalt --since "1 hour ago"`.
 
 See also: `dokwalt docs monitoring`, `dokwalt docs domains`,
-`dokwalt docs releases`, `dokwalt docs raspberry-pi`
+`dokwalt docs releases`, `dokwalt docs server`

@@ -32,7 +32,7 @@ var groups = []struct {
 	{"Deploy & ship", []string{"deploy", "compose", "config", "domains", "releases", "pipelines"}},
 	{"Data", []string{"databases", "backups"}},
 	{"Operate", []string{"logs", "monitoring", "alerts", "troubleshooting"}},
-	{"Servers", []string{"raspberry-pi", "vps", "reboot-recovery", "security"}},
+	{"Servers", []string{"server", "reboot-recovery", "security"}},
 	{"Reference", []string{"commands"}},
 }
 

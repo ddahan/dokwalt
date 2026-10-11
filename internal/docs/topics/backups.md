@@ -34,9 +34,9 @@ R2's free tier covers 10 GB of storage, and downloads are free.
 ```text
 $ dokwalt backup:setup --r2-account 1a2b3c4d… --bucket backups --access-key 7f8e…
 ? Secret access key: ••••••••
-✓ Backups set up on pi
+✓ Backups set up on prod
 
-Storage     backups/dokwalt/pi  https://1a2b3c4d….r2.cloudflarestorage.com
+Storage     backups/dokwalt/prod  https://1a2b3c4d….r2.cloudflarestorage.com
 Schedule    every day at 03:00 CEST · next Sun 11 Oct 03:00
 Retention   the newest backup of the last 7 days and 4 weeks
 Last run    never
@@ -132,7 +132,7 @@ $ dokwalt backup:restore latest --database blog
 ## Rebuild a lost server
 
 1. Prepare the new server and run `dokwalt server init` (`dokwalt docs
-   raspberry-pi` or `dokwalt docs vps`).
+   server`).
 2. Point the new server at the old backups:
    `dokwalt backup:setup … --prefix dokwalt/<old hostname>`, then
    `dokwalt backup:download latest dokwalt.db` (or download it from the R2

@@ -86,7 +86,7 @@
     
       <p class="side-group">Servers</p>
       <ul>
-        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+        <li><a href="/docs/server/">Setting up a server</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
       </ul>
     
       <p class="side-group">Reference</p>
@@ -176,13 +176,13 @@ object per line.</li>
 </ul>
 <h2 id="servers">Servers</h2>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Install Docker, the daemon (systemd) and Caddy over SSH; asks for sudo</span>
-<span class="t-cmd">dokwalt</span> server init dd@pi.home <span class="t-flag">--email</span> you@example.com
+<span class="t-cmd">dokwalt</span> server init deploy@203.0.113.10 <span class="t-flag">--name</span> prod <span class="t-flag">--email</span> you@example.com
 <span class="t-com"># Register an already-initialized server under a name</span>
 <span class="t-cmd">dokwalt</span> server add vps deploy@203.0.113.10
 <span class="t-com"># List server contexts</span>
 <span class="t-cmd">dokwalt</span> server list
 <span class="t-com"># Switch the current server</span>
-<span class="t-cmd">dokwalt</span> server use pi
+<span class="t-cmd">dokwalt</span> server use prod
 <span class="t-com"># Forget a server context (nothing is changed on the server)</span>
 <span class="t-cmd">dokwalt</span> server remove vps
 <span class="t-com"># Versions, resources, daemon and Caddy memory (RSS and heap)</span>
@@ -218,7 +218,7 @@ same way.</p>
 <span class="t-cmd">dokwalt</span> unlink</code></pre></div>
 <p><code>apps:export &lt;file&gt;</code> writes mode 0600. Images and volume data aren't included.</p>
 <h2 id="deploy--releases">Deploy &amp; releases</h2>
-<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Build on the Mac, upload changed images, roll out with zero downtime</span>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Build on your computer, upload changed images, roll out with zero downtime</span>
 <span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-m</span> <span class="t-str">&#34;fix feed&#34;</span>
 <span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-f</span> compose.yaml <span class="t-flag">-f</span> compose.prod.yaml
 <span class="t-com"># List releases, newest first</span>
@@ -340,7 +340,7 @@ shared database (<code>x-dokwalt.uses</code>): see <a class="xref" href="/docs/d
 <span class="t-cmd">dokwalt</span> alerts:test
 <span class="t-com"># Thresholds: disk, memory (%), temperature (°C), restarts (per 10 min)</span>
 <span class="t-cmd">dokwalt</span> alerts:set disk=85 temperature=75 restarts=5
-<span class="t-com"># Diagnose this Mac, the server, Caddy, apps and domains</span>
+<span class="t-com"># Diagnose this computer, the server, Caddy, apps and domains</span>
 <span class="t-cmd">dokwalt</span> doctor</code></pre></div>
 <h2 id="help">Help</h2>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Full-screen dashboard (without a terminal: prints help)</span>

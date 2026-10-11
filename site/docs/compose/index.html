@@ -86,7 +86,7 @@
     
       <p class="side-group">Servers</p>
       <ul>
-        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+        <li><a href="/docs/server/">Setting up a server</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
       </ul>
     
       <p class="side-group">Reference</p>
@@ -116,7 +116,7 @@ deploys (config, domains, health checks, overrides) lives on the server.</p>
 <p>On each deploy the CLI runs, in your project folder:</p>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">docker</span> compose config <span class="t-flag">--no-interpolate</span> <span class="t-flag">--format</span> json</code></pre></div>
 <p>Compose normalizes <code>extends</code>, profiles, short syntax and relative paths,
-but <code>--no-interpolate</code> keeps <code>${VAR}</code> references as they are: your Mac's
+but <code>--no-interpolate</code> keeps <code>${VAR}</code> references as they are: your computer's
 environment and <code>.env</code> never leak into production. The CLI sends this
 model unchanged; the release stores it as-is and the daemon transforms
 it for the target stage at deploy time. Your file is never modified.</p>
@@ -400,12 +400,12 @@ the files into the image.</li>
 compose file or profile you do not deploy.</li>
 <li><strong>Listen on 0.0.0.0</strong>, not <code>localhost</code>, inside the container, or Caddy
 and health checks cannot reach it.</li>
-<li><strong>arm64 images</strong> for a Raspberry Pi: check with
+<li><strong>arm64 images</strong> for an arm64 server: check with
 <code>docker manifest inspect postgres:17 | grep arm64</code>, or add <code>build:</code>.</li>
 </ul>
 <p>See also: <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>, <a class="xref" href="/docs/config/"><code>dokwalt docs config</code></a>,
 <a class="xref" href="/docs/concepts/"><code>dokwalt docs concepts</code></a>, <a class="xref" href="/docs/domains/"><code>dokwalt docs domains</code></a>, <a class="xref" href="/docs/databases/"><code>dokwalt docs databases</code></a>,
-<a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>.</p>
+<a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a>.</p>
 
         </div>
         <nav class="pager" aria-label="Previous and next pages">

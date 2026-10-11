@@ -1,6 +1,6 @@
 # Logs
 
-*Stream, filter and search your app's logs from the Mac, and know where every other log lives.*
+*Stream, filter and search your app's logs from your computer, and know where every other log lives.*
 
 Your services log to stdout/stderr (12-factor). DokWalt reads container logs
 through the Docker API on the server and streams them to your terminal,
@@ -90,7 +90,7 @@ upload, then each step on the server.
 
 ```text
 $ dokwalt deploy -m "fix feed"
-◆ Deploying blog  to pi (linux/arm64)
+◆ Deploying blog  to prod (linux/arm64)
 ✓ Built migrate, web for linux/arm64
 ✓ Uploaded 16.6 MiB in 0.6s
 ✓ Services — db: keeps its data (named volume pgdata), migrate: runs once per deploy, web: zero-downtime swap
@@ -131,15 +131,15 @@ if you need each one.
 **Caddy errors** (certificates, config loads), on the server:
 
 ```bash
-ssh pi.home docker logs --since 1h dokwalt-caddy
+ssh prod docker logs --since 1h dokwalt-caddy
 ```
 
 **The DokWalt daemon** runs under systemd, so its log is in the journal:
 
 ```bash
-ssh pi.home journalctl -u dokwalt -f
-ssh pi.home journalctl -u dokwalt --since "1 hour ago"
-ssh pi.home journalctl -u dokwalt -b     # since the last boot
+ssh prod journalctl -u dokwalt -f
+ssh prod journalctl -u dokwalt --since "1 hour ago"
+ssh prod journalctl -u dokwalt -b     # since the last boot
 ```
 
 The daemon logs reconciliation (what it repaired after a reboot), deploy

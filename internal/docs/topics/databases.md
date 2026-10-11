@@ -79,7 +79,7 @@ reference as `${VAR}`. So:
   init. Changing it later does **not** change the real password: run
   `ALTER USER` first, then update the config.
 
-## Connecting from your Mac
+## Connecting from your computer
 
 ```bash
 dokwalt db:connect
@@ -144,8 +144,11 @@ Passwords reach `psql`, `mysql` and `redis-cli` through the environment
 `mongosh` is the exception: it gets a `mongodb://` URL that includes the
 password (with `authSource=admin`).
 
-Install clients with Homebrew: `brew install libpq` (psql),
-`brew install mysql-client`, `brew install mongosh`, `brew install redis`.
+Install the clients with your package manager. On macOS (Homebrew):
+`brew install libpq` (psql), `brew install mysql-client`, `brew install mongosh`,
+`brew install redis`. On Debian or Ubuntu (and WSL):
+`sudo apt install postgresql-client default-mysql-client redis-tools`; `mongosh`
+comes from MongoDB's own repository.
 
 ## Migrations: one-shot jobs
 
@@ -193,7 +196,7 @@ any S3 storage, run on the server: `dokwalt backup:setup`, see
 `dokwalt docs backups`. For other kinds of databases, and for one-off copies,
 two approaches.
 
-**Logical dump** to your Mac, while the app runs:
+**Logical dump** to your computer, while the app runs:
 
 ```text
 $ dokwalt db:backup
@@ -204,7 +207,7 @@ $ dokwalt db:backup
 
 - `pg_dump --format=custom` runs **inside** the database container, through
   its Unix socket, and the dump streams back over SSH. Nothing is exposed, and
-  no Postgres client is needed on the Mac.
+  no Postgres client is needed on your computer.
 - The file is written as `<file>.part` and renamed only once pg_dump
   succeeded and the file is a valid archive, so a failed dump never leaves a
   file that looks good.
@@ -220,13 +223,13 @@ through it.
 
 ```bash
 dokwalt stop
-ssh pi.home 'docker run --rm -v dw-blog-production-pgdata:/data:ro \
+ssh prod 'docker run --rm -v dw-blog-production-pgdata:/data:ro \
   -v "$HOME":/backup alpine tar czf /backup/pgdata.tgz -C /data .'
 dokwalt start
 ```
 
 Restore a dump with `pg_restore -d "postgres://…@127.0.0.1:5433/blog"`.
-Full-server backups: `dokwalt docs raspberry-pi`.
+Full-server backups: `dokwalt docs server`.
 
 ## One database server for several apps
 
@@ -299,7 +302,7 @@ Instead:
 3. `dokwalt deploy` creates a fresh, empty `dw-blog-production-pgdata17`.
 4. Restore the dump through `db:connect --tunnel-only`.
 5. Once verified, delete the old volume on the server:
-   `ssh pi.home docker volume rm dw-blog-production-pgdata`.
+   `ssh prod docker volume rm dw-blog-production-pgdata`.
 
 Minor updates are safe: change the tag (`postgres:17.1` → `postgres:17.2`)
 and redeploy. Registry images are used by tag, not pinned by digest, and
@@ -307,4 +310,4 @@ are pulled only if the tag is missing on the server. So a floating tag like
 `postgres:17` doesn't move by itself. Pin exact tags.
 
 See also: `dokwalt docs backups`, `dokwalt docs compose`, `dokwalt docs config`, `dokwalt docs deploy`,
-`dokwalt docs raspberry-pi`, `dokwalt docs security`
+`dokwalt docs server`, `dokwalt docs security`

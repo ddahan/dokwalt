@@ -1,6 +1,6 @@
 # Deploying
 
-*How `dokwalt deploy` builds on your Mac, ships only changed images and swaps versions with zero downtime.*
+*How `dokwalt deploy` builds on your computer, ships only changed images and swaps versions with zero downtime.*
 
 ## Usage
 
@@ -17,7 +17,7 @@ Without `-f`, compose's own defaults apply (`compose.yaml`,
 
 ## What happens, step by step
 
-On your Mac:
+On your computer:
 
 1. **Read the compose file** with
    `docker compose config --no-interpolate --format json`. Your local
@@ -66,7 +66,7 @@ the server if absent, referenced by tag (not pinned by digest).
 
 ```text
 $ dokwalt deploy -m "new homepage"
-◆ Deploying blog  to pi (linux/arm64)
+◆ Deploying blog  to prod (linux/arm64)
 ✓ Built migrate, web, worker 23.4s
 ✓ Uploaded 12.8 MiB in 1.9s
 ! web: published ports removed — traffic reaches services only through the proxy (use `dokwalt domains:add` or `dokwalt db:connect`)
@@ -160,7 +160,7 @@ dokwalt healthcheck:unset --service web       # back to GET / < 500
 
 ## Deploying and going offline
 
-The build and upload need your Mac. Once the deploy request is sent, the
+The build and upload need your computer. Once the deploy request is sent, the
 daemon finishes alone: closing the laptop or losing Wi-Fi does not abort
 it. Check the result later with `dokwalt releases`. If the upload is
 interrupted, run `dokwalt deploy` again; images already on the server

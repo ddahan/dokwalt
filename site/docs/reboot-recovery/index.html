@@ -86,7 +86,7 @@
     
       <p class="side-group">Servers</p>
       <ul>
-        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/" class="active" aria-current="page">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+        <li><a href="/docs/server/">Setting up a server</a></li><li><a href="/docs/reboot-recovery/" class="active" aria-current="page">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
       </ul>
     
       <p class="side-group">Reference</p>
@@ -144,8 +144,8 @@
 <td>Certificates persist in the Docker volume <code>dokwalt-caddy-data</code></td>
 </tr>
 <tr>
-<td>SD card corruption</td>
-<td>NVMe recommended (<a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>); SQLite in WAL mode</td>
+<td>SD card or flash corruption</td>
+<td>An SSD is recommended (<a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a>); SQLite in WAL mode</td>
 </tr>
 <tr>
 <td>Wrong clock at boot, TLS failures</td>
@@ -289,8 +289,8 @@ alerts skip it. <code>dokwalt start</code> brings it back.</p>
 <p>Apps must retry their database connection at startup: after a reboot all containers start at
 once, so a web container may briefly come up before Postgres accepts connections.</p>
 <h2 id="the-hard-reboot-test">The hard-reboot test</h2>
-<p>Run it once after installation and after any big change. From the Mac:</p>
-<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">ssh</span> <span class="t-flag">-t</span> pi.home sudo reboot; <span class="t-cmd">date</span>
+<p>Run it once after installation and after any big change. From your computer:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">ssh</span> <span class="t-flag">-t</span> prod sudo reboot; <span class="t-cmd">date</span>
 <span class="t-cmd">until</span> curl <span class="t-flag">-sfo</span> /dev/null https://blog.example.com; <span class="t-cmd">do</span> sleep 2; <span class="t-cmd">done</span>; <span class="t-cmd">date</span>
 <span class="t-cmd">dokwalt</span> doctor</code></pre></div>
 <p><strong>Pass:</strong> every site returns 200 over valid HTTPS within 2 minutes, with no command sent to the
@@ -312,7 +312,7 @@ with the latest release, with no command sent, and the script prints how long it
 <span class="t-cmd">◆</span> Doctor
 
 <span class="t-ok">✓</span> Local Docker             Docker 28.4.0 (builds run here)
-<span class="t-ok">✓</span> Connection               pi (dd@pi.home), daemon 0.1.0 on linux/arm64
+<span class="t-ok">✓</span> Connection               prod (deploy@203.0.113.10), daemon 0.1.0 on linux/arm64
 <span class="t-ok">✓</span> Docker                   Docker 28.4.0 (API 1.51), 4 CPUs, 7.9 GiB RAM
 <span class="t-ok">✓</span> Docker live-restore      containers keep running while dockerd restarts or upgrades
 <span class="t-ok">✓</span> Memory cgroup            cgroup 2 (systemd driver)
@@ -335,12 +335,12 @@ with the latest release, with no command sent, and the script prints how long it
 <span class="t-cmd">journalctl</span> <span class="t-flag">-u</span> dokwalt <span class="t-flag">-b</span> <span class="t-flag">--no-pager</span>       <span class="t-com"># this boot&#39;s daemon log</span>
 <span class="t-cmd">journalctl</span> <span class="t-flag">-b</span> <span class="t-flag">-1</span> <span class="t-flag">-p</span> warning <span class="t-flag">--no-pager</span>    <span class="t-com"># previous boot&#39;s warnings (needs persistent journal)</span>
 <span class="t-cmd">docker</span> ps <span class="t-flag">-a</span> <span class="t-flag">--filter</span> label=dokwalt.app   <span class="t-com"># what actually runs</span></code></pre></div>
-<p>See also: <a class="xref" href="/docs/troubleshooting/"><code>dokwalt docs troubleshooting</code></a>, <a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>, <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>,
+<p>See also: <a class="xref" href="/docs/troubleshooting/"><code>dokwalt docs troubleshooting</code></a>, <a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a>, <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>,
 <a class="xref" href="/docs/monitoring/"><code>dokwalt docs monitoring</code></a>.</p>
 
         </div>
         <nav class="pager" aria-label="Previous and next pages">
-          <a class="pager-prev" href="/docs/vps/"><small>← Previous</small><b>VPS</b></a>
+          <a class="pager-prev" href="/docs/server/"><small>← Previous</small><b>Setting up a server</b></a>
           <a class="pager-next" href="/docs/security/"><small>Next →</small><b>Security</b></a>
         </nav>
       </article>

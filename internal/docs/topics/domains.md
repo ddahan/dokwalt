@@ -26,7 +26,7 @@ server's public IP:
 
 Only publish an `AAAA` record if the server is really reachable over IPv6
 on 80 and 443: Let's Encrypt prefers IPv6, and a broken `AAAA` record makes
-validation fail even when IPv4 is fine. Check propagation from your Mac:
+validation fail even when IPv4 is fine. Check propagation from your computer:
 
 ```bash
 dig +short A blog.example.com
@@ -34,7 +34,7 @@ dig +short AAAA blog.example.com
 ```
 
 Home server with a changing public IP? Use dynamic DNS; see
-`dokwalt docs raspberry-pi`.
+`dokwalt docs server`.
 
 ## 2. Attach the domain
 
@@ -126,7 +126,7 @@ keeps retrying the certificate on its own.
   from Caddy's **internal CA** instead. No Let's Encrypt, and no probe: the
   check reports `ok (local name, internal certificate)`. Browsers don't
   trust that CA until you import its root certificate:
-  `ssh pi.home docker cp dokwalt-caddy:/data/caddy/pki/authorities/local/root.crt .`
+  `ssh prod docker cp dokwalt-caddy:/data/caddy/pki/authorities/local/root.crt .`
 - **Storage**: certificates live in the Docker volume `dokwalt-caddy-data`
   (`/data` in the Caddy container). They survive reboots, `server upgrade`
   and Caddy being recreated. Include that volume in server backups.
@@ -211,7 +211,7 @@ doesn't affect other sites. Delete the DNS record yourself.
 
 - **Wildcards** (`*.example.com`) and wildcard certificates: add each host.
 - **DNS-01 challenge**: ports 80/443 must reach the server. Behind CGNAT or
-  a router you can't configure, see `dokwalt docs raspberry-pi` (Cloudflare
+  a router you can't configure, see `dokwalt docs server` (Cloudflare
   Tunnel / Tailscale options).
 
 ## When something goes wrong
@@ -228,7 +228,7 @@ $ dokwalt doctor
 ```
 
 - Caddy's own log (ACME errors, config loads):
-  `ssh pi.home docker logs --since 1h dokwalt-caddy`.
+  `ssh prod docker logs --since 1h dokwalt-caddy`.
 
 See also: `dokwalt docs deploy`, `dokwalt docs alerts`,
-`dokwalt docs troubleshooting`, `dokwalt docs raspberry-pi`, `dokwalt docs vps`
+`dokwalt docs troubleshooting`, `dokwalt docs server`

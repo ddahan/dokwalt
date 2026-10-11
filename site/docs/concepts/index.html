@@ -86,7 +86,7 @@
     
       <p class="side-group">Servers</p>
       <ul>
-        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+        <li><a href="/docs/server/">Setting up a server</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
       </ul>
     
       <p class="side-group">Reference</p>
@@ -109,7 +109,7 @@
         </header>
         <div class="prose">
 <h2 id="architecture">Architecture</h2>
-<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code> Your Mac                               Server (VPS or Raspberry Pi)
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code> Your computer                          Server (a VPS or your own machine)
 ┌────────────────────┐   one SSH      ┌──────────────────────────────────────┐
 │ dokwalt (CLI, TUI) │  connection    │ dokwalt dial-stdio                   │
 │ docker compose     │ ─────────────→ │   ↓ /run/dokwalt/dokwalt.sock        │
@@ -122,7 +122,7 @@
                                       │                    web, redis        │
                                       └──────────────────────────────────────┘</code></pre></div>
 <ul>
-<li>The <strong>CLI</strong> builds images on your Mac and talks to the daemon over SSH.
+<li>The <strong>CLI</strong> builds images on your computer and talks to the daemon over SSH.
 There is no public control-plane port and no DokWalt password: access
 is your SSH key.</li>
 <li>The <strong>daemon</strong> runs natively under systemd (never in a container). It
@@ -132,11 +132,11 @@ stores state in SQLite under <code>/var/lib/dokwalt</code> and drives Docker.</l
 </ul>
 <h2 id="server-context">Server (context)</h2>
 <p>A server context is a name for a target (<code>user@host</code>, <code>user@host:port</code>
-or an ssh alias), stored on your Mac in <code>~/.config/dokwalt/config.json</code>
+or an ssh alias), stored on your computer in <code>~/.config/dokwalt/config.json</code>
 (override the path with <code>DOKWALT_CONFIG</code>):</p>
-<div class="code" data-lang="json"><div class="code-bar"><span>json</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code>{<span class="t-key">&#34;current&#34;</span>:<span class="t-str">&#34;pi&#34;</span>,
- <span class="t-key">&#34;servers&#34;</span>:{<span class="t-key">&#34;pi&#34;</span>:{<span class="t-key">&#34;target&#34;</span>:<span class="t-str">&#34;dd@pi.home&#34;</span>}},
- <span class="t-key">&#34;links&#34;</span>:{<span class="t-key">&#34;/Users/dd/Code/blog&#34;</span>:{<span class="t-key">&#34;server&#34;</span>:<span class="t-str">&#34;pi&#34;</span>,<span class="t-key">&#34;app&#34;</span>:<span class="t-str">&#34;blog&#34;</span>}}}</code></pre></div>
+<div class="code" data-lang="json"><div class="code-bar"><span>json</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code>{<span class="t-key">&#34;current&#34;</span>:<span class="t-str">&#34;prod&#34;</span>,
+ <span class="t-key">&#34;servers&#34;</span>:{<span class="t-key">&#34;prod&#34;</span>:{<span class="t-key">&#34;target&#34;</span>:<span class="t-str">&#34;deploy@203.0.113.10&#34;</span>}},
+ <span class="t-key">&#34;links&#34;</span>:{<span class="t-key">&#34;/home/you/code/blog&#34;</span>:{<span class="t-key">&#34;server&#34;</span>:<span class="t-str">&#34;prod&#34;</span>,<span class="t-key">&#34;app&#34;</span>:<span class="t-str">&#34;blog&#34;</span>}}}</code></pre></div>
 <p>Manage them with <code>server init</code>, <code>server add</code>, <code>server list</code>, <code>server use</code>
 and <code>server remove</code>. Resolution: <code>--server</code> flag, then the server of the
 folder link, then the current server.</p>

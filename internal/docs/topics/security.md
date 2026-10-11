@@ -11,7 +11,7 @@ DokWalt is a single-admin tool: one person, one or a few servers, many sites.
 | Internet scanners and attackers reaching the server | Someone who can log in over SSH as you (that is root) |
 | Secrets leaking through the repository | Malicious images you choose to deploy |
 | Databases and internal ports exposed by accident | Physical access to an unencrypted disk |
-| A copied `dokwalt.db` or backup revealing config values | A compromised Mac with an unlocked SSH agent |
+| A copied `dokwalt.db` or backup revealing config values | A compromised computer with an unlocked SSH agent |
 | One app reaching another app (database or web service) | Vulnerabilities inside your own applications |
 
 The whole design reduces to two doors: **SSH (22)** for you, **Caddy (80/443)** for visitors.
@@ -39,7 +39,7 @@ checked could be bypassed by that same user with one `docker` command: prompts w
 boundary. What actually protects the server is the SSH key, so protect it:
 
 - a passphrase-protected Ed25519 key, or a hardware-backed agent (Secretive, 1Password, YubiKey);
-- limited agent lifetimes, e.g. `ssh-add -t 8h`, so an unattended Mac is not an open door;
+- limited agent lifetimes, e.g. `ssh-add -t 8h`, so an unattended computer is not an open door;
 - `PasswordAuthentication no` and `PermitRootLogin no` on the server;
 - no port 22 forwarded from home; reach a home server over a VPN such as Tailscale.
 
@@ -84,7 +84,7 @@ boundary. What actually protects the server is the SSH key, so protect it:
 - Caddy's admin API is a **Unix socket** (`/var/lib/dokwalt/caddy/run/admin.sock`), never TCP
   port 2019. Its access and TLS logs go to another Unix socket read by the daemon
   (`access.sock`) and are only aggregated into metrics, never written to disk.
-- **Databases are never public.** `dokwalt db:connect` opens a listener on your Mac and tunnels
+- **Databases are never public.** `dokwalt db:connect` opens a listener on your computer and tunnels
   it through SSH with `dokwalt dial-stdio --tcp` to the database container. Client passwords are
   passed through `PGPASSWORD`, `MYSQL_PWD` or `REDISCLI_AUTH`, never on the command line.
 
@@ -129,7 +129,7 @@ dokwalt`). It only accepts requests on its socket, i.e. from you over SSH.
   rollback runs exactly the same bytes, as long as the image wasn't pruned.
 - **Registry images** (e.g. `postgres:16`) are **not** pinned by digest: they get `pull_policy:
   missing` and are pulled only if absent on the server. Pin a specific tag if that matters.
-- **Builds happen on your Mac.** No CI system holds credentials; nothing builds on the server.
+- **Builds happen on your computer.** No CI system holds credentials; nothing builds on the server.
   Private registries: `sudo docker login` on the server (the daemon uses root's Docker config).
 
 ## No telemetry
@@ -145,7 +145,7 @@ registries you pull from, your alert webhooks (`https://` required), OS/Docker r
   definition changed (about a 1 s blip). It takes no database backup: make your own first.
 - `dokwalt doctor` warns (check *Versions*) when the CLI and the daemon builds differ.
 - OS and Docker security fixes: `unattended-upgrades` with a nightly reboot window (see
-  `dokwalt docs raspberry-pi` or `dokwalt docs vps`).
+  `dokwalt docs server`).
 
 ## Checklist
 
@@ -155,5 +155,4 @@ registries you pull from, your alert webhooks (`https://` required), OS/Docker r
 4. `secret.key` and backups are stored off the server, apart from each other.
 5. No `.env` or `apps:export` file is committed or lying around.
 
-See also: `dokwalt docs config`, `dokwalt docs databases`, `dokwalt docs raspberry-pi`,
-`dokwalt docs vps`.
+See also: `dokwalt docs config`, `dokwalt docs databases`, `dokwalt docs server`.

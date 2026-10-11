@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <title>Deploying · DokWalt docs</title>
-  <meta name="description" content="How dokwalt deploy builds on your Mac, ships only changed images and swaps versions with zero downtime.">
+  <meta name="description" content="How dokwalt deploy builds on your computer, ships only changed images and swaps versions with zero downtime.">
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -86,7 +86,7 @@
     
       <p class="side-group">Servers</p>
       <ul>
-        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+        <li><a href="/docs/server/">Setting up a server</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
       </ul>
     
       <p class="side-group">Reference</p>
@@ -101,7 +101,7 @@
         <header class="doc-head">
           <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Deploy &amp; ship</p>
           <h1>Deploying</h1>
-          <p class="doc-lead">How <code>dokwalt deploy</code> builds on your Mac, ships only changed images and swaps versions with zero downtime.</p>
+          <p class="doc-lead">How <code>dokwalt deploy</code> builds on your computer, ships only changed images and swaps versions with zero downtime.</p>
           <div class="doc-meta">
             <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs deploy</span>
             <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/deploy.md" rel="noopener">Edit on GitHub</a>
@@ -117,7 +117,7 @@
 <p>Without <code>-f</code>, compose's own defaults apply (<code>compose.yaml</code>,
 <code>docker-compose.yml</code>). <code>-f</code> is repeatable.</p>
 <h2 id="what-happens-step-by-step">What happens, step by step</h2>
-<p>On your Mac:</p>
+<p>On your computer:</p>
 <ol>
 <li><strong>Read the compose file</strong> with
 <code>docker compose config --no-interpolate --format json</code>. Your local
@@ -163,7 +163,7 @@ stage. Registry images (e.g. <code>postgres</code>) are not pruned.</li>
 the server if absent, referenced by tag (not pinned by digest).</p>
 <h2 id="sample-output">Sample output</h2>
 <div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-m</span> <span class="t-str">&#34;new homepage&#34;</span>
-<span class="t-cmd">◆</span> Deploying blog  to pi (linux/arm64)
+<span class="t-cmd">◆</span> Deploying blog  to prod (linux/arm64)
 <span class="t-ok">✓</span> Built migrate, web, worker 23.4s
 <span class="t-ok">✓</span> Uploaded 12.8 MiB in 1.9s
 ! web: published ports removed — traffic reaches services only through the proxy (use `dokwalt domains:add` or `dokwalt db:connect`)
@@ -254,7 +254,7 @@ release):</p>
 <span class="t-cmd">dokwalt</span> healthcheck:set <span class="t-flag">--service</span> web <span class="t-flag">--path</span> /healthz <span class="t-flag">--timeout</span> 120s
 <span class="t-cmd">dokwalt</span> healthcheck:unset <span class="t-flag">--service</span> web       <span class="t-com"># back to GET / &lt; 500</span></code></pre></div>
 <h2 id="deploying-and-going-offline">Deploying and going offline</h2>
-<p>The build and upload need your Mac. Once the deploy request is sent, the
+<p>The build and upload need your computer. Once the deploy request is sent, the
 daemon finishes alone: closing the laptop or losing Wi-Fi does not abort
 it. Check the result later with <code>dokwalt releases</code>. If the upload is
 interrupted, run <code>dokwalt deploy</code> again; images already on the server

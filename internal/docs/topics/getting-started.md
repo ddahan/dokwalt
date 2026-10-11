@@ -4,12 +4,14 @@
 
 ## What you need
 
-On your Mac:
+On your computer (macOS or Linux; on Windows, inside WSL):
 
-- **Docker Desktop (Docker 28+) or OrbStack** with the Compose v2 plugin.
-  DokWalt builds your images locally, so `docker compose version` must
-  work. Docker 28+ is needed for `docker save --platform`.
-- An **SSH key** that can log in to the server (`ssh dd@pi.home` works).
+- **Docker 28+** with the Compose v2 plugin: Docker Engine on Linux,
+  Docker Desktop or OrbStack on macOS, Docker Desktop with the WSL 2
+  backend on Windows. DokWalt builds your images locally, so
+  `docker compose version` must work. Docker 28+ is needed for
+  `docker save --platform`.
+- An **SSH key** that can log in to the server (`ssh deploy@203.0.113.10` works).
   Agent keys are tried first, then identity files. `~/.ssh/config`
   aliases and `ProxyJump` are honoured.
 - A project folder with a `Dockerfile` and a compose file
@@ -17,8 +19,9 @@ On your Mac:
 
 On the server:
 
-- A 64-bit Linux with systemd (Debian, Ubuntu, Raspberry Pi OS), amd64
-  or arm64. 32-bit Raspberry Pi OS is refused.
+- A 64-bit Linux with systemd (Debian or Ubuntu), amd64 or arm64: a VPS
+  or your own machine. 32-bit systems are refused. Step-by-step setup and
+  hardening: `dokwalt docs server`.
 - A user with `sudo` (or root). You type the sudo password yourself.
 - Ports **80 and 443** reachable from the internet (router port forwarding
   at home, firewall rules on a VPS).
@@ -44,7 +47,7 @@ for the same version, and verifies it the same way.
 ## 2. Set up the server
 
 ```bash
-dokwalt server init dd@pi.home --name pi --email you@example.com
+dokwalt server init deploy@203.0.113.10 --name prod --email you@example.com
 ```
 
 The target is `user@host`, `user@host:port` or any `~/.ssh/config`
@@ -53,24 +56,24 @@ context name (default: the host's first label, `default` for an IP). The
 first server you add becomes the current one.
 
 ```text
-◆ Installing DokWalt on dd@pi.home
+◆ Installing DokWalt on deploy@203.0.113.10
 ✓ Connecting over SSH
 ✓ Uploading dokwalt for linux/arm64 (14.2 MiB)
 ◆ Running the installer with sudo on the server (you may be asked for your password)
-[sudo] password for dd:
+[sudo] password for deploy:
 ◆ Installing DokWalt  arm64
 → Installing Docker (official get.docker.com script)
 ✓ Docker 28.4.0
 ✓ Docker Compose 2.39.2
 → Configuring Docker: live-restore (containers survive Docker restarts), bounded logs
 ✓ Docker configured
-✓ User dd can manage DokWalt (groups dokwalt, docker)
+✓ User deploy can manage DokWalt (groups dokwalt, docker)
 ✓ Installed /usr/local/bin/dokwalt
 → Waiting for the daemon
 ✓ Daemon running (systemd unit dokwalt.service, starts at boot)
 ✓ Let's Encrypt account email: you@example.com
 
-✓ dd@pi.home is ready — saved as server pi
+✓ deploy@203.0.113.10 is ready — saved as server prod
 ```
 
 What init did: upload the Linux binary, install Docker if missing (and
@@ -91,14 +94,14 @@ dokwalt apps:create blog
 ```
 
 ```text
-✓ Created blog on pi
-  Linked to /Users/dd/Code/blog
+✓ Created blog on prod
+  Linked to /home/you/code/blog
   Next: dokwalt deploy then dokwalt domains:add example.com --service web
 ```
 
 `apps:create` links the current folder by default (`--no-link` to skip;
 `dokwalt link blog` links another folder later). The link lives in
-`~/.config/dokwalt/config.json` on your Mac; nothing is written to the
+`~/.config/dokwalt/config.json` on your computer; nothing is written to the
 repository. From this folder (or any subfolder) you can omit `-a blog`.
 
 ## 4. Set config
@@ -131,7 +134,7 @@ dokwalt deploy -m "first deploy"
 ```
 
 ```text
-◆ Deploying blog  to pi (linux/arm64)
+◆ Deploying blog  to prod (linux/arm64)
 ✓ Built migrate, web, worker
 ✓ Uploaded 41.3 MiB in 7.2s
 ! web: published ports removed — traffic reaches services only through the proxy (use `dokwalt domains:add` or `dokwalt db:connect`)
@@ -208,5 +211,4 @@ Run `dokwalt` with no arguments for the full-screen dashboard.
 - Open a database shell: `dokwalt db:connect`.
 
 See also: `dokwalt docs concepts`, `dokwalt docs deploy`,
-`dokwalt docs compose`, `dokwalt docs domains`, `dokwalt docs raspberry-pi`,
-`dokwalt docs vps`.
+`dokwalt docs compose`, `dokwalt docs domains`, `dokwalt docs server`.

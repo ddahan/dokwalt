@@ -5,7 +5,6 @@
 [![Release](https://img.shields.io/github/v/release/ddahan/dokwalt)](https://github.com/ddahan/dokwalt/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Servers](https://img.shields.io/badge/servers-linux%20amd64%20%7C%20arm64-informational)
-![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi%205-ready-c51a4a)
 
 DokWalt is a single small binary. On your laptop it's a polished CLI (plus a live
 full-screen dashboard); on your server it's a ~27 MB daemon next to the Caddy
@@ -64,14 +63,14 @@ temperature crosses your threshold — and another one when it's resolved.
 ~27 MB of RAM. Nothing exposed: you talk to the server over SSH, and only the proxy
 listens on 80/443.
 
-🍓 **Raspberry Pi ready** — a complete Pi 5 guide ships with the tool
-(`dokwalt docs raspberry-pi`).
+🖥️ **Any server** — a cheap VPS or a machine at home, amd64 or arm64. One step-by-step
+setup and hardening guide ships with the tool (`dokwalt docs server`).
 
 ## 📋 Requirements
 
 | | |
 |---|---|
-| **Your computer** | macOS (Apple Silicon or Intel) or Linux, with **Docker** (Docker Desktop or OrbStack): images are built here |
+| **Your computer** | macOS or Linux (on Windows, inside WSL), with **Docker 28+** (Docker Engine, Docker Desktop or OrbStack): images are built here |
 | **Server** | Debian 12+, Ubuntu 22.04+ or Raspberry Pi OS — **64-bit** (amd64 or arm64), with systemd. 1 GB RAM is enough for a few small sites |
 | **Access** | SSH login **with a key** (`ssh you@server` works without a password) and `sudo` rights. Docker is installed for you if missing |
 | **Network** | Ports **80** and **443** reachable from the internet, and a DNS record (A/AAAA) for each domain pointing to the server |

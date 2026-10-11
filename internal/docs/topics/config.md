@@ -147,7 +147,7 @@ Consequences:
   when the volume is first initialized. Changing `DB_PASSWORD` later does
   not change the real password: change it inside the database first
   (`dokwalt db:connect`), then update config.
-- `${VAR}` is resolved on the server, never from your Mac. Defaults such
+- `${VAR}` is resolved on the server, never from your computer. Defaults such
   as `${LOG_LEVEL:-info}` work as in Compose; a missing variable without
   default warns during deploy and becomes empty.
 

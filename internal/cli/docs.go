@@ -20,7 +20,7 @@ func docsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "docs [topic]",
 		Short:   "Read the built-in documentation",
-		Example: "  dokwalt docs\n  dokwalt docs raspberry-pi\n  dokwalt docs --search rollback",
+		Example: "  dokwalt docs\n  dokwalt docs server\n  dokwalt docs --search rollback",
 		Args:    cobra.MaximumNArgs(1),
 		ValidArgsFunction: func(*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
 			var names []string

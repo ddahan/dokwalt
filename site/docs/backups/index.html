@@ -86,7 +86,7 @@
     
       <p class="side-group">Servers</p>
       <ul>
-        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+        <li><a href="/docs/server/">Setting up a server</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
       </ul>
     
       <p class="side-group">Reference</p>
@@ -139,9 +139,9 @@ Keep the default location and storage class.</li>
 <h2 id="2-set-up-dokwalt">2. Set up DokWalt</h2>
 <div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> backup:setup <span class="t-flag">--r2-account</span> 1a2b3c4d… <span class="t-flag">--bucket</span> backups <span class="t-flag">--access-key</span> 7f8e…
 ? Secret access key: ••••••••
-<span class="t-ok">✓</span> Backups set up on pi
+<span class="t-ok">✓</span> Backups set up on prod
 
-Storage     backups/dokwalt/pi  https://1a2b3c4d….r2.cloudflarestorage.com
+Storage     backups/dokwalt/prod  https://1a2b3c4d….r2.cloudflarestorage.com
 Schedule    every day at 03:00 CEST · next Sun 11 Oct 03:00
 Retention   the newest backup of the last 7 days and 4 weeks
 Last run    never
@@ -222,7 +222,7 @@ database with the same name. <code>--confirm &lt;database&gt;</code> skips the q
 </ul>
 <h2 id="rebuild-a-lost-server">Rebuild a lost server</h2>
 <ol>
-<li>Prepare the new server and run <code>dokwalt server init</code> (<a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a> or <a class="xref" href="/docs/vps/"><code>dokwalt docs vps</code></a>).</li>
+<li>Prepare the new server and run <code>dokwalt server init</code> (<a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a>).</li>
 <li>Point the new server at the old backups:
 <code>dokwalt backup:setup … --prefix dokwalt/&lt;old hostname&gt;</code>, then
 <code>dokwalt backup:download latest dokwalt.db</code> (or download it from the R2

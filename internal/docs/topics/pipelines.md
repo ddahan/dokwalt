@@ -66,7 +66,7 @@ dokwalt deploy -s staging -m "new checkout flow"
 ```
 
 ```text
-◆ Deploying blog (staging)  to pi (linux/arm64)
+◆ Deploying blog (staging)  to prod (linux/arm64)
 ✓ Built migrate, web, worker
 ✓ Uploaded 12.8 MiB in 1.9s
 ✓ Services — db: keeps its data (named volume pgdata), migrate: runs once per deploy, web: zero-downtime swap, worker: zero-downtime swap

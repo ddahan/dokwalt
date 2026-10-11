@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Setting up a server · DokWalt docs</title>
+  <meta name="description" content="From a fresh Debian or Ubuntu machine, a VPS or your own, to a hardened, reboot-proof DokWalt server.">
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070c">
+  <meta name="dokwalt-version" content="v0.3.0">
+  <script>
+    
+    (function () {
+      var t; try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.querySelector('meta[name="theme-color"]').content = "#f7f7fb";
+    })();
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs/docs.css">
+  <script src="/docs/docs.js" defer></script>
+
+</head>
+<body class="docs-body">
+  <div class="noise" aria-hidden="true"></div>
+  
+  <header class="nav scrolled docs-nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="DokWalt home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg><span>DokWalt</span></a>
+      <a class="docs-badge" href="/docs/">Docs</a>
+      <button class="search-trigger" type="button" data-search aria-label="Search the docs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search the docs…</span><kbd class="kbd-k">⌘K</kbd>
+      </button>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/ddahan/dokwalt" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="docs-bar">
+    <button class="side-toggle" type="button" aria-controls="docs-side" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
+    <span class="docs-bar-title">Setting up a server</span>
+  </div>
+  <div class="docs-shell">
+    <aside class="docs-side" id="docs-side">
+  <nav class="side-nav" aria-label="Documentation">
+    <a class="side-home" href="/docs/">
+      <span>Overview</span><span class="ver">v0.3.0</span>
+    </a>
+    
+      <p class="side-group">Start here</p>
+      <ul>
+        <li><a href="/docs/getting-started/">Getting started</a></li><li><a href="/docs/concepts/">Concepts</a></li>
+      </ul>
+    
+      <p class="side-group">Deploy &amp; ship</p>
+      <ul>
+        <li><a href="/docs/deploy/">Deploying</a></li><li><a href="/docs/compose/">Docker Compose apps</a></li><li><a href="/docs/config/">Config and secrets</a></li><li><a href="/docs/domains/">Domains &amp; HTTPS</a></li><li><a href="/docs/releases/">Releases &amp; rollback</a></li><li><a href="/docs/pipelines/">Pipelines: staging and promote</a></li>
+      </ul>
+    
+      <p class="side-group">Data</p>
+      <ul>
+        <li><a href="/docs/databases/">Databases</a></li><li><a href="/docs/backups/">Backups</a></li>
+      </ul>
+    
+      <p class="side-group">Operate</p>
+      <ul>
+        <li><a href="/docs/logs/">Logs</a></li><li><a href="/docs/monitoring/">Monitoring</a></li><li><a href="/docs/alerts/">Alerts</a></li><li><a href="/docs/troubleshooting/">Troubleshooting</a></li>
+      </ul>
+    
+      <p class="side-group">Servers</p>
+      <ul>
+        <li><a href="/docs/server/" class="active" aria-current="page">Setting up a server</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+      </ul>
+    
+      <p class="side-group">Reference</p>
+      <ul>
+        <li><a href="/docs/commands/">Command reference</a></li>
+      </ul>
+    
+  </nav>
+</aside>
+    <main class="docs-main">
+      <article>
+        <header class="doc-head">
+          <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Servers</p>
+          <h1>Setting up a server</h1>
+          <p class="doc-lead">From a fresh Debian or Ubuntu machine, a VPS or your own, to a hardened, reboot-proof DokWalt server.</p>
+          <div class="doc-meta">
+            <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs server</span>
+            <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/server.md" rel="noopener">Edit on GitHub</a>
+          </div>
+        </header>
+        <div class="prose">
+<p>DokWalt runs on any 64-bit Linux machine with systemd, <strong>amd64 or arm64</strong>: a VPS, a mini PC, a
+home server or a single-board computer. Each step is tagged <strong>[by hand]</strong> or <strong>[server init]</strong>
+(done for you by <code>dokwalt server init</code>). Commands run on the server unless the block starts with
+<code># on your computer</code>. Where a rented server and a machine at home differ, the step says so.</p>
+<h2 id="1-choose-the-machine-by-hand">1. Choose the machine [by hand]</h2>
+<table>
+<thead>
+<tr>
+<th>RAM</th>
+<th>Good for</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 GB</td>
+<td>4–6 small sites with databases</td>
+<td>Add swap (step 4)</td>
+</tr>
+<tr>
+<td>2 GB</td>
+<td>~10 small sites</td>
+<td>Comfortable default</td>
+</tr>
+<tr>
+<td>4 GB</td>
+<td>10–20 sites</td>
+<td>Room for several Postgres</td>
+</tr>
+<tr>
+<td>8 GB+</td>
+<td>20–30+ sites</td>
+<td>Heavier stacks: JVM, Elasticsearch</td>
+</tr>
+</tbody>
+</table>
+<p>DokWalt's overhead is ~73 MiB (daemon ~27 MiB RSS, ~9 MiB of it heap; Caddy ~46 MiB). Both disable
+transparent huge pages for themselves, so leave the system THP setting alone. A small dynamic site
+with its own Postgres needs 150–400 MB, a static site 10–30 MB: sites run out of RAM long before
+CPU. During a deploy the old and new versions of an app's stateless services run side by side
+(about 10–15 s with the default 10 s drain), so keep headroom for your largest app twice.</p>
+<p><strong>Disk:</strong> 20 GB minimum. Per stage, the images of the current release and the last 5 releases are
+kept (older ones pruned after each deploy).</p>
+<p><strong>Your own hardware:</strong></p>
+<ul>
+<li><strong>An SSD, not an SD card or a USB stick.</strong> Docker layers, SQLite, logs and the journal write
+constantly. Flash cards have weak wear-levelling and no power-loss protection; a worn card fails
+silently (read-only or corrupt filesystem), the classic &quot;broken after reboot&quot;.</li>
+<li><strong>Wired Ethernet</strong> rather than Wi-Fi, and a power supply rated for the board. A small UPS rides
+out short power cuts, but DokWalt doesn't need one (step 4, <em>Power cuts</em>).</li>
+</ul>
+<h2 id="2-operating-system-by-hand">2. Operating system [by hand]</h2>
+<p>Use <strong>Debian 12 / 13</strong> or <strong>Ubuntu 24.04 LTS</strong> (or newer LTS), 64-bit, as a minimal server image:
+no desktop. Debian-based distributions built for a specific board work too. 32-bit systems are
+refused. On a VPS, pick the provider's image. On your own machine, install the server image with
+the OpenSSH server enabled. Then bring it up to date:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">sudo</span> <span class="t-cmd">apt</span> update &amp;&amp; <span class="t-cmd">sudo</span> <span class="t-cmd">apt</span> full-upgrade <span class="t-flag">-y</span> &amp;&amp; <span class="t-cmd">sudo</span> <span class="t-cmd">reboot</span></code></pre></div>
+<h2 id="3-your-user-and-ssh-access-by-hand">3. Your user and SSH access [by hand]</h2>
+<p>Create a key on your computer if you have none (<code>ssh-keygen -t ed25519</code>). Log in with that key as a
+normal user with <code>sudo</code>, never as root:</p>
+<ul>
+<li><strong>VPS:</strong> add your public key when creating the server. Most providers inject it with
+cloud-init into a default user: <code>ubuntu</code> on Ubuntu, <code>debian</code> (or <code>admin</code>) on Debian images.</li>
+<li><strong>Root-only images:</strong> create your own user once, then never log in as root again:</li>
+</ul>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># as root, once</span>
+<span class="t-cmd">adduser</span> deploy &amp;&amp; <span class="t-cmd">usermod</span> <span class="t-flag">-aG</span> sudo deploy
+<span class="t-cmd">install</span> <span class="t-flag">-d</span> <span class="t-flag">-m</span> 700 <span class="t-flag">-o</span> deploy <span class="t-flag">-g</span> deploy /home/deploy/.ssh
+<span class="t-cmd">install</span> <span class="t-flag">-m</span> 600 <span class="t-flag">-o</span> deploy <span class="t-flag">-g</span> deploy ~/.ssh/authorized_keys /home/deploy/.ssh/</code></pre></div>
+<ul>
+<li><strong>Your own machine:</strong> create the user in the installer, then copy your key:
+<code>ssh-copy-id deploy@192.168.1.50</code> from your computer.</li>
+</ul>
+<p>Cloud-init users often have passwordless sudo; <code>server init</code> then simply won't prompt. Set a
+password anyway (<code>sudo passwd deploy</code>) so you can use the provider's web console or a local screen.</p>
+<p>Give the server an alias in <code>~/.ssh/config</code> on your computer (DokWalt resolves it with <code>ssh -G</code>;
+<code>DOKWALT_SSH_CONFIG</code> selects another file), then <code>ssh prod</code> once to record the host key
+(otherwise DokWalt shows the fingerprint and asks):</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code>Host prod
+  HostName 203.0.113.10
+  User deploy</code></pre></div>
+<h2 id="4-system-configuration-by-hand">4. System configuration [by hand]</h2>
+<p><strong>Memory cgroup.</strong> Needed for memory limits, <code>docker stats</code> and per-service memory metrics. It is
+on by default on Debian 12+ and Ubuntu 24.04 (cgroup v2), but some kernels built for ARM boards
+disable it; <code>server init</code> warns and <code>dokwalt doctor</code> (<em>Memory cgroup</em>) flags it when off:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">grep</span> memory /sys/fs/cgroup/cgroup.controllers   <span class="t-com"># must print a line</span></code></pre></div>
+<p>If it prints nothing, add <code>cgroup_enable=memory cgroup_memory=1</code> to the kernel command line (the
+file depends on the bootloader; it is a single line) and reboot.</p>
+<p><strong>Swap.</strong> On a 1–2 GB machine, swap turns an out-of-memory kill during a deploy into a short
+slowdown. A plain swap file is fine on a VPS or an SSD:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">sudo</span> <span class="t-cmd">fallocate</span> <span class="t-flag">-l</span> 1G /swapfile &amp;&amp; <span class="t-cmd">sudo</span> <span class="t-cmd">chmod</span> 600 /swapfile
+<span class="t-cmd">sudo</span> <span class="t-cmd">mkswap</span> /swapfile &amp;&amp; <span class="t-cmd">sudo</span> <span class="t-cmd">swapon</span> /swapfile
+<span class="t-cmd">echo</span> <span class="t-str">&#39;/swapfile none swap sw 0 0&#39;</span> | <span class="t-cmd">sudo</span> <span class="t-cmd">tee</span> <span class="t-flag">-a</span> /etc/fstab
+<span class="t-cmd">echo</span> <span class="t-str">&#39;vm.swappiness=10&#39;</span> | <span class="t-cmd">sudo</span> <span class="t-cmd">tee</span> /etc/sysctl.d/99-swappiness.conf &amp;&amp; <span class="t-cmd">sudo</span> <span class="t-cmd">sysctl</span> <span class="t-flag">--system</span></code></pre></div>
+<p>On flash storage you'd rather not wear, use zram instead: compressed swap in RAM, zero disk writes.</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">sudo</span> <span class="t-cmd">apt</span> install <span class="t-flag">-y</span> zram-tools &amp;&amp; <span class="t-cmd">printf</span> <span class="t-str">&#39;ALGO=zstd\nPERCENT=25\n&#39;</span> | <span class="t-cmd">sudo</span> <span class="t-cmd">tee</span> /etc/default/zramswap
+<span class="t-cmd">sudo</span> <span class="t-cmd">systemctl</span> restart zramswap &amp;&amp; <span class="t-cmd">swapon</span> <span class="t-flag">--show</span></code></pre></div>
+<p><strong>Bounded logs.</strong> Cap the journal: <code>persistent</code> keeps the last boot's logs (<code>journalctl -b -1</code>).
+Container logs are capped by DokWalt (<code>local</code> driver, 10 MB × 3 each).</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">sudo</span> <span class="t-cmd">mkdir</span> <span class="t-flag">-p</span> /etc/systemd/journald.conf.d
+<span class="t-cmd">printf</span> <span class="t-str">&#39;[Journal]\nStorage=persistent\nSystemMaxUse=100M\nRuntimeMaxUse=50M\n&#39;</span> \
+  | <span class="t-cmd">sudo</span> <span class="t-cmd">tee</span> /etc/systemd/journald.conf.d/dokwalt.conf
+<span class="t-cmd">sudo</span> <span class="t-cmd">systemctl</span> restart systemd-journald</code></pre></div>
+<p><strong>Time sync.</strong> A wrong clock breaks TLS and Let's Encrypt. <code>timedatectl</code> must say <code>System clock synchronized: yes</code> (<code>doctor</code> checks it); if NTP is inactive, <code>sudo timedatectl set-ntp true</code>.</p>
+<p><strong>Hardware watchdog</strong> (most physical machines; usually absent in VMs). If <code>wdctl</code> finds one, let
+systemd feed it: a frozen kernel then resets the machine by itself. DokWalt's own unit adds
+<code>WatchdogSec=60</code> either way: a daemon stuck for 10 minutes gets restarted.</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">sudo</span> <span class="t-cmd">mkdir</span> <span class="t-flag">-p</span> /etc/systemd/system.conf.d
+<span class="t-cmd">printf</span> <span class="t-str">&#39;[Manager]\nRuntimeWatchdogSec=15s\nRebootWatchdogSec=2min\n&#39;</span> \
+  | <span class="t-cmd">sudo</span> <span class="t-cmd">tee</span> /etc/systemd/system.conf.d/watchdog.conf &amp;&amp; <span class="t-cmd">sudo</span> <span class="t-cmd">systemctl</span> daemon-reexec &amp;&amp; <span class="t-cmd">wdctl</span></code></pre></div>
+<p><strong>Power cuts</strong> (your own machine). Set the firmware's <em>restore on AC power loss</em> option to
+<em>power on</em>, so the machine boots by itself when power returns. Nothing else to enable: ext4 on an
+SSD, SQLite in WAL mode, restart policies and the reconciler do the rest.</p>
+<h2 id="5-networking-by-hand">5. Networking [by hand]</h2>
+<p>Every domain needs an A record (and optionally AAAA) pointing at the server, and <strong>ports 80/tcp</strong>
+(Let's Encrypt HTTP-01 and the HTTPS redirect), <strong>443/tcp</strong> (HTTPS) and optionally <strong>443/udp</strong>
+(HTTP/3) reachable from the internet. Don't expose SSH more than you need.</p>
+<h3 id="on-a-vps">On a VPS</h3>
+<ul>
+<li><strong>Public IP, no NAT:</strong> no port forwarding, no dynamic DNS. Point each domain's A record at the
+server's IPv4 (<code>curl -4 -s https://ifconfig.me</code> to confirm it).</li>
+<li><strong>Provider firewall / security groups:</strong> allow <code>22/tcp</code> (ideally only from your IP), <code>80/tcp</code>,
+<code>443/tcp</code>, <code>443/udp</code>. It sits outside the VM, so Docker cannot bypass it: a good second layer
+on top of ufw (step 6).</li>
+</ul>
+<h3 id="at-home-behind-a-router">At home, behind a router</h3>
+<ul>
+<li><strong>Fixed LAN address:</strong> a DHCP reservation on the router (the MAC address is in <code>ip link</code>), e.g.
+192.168.1.50. Better than a static IP on the machine: the router stays the single source of truth.</li>
+<li><strong>Port forwarding</strong> of 80/tcp, 443/tcp and 443/udp to that address. Don't forward 22; use
+Tailscale for remote SSH.</li>
+<li><strong>Changing public IP:</strong> the router's DDNS client, or <code>ddclient</code> with your DNS provider's API
+(Cloudflare is supported) updating the A/AAAA records. Keep TTLs low (300 s).</li>
+<li><strong>CGNAT:</strong> compare the router's WAN IP with <code>curl -4 -s https://ifconfig.me</code>. If they differ, or
+the WAN IP is in 100.64.0.0/10, forwarding cannot work. Ask the ISP for a public IPv4, or:
+<ul>
+<li><strong>Cloudflare Tunnel</strong> (<code>cloudflared</code>, free): Cloudflare terminates visitor TLS at its edge.
+DokWalt only does HTTP-01 (no DNS-01), so use two ingress rules per host: path
+<code>^/\.well-known/acme-challenge/</code> → <code>http://localhost:80</code>, everything else →
+<code>https://localhost:443</code> with <code>originServerName: &lt;host&gt;</code>. The <code>domains:add</code> check may report
+that the domain isn't reachable (DNS points at Cloudflare): expected, the domain is added anyway.</li>
+<li><strong>Tailscale Funnel</strong> serves only <code>*.ts.net</code> names on 443 and terminates TLS itself (no port
+80, no custom domains): demos only. Plain Tailscale suits private admin access (SSH, DokWalt CLI).</li>
+</ul>
+</li>
+</ul>
+<h3 id="ipv6">IPv6</h3>
+<p>Publish AAAA records only if IPv6 really works end to end: Let's Encrypt prefers IPv6, so a broken
+AAAA record means no certificate. On a VPS, check it is configured and allowed in the provider
+firewall. At home, use the stable address from <code>ip -6 addr show scope global</code>, allow inbound
+80/443 to it in the router's IPv6 firewall, and let DDNS follow prefix changes. Docker needs no
+IPv6 networking: Caddy listens on both.</p>
+<h2 id="6-hardening-by-hand">6. Hardening [by hand]</h2>
+<p><strong>SSH keys only, no root; firewall: SSH (throttled by <code>ufw limit</code>) and web.</strong> Test a new login
+before closing your session. Name the drop-in <code>10-…</code> so it wins: sshd keeps the first value it
+reads, and Ubuntu cloud images ship <code>50-cloud-init.conf</code>, which may enable passwords.</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">printf</span> <span class="t-str">&#39;PasswordAuthentication no\nKbdInteractiveAuthentication no\nPermitRootLogin no\nMaxAuthTries 3\n&#39;</span> \
+  | <span class="t-cmd">sudo</span> <span class="t-cmd">tee</span> /etc/ssh/sshd_config.d/10-dokwalt.conf &amp;&amp; <span class="t-cmd">sudo</span> <span class="t-cmd">sshd</span> <span class="t-flag">-t</span> &amp;&amp; <span class="t-cmd">sudo</span> <span class="t-cmd">systemctl</span> reload ssh
+<span class="t-cmd">sudo</span> <span class="t-cmd">apt</span> install <span class="t-flag">-y</span> ufw &amp;&amp; <span class="t-cmd">sudo</span> <span class="t-cmd">ufw</span> default deny incoming &amp;&amp; <span class="t-cmd">sudo</span> <span class="t-cmd">ufw</span> default allow outgoing
+<span class="t-cmd">sudo</span> <span class="t-cmd">ufw</span> limit 22/tcp; <span class="t-cmd">for</span> p in 80/tcp 443/tcp 443/udp; <span class="t-cmd">do</span> sudo ufw allow $p; <span class="t-cmd">done</span>; <span class="t-cmd">sudo</span> <span class="t-cmd">ufw</span> enable</code></pre></div>
+<p><strong>The Docker gotcha:</strong> container-published ports go through Docker's own iptables rules and
+bypass ufw, so <code>ports: [&#34;5432:5432&#34;]</code> would be public despite <code>ufw deny</code>. DokWalt avoids it by
+design: it strips <code>ports:</code> from your compose file (with a warning), only <code>dokwalt-caddy</code>
+publishes 80/443, and apps stay on private <code>dw-&lt;app&gt;-&lt;stage&gt;</code> networks (Caddy joins each; apps
+can't reach each other). <code>sudo ss -tlnp</code> should list only sshd on 22 and docker-proxy on 80/443.</p>
+<p><strong>Automatic security updates</strong>, rebooting at 04:00 when needed. Safe with DokWalt: reboots are
+what it is built and tested for, and a site-down alert fires if a site doesn't come back.
+<code>unattended-upgrades</code> is preinstalled on Ubuntu and most Debian cloud images.</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">sudo</span> <span class="t-cmd">apt</span> install <span class="t-flag">-y</span> unattended-upgrades &amp;&amp; <span class="t-cmd">sudo</span> <span class="t-cmd">dpkg-reconfigure</span> <span class="t-flag">-plow</span> unattended-upgrades
+<span class="t-cmd">printf</span> <span class="t-str">&#39;Unattended-Upgrade::Automatic-Reboot &#34;true&#34;;\nUnattended-Upgrade::Automatic-Reboot-Time &#34;04:00&#34;;\n&#39;</span> \
+  | <span class="t-cmd">sudo</span> <span class="t-cmd">tee</span> /etc/apt/apt.conf.d/52local</code></pre></div>
+<p><strong>fail2ban?</strong> 40–60 MB of Python against password guessing that key-only SSH makes moot; <code>ufw limit</code>, <code>MaxAuthTries</code> and OpenSSH ≥ 9.8's <code>PerSourcePenalties</code> suffice. <strong>Disable what you don't
+use</strong> to save RAM: services such as <code>bluetooth</code>, <code>avahi-daemon</code>, <code>cups</code> or <code>ModemManager</code> where
+present, and <code>snapd</code> on Ubuntu if you don't use snaps (<code>sudo apt purge snapd</code>).</p>
+<p><strong>DokWalt's attack surface:</strong> no network port, only <code>/run/dokwalt/dokwalt.sock</code> (root:dokwalt,
+0660) reached through your SSH login. <code>dokwalt</code> and <code>docker</code> members are root-equivalent: admin only.</p>
+<h2 id="7-install-dokwalt-server-init">7. Install DokWalt [server init]</h2>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># on your computer</span>
+<span class="t-cmd">dokwalt</span> server init deploy@203.0.113.10 <span class="t-flag">--name</span> prod <span class="t-flag">--email</span> you@example.com
+<span class="t-cmd">dokwalt</span> doctor</code></pre></div>
+<p><code>server init</code> detects the architecture (amd64 or arm64) and uploads the matching binary
+(<code>--binary</code>, <code>dokwalt_linux_&lt;arch&gt;</code> next to the CLI or in <code>dist/</code>, else the release download
+checked against <code>checksums.txt</code>). It then runs <code>sudo … server bootstrap</code> in a terminal session
+(you type your password once; none with passwordless sudo or root), which:</p>
+<ul>
+<li>installs Docker with the official get.docker.com script if missing (enabled at boot), and
+<code>docker-compose-plugin</code> via apt if missing. A Docker you installed yourself is kept;</li>
+<li>merges <code>live-restore: true</code> (plus <code>log-driver: local</code> if none is set) into
+<code>/etc/docker/daemon.json</code>, restarting Docker only if that file changed;</li>
+<li>warns if the memory cgroup is off (step 4);</li>
+<li>creates group <code>dokwalt</code> and adds you to <code>dokwalt</code> and <code>docker</code>;</li>
+<li>installs <code>/usr/local/bin/dokwalt</code> and <code>/var/lib/dokwalt</code>, writes, enables and starts
+<code>dokwalt.service</code>, waits for its socket and stores the <code>--email</code> (Let's Encrypt notices).</li>
+</ul>
+<p>The daemon then creates <code>secret.key</code> and starts Caddy. Re-running <code>server init</code>, or <code>dokwalt server upgrade</code>, is safe at any time (idempotent).</p>
+<p>Pass <code>--name</code>: without it an IP target is saved as <code>default</code>. The first server becomes the
+current one; with several use <code>--server prod</code> or <code>dokwalt server use prod</code>. Any <code>~/.ssh/config</code>
+alias or <code>user@host:port</code> works as a target. Private registries: <code>sudo docker login</code> on the
+server; the unit sets <code>HOME=/root</code>, so deploys use root's Docker credentials.</p>
+<h3 id="arm64-servers">arm64 servers</h3>
+<p>Images are built on your computer for the server's architecture: natively on an arm64 computer
+(Apple Silicon, arm64 Linux), under emulation on an amd64 one (slower; Docker Desktop includes
+it, with Docker Engine on Linux install it once with
+<code>docker run --privileged --rm tonistiigi/binfmt --install arm64</code>). Images pulled from a registry
+must publish <code>linux/arm64</code> too. Check before deploying:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># on your computer</span>
+<span class="t-cmd">docker</span> manifest inspect some/image:tag | <span class="t-cmd">grep</span> <span class="t-flag">-c</span> arm64      <span class="t-com"># 0 = no arm64 variant</span></code></pre></div>
+<p>No arm64 variant? Use another maintained image, or give the service a <code>build:</code> pointing at the
+upstream source: DokWalt builds it on your computer for <code>linux/arm64</code>. Don't run amd64 images under
+QEMU on the server (5–20× slower). Wrong architecture shows as <code>exec format error</code>.</p>
+<h2 id="8-health-and-alerts">8. Health and alerts</h2>
+<p><code>dokwalt doctor</code>, <code>dokwalt top</code> and the dashboard show CPU, memory, disk and load. Where the
+machine exposes a thermal sensor (most physical machines, rarely VMs), they show the temperature
+too, and the temperature alert fires above 80 °C by default; boards whose firmware reports CPU
+throttling or under-voltage get a throttling alert as well. Without a sensor these lines and
+alerts are simply omitted. Disk and memory alerts (default 90 %) matter everywhere:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> alerts:add discord &lt;webhook-url&gt;
+<span class="t-cmd">dokwalt</span> alerts:set disk=85 memory=85 temperature=75</code></pre></div>
+<p>See <a class="xref" href="/docs/alerts/"><code>dokwalt docs alerts</code></a> and <a class="xref" href="/docs/monitoring/"><code>dokwalt docs monitoring</code></a>.</p>
+<h2 id="9-backups-and-restore">9. Backups and restore</h2>
+<p><strong>Databases and DokWalt's state:</strong> <code>dokwalt backup:setup</code> sends them to Cloudflare R2 (or any S3
+storage) every night (<a class="xref" href="/docs/backups/"><code>dokwalt docs backups</code></a>), off the server: a dead disk doesn't take the data
+with it. Keep a copy of <code>/var/lib/dokwalt/secret.key</code> apart from the bucket.</p>
+<p><strong>Whole machine:</strong> on a VPS, provider snapshots are the easiest full backup: schedule them daily or
+weekly. A snapshot of a running server is crash-consistent: databases recover as after a power cut.</p>
+<p><strong>By hand:</strong> back up <code>/var/lib/dokwalt/dokwalt.db</code> (apps, releases, domains, encrypted config),
+<code>secret.key</code> (without it config cannot be decrypted), the Docker volume <code>dokwalt-caddy-data</code>
+(certificates and ACME account: no re-issuance, no rate limits after a restore) and the <code>dw-*</code>
+volumes (databases, uploads). Config values exist nowhere else on disk; <code>caddy/config/caddy.json</code>
+is regenerated.</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">sudo</span> <span class="t-cmd">apt</span> install <span class="t-flag">-y</span> sqlite3; B=/srv/backup/$(date <span class="t-cmd">+%F)</span>; <span class="t-cmd">sudo</span> <span class="t-cmd">mkdir</span> <span class="t-flag">-p</span> $B
+<span class="t-cmd">sudo</span> <span class="t-cmd">sqlite3</span> /var/lib/dokwalt/dokwalt.db <span class="t-str">&#34;.backup $B/dokwalt.db&#34;</span>
+<span class="t-cmd">sudo</span> <span class="t-cmd">cp</span> /var/lib/dokwalt/secret.key $B/
+<span class="t-cmd">for</span> v in dokwalt-caddy-data $(docker volume ls <span class="t-flag">-q</span> <span class="t-flag">--filter</span> name=dw-); <span class="t-cmd">do</span>
+  <span class="t-cmd">docker</span> run <span class="t-flag">--rm</span> <span class="t-flag">-v</span> $v:/v:ro <span class="t-flag">-v</span> $B:/b alpine tar czf /b/$v.tgz <span class="t-flag">-C</span> /v .
+<span class="t-cmd">done</span></code></pre></div>
+<p>A tar of a live database may be inconsistent: also <code>pg_dump</code> the URL printed by <code>dokwalt db:connect -a blog --service db --tunnel-only</code>. Copy backups off the server; treat <code>secret.key</code> like a password.</p>
+<p><strong>Restore onto a fresh server:</strong> steps 1–7 (<code>ssh-keygen -R &lt;host&gt;</code> on your computer), backup in <code>$B</code>, then:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">sudo</span> <span class="t-cmd">systemctl</span> stop dokwalt &amp;&amp; <span class="t-cmd">docker</span> stop dokwalt-caddy
+<span class="t-cmd">sudo</span> <span class="t-cmd">rm</span> <span class="t-flag">-f</span> /var/lib/dokwalt/dokwalt.db-wal /var/lib/dokwalt/dokwalt.db-shm
+<span class="t-cmd">sudo</span> <span class="t-cmd">cp</span> $B/dokwalt.db $B/secret.key /var/lib/dokwalt/ &amp;&amp; <span class="t-cmd">sudo</span> <span class="t-cmd">chmod</span> 600 /var/lib/dokwalt/secret.key
+<span class="t-cmd">for</span> f in $B/*.tgz; <span class="t-cmd">do</span> v=$(basename $f .tgz)
+  <span class="t-cmd">docker</span> run <span class="t-flag">--rm</span> <span class="t-flag">-v</span> $v:/v <span class="t-flag">-v</span> $B:/b alpine tar xzf /b/$v.tgz <span class="t-flag">-C</span> /v
+<span class="t-cmd">done</span>
+<span class="t-cmd">sudo</span> <span class="t-cmd">systemctl</span> start dokwalt    <span class="t-com"># reconciler: Caddy, networks, registry-image stacks</span></code></pre></div>
+<p>Built images aren't in the backup: until you <code>dokwalt deploy</code> once from each app folder, those
+apps stay down, the reconciler alerts &quot;Self-healing failed&quot; and <code>doctor</code> marks them ✗ (registry
+images are pulled again). Moving servers without the state DB: <code>dokwalt apps:export blog.json</code>
+(old server), <code>apps:import blog.json</code> (new one), restore volumes, <code>deploy</code>; release history is lost.</p>
+<h2 id="10-final-checklist">10. Final checklist</h2>
+<ol>
+<li><code>dokwalt doctor</code> is all ✓ and <code>dokwalt alerts:test</code> reaches Discord/Slack.</li>
+<li>The site opens over HTTPS from outside: <code>curl -I https://blog.example.com</code> from your computer, and for
+a server at home, on your phone <strong>on mobile data</strong> (home Wi-Fi can be fooled by hairpin NAT).</li>
+<li><strong>Reboot test</strong>, from your computer: <code>ssh -t prod sudo reboot</code>, then time
+<code>until curl -sfo /dev/null https://blog.example.com; do sleep 2; done</code>. Must be &lt; 2 min.</li>
+<li><strong>Power-cut test:</strong> pull the plug while a page loads (on a VPS: a hard reset from the provider
+panel), wait 10 s, power back on, same loop, then <code>dokwalt doctor</code>, <code>dokwalt releases</code> (a
+deploy cut mid-way shows <code>failed</code>) and on the server
+<code>sudo sqlite3 /var/lib/dokwalt/dokwalt.db &#39;PRAGMA integrity_check&#39;</code> (must print <code>ok</code>).</li>
+<li>Optional watchdog test, if you set one up (kernel crash; the machine must come back):
+<code>echo c | sudo tee /proc/sysrq-trigger</code>.</li>
+</ol>
+<p>See also: <a class="xref" href="/docs/getting-started/"><code>dokwalt docs getting-started</code></a>, <a class="xref" href="/docs/reboot-recovery/"><code>dokwalt docs reboot-recovery</code></a>, <a class="xref" href="/docs/security/"><code>dokwalt docs security</code></a>,
+<a class="xref" href="/docs/troubleshooting/"><code>dokwalt docs troubleshooting</code></a>.</p>
+
+        </div>
+        <nav class="pager" aria-label="Previous and next pages">
+          <a class="pager-prev" href="/docs/troubleshooting/"><small>← Previous</small><b>Troubleshooting</b></a>
+          <a class="pager-next" href="/docs/reboot-recovery/"><small>Next →</small><b>Reboot recovery</b></a>
+        </nav>
+      </article>
+    </main>
+    <aside class="docs-toc" aria-label="On this page">
+      
+        <p>On this page</p>
+        <ul>
+          <li class="toc-2"><a href="#1-choose-the-machine-by-hand">1. Choose the machine [by hand]</a></li><li class="toc-2"><a href="#2-operating-system-by-hand">2. Operating system [by hand]</a></li><li class="toc-2"><a href="#3-your-user-and-ssh-access-by-hand">3. Your user and SSH access [by hand]</a></li><li class="toc-2"><a href="#4-system-configuration-by-hand">4. System configuration [by hand]</a></li><li class="toc-2"><a href="#5-networking-by-hand">5. Networking [by hand]</a></li><li class="toc-3"><a href="#on-a-vps">On a VPS</a></li><li class="toc-3"><a href="#at-home-behind-a-router">At home, behind a router</a></li><li class="toc-3"><a href="#ipv6">IPv6</a></li><li class="toc-2"><a href="#6-hardening-by-hand">6. Hardening [by hand]</a></li><li class="toc-2"><a href="#7-install-dokwalt-server-init">7. Install DokWalt [server init]</a></li><li class="toc-3"><a href="#arm64-servers">arm64 servers</a></li><li class="toc-2"><a href="#8-health-and-alerts">8. Health and alerts</a></li><li class="toc-2"><a href="#9-backups-and-restore">9. Backups and restore</a></li><li class="toc-2"><a href="#10-final-checklist">10. Final checklist</a></li>
+        </ul>
+      
+    </aside>
+  </div>
+  
+  <footer class="footer">
+    <div class="docs-wrap footer-inner">
+      <span class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><polygon class="lo" points="60,10 110,60 60,110 10,60"/><polygon class="lb" points="55,24 55,96 20,60"/><polygon class="lg" points="65,24 100,60 65,96"/><rect class="ls" x="57" y="16" width="6" height="88" rx="3"/></svg> DokWalt</span>
+      <span class="c-mute">Docs for v0.3.0, the latest release · also in your terminal: <code>dokwalt docs</code></span>
+      <a href="https://github.com/ddahan/dokwalt" rel="noopener">github.com/ddahan/dokwalt</a>
+    </div>
+  </footer>
+
+  
+  <div class="search" id="search" hidden>
+    <div class="search-backdrop" data-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search the docs">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search-input" type="search" placeholder="Search: rollback, tunnel, backups…" autocomplete="off" spellcheck="false" aria-controls="search-results">
+        <kbd data-close>Esc</kbd>
+      </div>
+      <ul class="search-results" id="search-results" role="listbox"></ul>
+      <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span class="search-cli">Offline: <code>dokwalt docs --search &lt;words&gt;</code></span></p>
+    </div>
+  </div>
+
+</body>
+</html>

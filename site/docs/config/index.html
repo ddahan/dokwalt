@@ -86,7 +86,7 @@
     
       <p class="side-group">Servers</p>
       <ul>
-        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+        <li><a href="/docs/server/">Setting up a server</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
       </ul>
     
       <p class="side-group">Reference</p>
@@ -235,7 +235,7 @@ stateless services.</li>
 when the volume is first initialized. Changing <code>DB_PASSWORD</code> later does
 not change the real password: change it inside the database first
 (<code>dokwalt db:connect</code>), then update config.</li>
-<li><code>${VAR}</code> is resolved on the server, never from your Mac. Defaults such
+<li><code>${VAR}</code> is resolved on the server, never from your computer. Defaults such
 as <code>${LOG_LEVEL:-info}</code> work as in Compose; a missing variable without
 default warns during deploy and becomes empty.</li>
 </ul>

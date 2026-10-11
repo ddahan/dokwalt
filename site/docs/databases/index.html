@@ -86,7 +86,7 @@
     
       <p class="side-group">Servers</p>
       <ul>
-        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+        <li><a href="/docs/server/">Setting up a server</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
       </ul>
     
       <p class="side-group">Reference</p>
@@ -175,7 +175,7 @@ means a short restart, not zero downtime.</li>
 init. Changing it later does <strong>not</strong> change the real password: run
 <code>ALTER USER</code> first, then update the config.</li>
 </ul>
-<h2 id="connecting-from-your-mac">Connecting from your Mac</h2>
+<h2 id="connecting-from-your-computer">Connecting from your computer</h2>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> db:connect</code></pre></div>
 <ol>
 <li><strong>Service</strong>: <code>--service</code>, or else the first service with a recognised
@@ -250,8 +250,11 @@ installed, DokWalt says <code>psql not found on this machine — keeping the tun
 (<code>PGPASSWORD</code>, <code>MYSQL_PWD</code>, <code>REDISCLI_AUTH</code>), not command-line arguments.
 <code>mongosh</code> is the exception: it gets a <code>mongodb://</code> URL that includes the
 password (with <code>authSource=admin</code>).</p>
-<p>Install clients with Homebrew: <code>brew install libpq</code> (psql),
-<code>brew install mysql-client</code>, <code>brew install mongosh</code>, <code>brew install redis</code>.</p>
+<p>Install the clients with your package manager. On macOS (Homebrew):
+<code>brew install libpq</code> (psql), <code>brew install mysql-client</code>, <code>brew install mongosh</code>,
+<code>brew install redis</code>. On Debian or Ubuntu (and WSL):
+<code>sudo apt install postgresql-client default-mysql-client redis-tools</code>; <code>mongosh</code>
+comes from MongoDB's own repository.</p>
 <h2 id="migrations-one-shot-jobs">Migrations: one-shot jobs</h2>
 <p>During a deploy, the old version keeps serving until traffic switches.
 DokWalt's release phase is a <strong>one-shot job</strong>: a service that another
@@ -291,7 +294,7 @@ command: <code>dokwalt exec --service web -- ./bin/migrate status</code>.</p>
 any S3 storage, run on the server: <code>dokwalt backup:setup</code>, see
 <a class="xref" href="/docs/backups/"><code>dokwalt docs backups</code></a>. For other kinds of databases, and for one-off copies,
 two approaches.</p>
-<p><strong>Logical dump</strong> to your Mac, while the app runs:</p>
+<p><strong>Logical dump</strong> to your computer, while the app runs:</p>
 <div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> db:backup
 ℹ Dumping database blog from db (production)…
 <span class="t-ok">✓</span> Saved blog-production-20261010-153000.dump (2.4 MB in 1.2s)
@@ -299,7 +302,7 @@ two approaches.</p>
 <ul>
 <li><code>pg_dump --format=custom</code> runs <strong>inside</strong> the database container, through
 its Unix socket, and the dump streams back over SSH. Nothing is exposed, and
-no Postgres client is needed on the Mac.</li>
+no Postgres client is needed on your computer.</li>
 <li>The file is written as <code>&lt;file&gt;.part</code> and renamed only once pg_dump
 succeeded and the file is a valid archive, so a failed dump never leaves a
 file that looks good.</li>
@@ -312,11 +315,11 @@ with the kind's own tool.</li>
 through it.</p>
 <p><strong>Volume archive</strong> on the server. Stop the stage first for a consistent copy:</p>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> stop
-<span class="t-cmd">ssh</span> pi.home <span class="t-str">&#39;docker run --rm -v dw-blog-production-pgdata:/data:ro \</span>
+<span class="t-cmd">ssh</span> prod <span class="t-str">&#39;docker run --rm -v dw-blog-production-pgdata:/data:ro \</span>
   <span class="t-flag">-v</span> <span class="t-str">&#34;$HOME&#34;</span>:/backup alpine tar czf /backup/pgdata.tgz <span class="t-flag">-C</span> /data .&#39;
 <span class="t-cmd">dokwalt</span> start</code></pre></div>
 <p>Restore a dump with <code>pg_restore -d &#34;postgres://…@127.0.0.1:5433/blog&#34;</code>.
-Full-server backups: <a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>.</p>
+Full-server backups: <a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a>.</p>
 <h2 id="one-database-server-for-several-apps">One database server for several apps</h2>
 <p>Running one Postgres per app costs memory on a small server. Instead, deploy
 the database server as its own app, and let other apps <strong>use</strong> it:</p>
@@ -379,14 +382,14 @@ Instead:</p>
 <li><code>dokwalt deploy</code> creates a fresh, empty <code>dw-blog-production-pgdata17</code>.</li>
 <li>Restore the dump through <code>db:connect --tunnel-only</code>.</li>
 <li>Once verified, delete the old volume on the server:
-<code>ssh pi.home docker volume rm dw-blog-production-pgdata</code>.</li>
+<code>ssh prod docker volume rm dw-blog-production-pgdata</code>.</li>
 </ol>
 <p>Minor updates are safe: change the tag (<code>postgres:17.1</code> → <code>postgres:17.2</code>)
 and redeploy. Registry images are used by tag, not pinned by digest, and
 are pulled only if the tag is missing on the server. So a floating tag like
 <code>postgres:17</code> doesn't move by itself. Pin exact tags.</p>
 <p>See also: <a class="xref" href="/docs/backups/"><code>dokwalt docs backups</code></a>, <a class="xref" href="/docs/compose/"><code>dokwalt docs compose</code></a>, <a class="xref" href="/docs/config/"><code>dokwalt docs config</code></a>, <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>,
-<a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>, <a class="xref" href="/docs/security/"><code>dokwalt docs security</code></a></p>
+<a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a>, <a class="xref" href="/docs/security/"><code>dokwalt docs security</code></a></p>
 
         </div>
         <nav class="pager" aria-label="Previous and next pages">
@@ -399,7 +402,7 @@ are pulled only if the tag is missing on the server. So a floating tag like
       
         <p>On this page</p>
         <ul>
-          <li class="toc-2"><a href="#how-dokwalt-treats-a-database">How DokWalt treats a database</a></li><li class="toc-2"><a href="#config-and-restarts">Config and restarts</a></li><li class="toc-2"><a href="#connecting-from-your-mac">Connecting from your Mac</a></li><li class="toc-3"><a href="#gui-tools-tableplus-dbeaver-postico">GUI tools (TablePlus, DBeaver, Postico…)</a></li><li class="toc-3"><a href="#other-services-and-stages">Other services and stages</a></li><li class="toc-2"><a href="#supported-kinds">Supported kinds</a></li><li class="toc-2"><a href="#migrations-one-shot-jobs">Migrations: one-shot jobs</a></li><li class="toc-2"><a href="#backups">Backups</a></li><li class="toc-2"><a href="#one-database-server-for-several-apps">One database server for several apps</a></li><li class="toc-2"><a href="#major-version-upgrades">Major version upgrades</a></li>
+          <li class="toc-2"><a href="#how-dokwalt-treats-a-database">How DokWalt treats a database</a></li><li class="toc-2"><a href="#config-and-restarts">Config and restarts</a></li><li class="toc-2"><a href="#connecting-from-your-computer">Connecting from your computer</a></li><li class="toc-3"><a href="#gui-tools-tableplus-dbeaver-postico">GUI tools (TablePlus, DBeaver, Postico…)</a></li><li class="toc-3"><a href="#other-services-and-stages">Other services and stages</a></li><li class="toc-2"><a href="#supported-kinds">Supported kinds</a></li><li class="toc-2"><a href="#migrations-one-shot-jobs">Migrations: one-shot jobs</a></li><li class="toc-2"><a href="#backups">Backups</a></li><li class="toc-2"><a href="#one-database-server-for-several-apps">One database server for several apps</a></li><li class="toc-2"><a href="#major-version-upgrades">Major version upgrades</a></li>
         </ul>
       
     </aside>

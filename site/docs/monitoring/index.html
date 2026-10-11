@@ -86,7 +86,7 @@
     
       <p class="side-group">Servers</p>
       <ul>
-        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+        <li><a href="/docs/server/">Setting up a server</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
       </ul>
     
       <p class="side-group">Reference</p>
@@ -134,7 +134,7 @@ extra database. Three ways to look at them:</p>
 </table>
 <h2 id="live-dokwalt-top">Live: <code>dokwalt top</code></h2>
 <div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> top
-<span class="t-cmd">◆</span> pi  10:42:07
+<span class="t-cmd">◆</span> prod  10:42:07
 
 CPU  ███░░░░░░░░░░░░░░░░░░░░░  11.4%  load 0.42 · 4 cores
 MEM  ██████░░░░░░░░░░░░░░░░░░  26.9%  2.1 GiB / 7.9 GiB
@@ -249,10 +249,10 @@ both now and since boot.</p>
 socket read by the daemon, with nothing on disk. The daemon counts
 requests and 2xx/3xx/4xx/5xx, and computes p50/p95/p99 latency from
 histogram buckets.</p>
-<p>Memory metrics need the cgroup memory controller. If it is disabled (older
-Raspberry Pi OS images), <code>dokwalt doctor</code> says so and how to enable it:
-append <code>cgroup_enable=memory cgroup_memory=1</code> to
-<code>/boot/firmware/cmdline.txt</code> and reboot.</p>
+<p>Memory metrics need the cgroup memory controller. If it is disabled (some
+kernels built for ARM boards), <code>dokwalt doctor</code> says so: add
+<code>cgroup_enable=memory cgroup_memory=1</code> to the kernel command line and reboot
+(<a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a>).</p>
 <h2 id="storage-and-retention">Storage and retention</h2>
 <table>
 <thead>
@@ -288,9 +288,9 @@ about 9 MiB is heap (the rest is shared binary code). Caddy uses about
 <strong>46 MiB RSS</strong>, with about 12 MiB of heap. That makes about 73 MiB in
 total, under the 100 MB target. Check your own numbers:</p>
 <div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> server info
-<span class="t-cmd">◆</span> pi  dd@pi.home
+<span class="t-cmd">◆</span> prod  deploy@203.0.113.10
 
-Host            pi (linux/arm64), up 12d
+Host            prod (linux/arm64), up 12d
 DokWalt         0.1.0 (API 1.0) · CLI 0.1.0
 Docker          28.4.0 · compose 2.39.1
 Apps            2
@@ -320,7 +320,7 @@ self-healing failed and Pi throttling are always on:</p>
 <span class="t-cmd">dokwalt</span> <span class="t-flag">-a</span> shop metrics <span class="t-flag">--since</span> 7d <span class="t-flag">--json</span> &gt; week.json
 <span class="t-cmd">dokwalt</span> metrics <span class="t-flag">-s</span> staging <span class="t-flag">--since</span> 24h       <span class="t-com"># staging (pipeline apps)</span></code></pre></div>
 <p>See also: <a class="xref" href="/docs/alerts/"><code>dokwalt docs alerts</code></a>, <a class="xref" href="/docs/logs/"><code>dokwalt docs logs</code></a>,
-<a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>, <a class="xref" href="/docs/troubleshooting/"><code>dokwalt docs troubleshooting</code></a></p>
+<a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a>, <a class="xref" href="/docs/troubleshooting/"><code>dokwalt docs troubleshooting</code></a></p>
 
         </div>
         <nav class="pager" aria-label="Previous and next pages">

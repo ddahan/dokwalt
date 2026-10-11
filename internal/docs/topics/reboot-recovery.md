@@ -15,7 +15,7 @@ After a `sudo reboot`, a kernel update at 04:00 or a power cut, every site must 
 | A deploy was half done at reboot time (two versions, proxy on a dead one) | Startup recovery marks it failed and tears down the unfinished color |
 | An old color left running after an interrupted drain | The reconciler removes it (never while it is still draining) |
 | Certificates lost or re-requested (and rate limited) | Certificates persist in the Docker volume `dokwalt-caddy-data` |
-| SD card corruption | NVMe recommended (`dokwalt docs raspberry-pi`); SQLite in WAL mode |
+| SD card or flash corruption | An SSD is recommended (`dokwalt docs server`); SQLite in WAL mode |
 | Wrong clock at boot, TLS failures | `doctor` checks clock sync; Caddy retries |
 | Restarting Docker kills all containers | Docker `live-restore: true`, set by `server init` |
 
@@ -149,10 +149,10 @@ once, so a web container may briefly come up before Postgres accepts connections
 
 ## The hard-reboot test
 
-Run it once after installation and after any big change. From the Mac:
+Run it once after installation and after any big change. From your computer:
 
 ```bash
-ssh -t pi.home sudo reboot; date
+ssh -t prod sudo reboot; date
 until curl -sfo /dev/null https://blog.example.com; do sleep 2; done; date
 dokwalt doctor
 ```
@@ -183,7 +183,7 @@ $ dokwalt doctor
 ◆ Doctor
 
 ✓ Local Docker             Docker 28.4.0 (builds run here)
-✓ Connection               pi (dd@pi.home), daemon 0.1.0 on linux/arm64
+✓ Connection               prod (deploy@203.0.113.10), daemon 0.1.0 on linux/arm64
 ✓ Docker                   Docker 28.4.0 (API 1.51), 4 CPUs, 7.9 GiB RAM
 ✓ Docker live-restore      containers keep running while dockerd restarts or upgrades
 ✓ Memory cgroup            cgroup 2 (systemd driver)
@@ -212,5 +212,5 @@ journalctl -b -1 -p warning --no-pager    # previous boot's warnings (needs pers
 docker ps -a --filter label=dokwalt.app   # what actually runs
 ```
 
-See also: `dokwalt docs troubleshooting`, `dokwalt docs raspberry-pi`, `dokwalt docs deploy`,
+See also: `dokwalt docs troubleshooting`, `dokwalt docs server`, `dokwalt docs deploy`,
 `dokwalt docs monitoring`.

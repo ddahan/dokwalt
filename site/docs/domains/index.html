@@ -86,7 +86,7 @@
     
       <p class="side-group">Servers</p>
       <ul>
-        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+        <li><a href="/docs/server/">Setting up a server</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
       </ul>
     
       <p class="side-group">Reference</p>
@@ -152,11 +152,11 @@ server's public IP:</p>
 </table>
 <p>Only publish an <code>AAAA</code> record if the server is really reachable over IPv6
 on 80 and 443: Let's Encrypt prefers IPv6, and a broken <code>AAAA</code> record makes
-validation fail even when IPv4 is fine. Check propagation from your Mac:</p>
+validation fail even when IPv4 is fine. Check propagation from your computer:</p>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dig</span> +short A blog.example.com
 <span class="t-cmd">dig</span> +short AAAA blog.example.com</code></pre></div>
 <p>Home server with a changing public IP? Use dynamic DNS; see
-<a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>.</p>
+<a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a>.</p>
 <h2 id="2-attach-the-domain">2. Attach the domain</h2>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> domains:add blog.example.com                              <span class="t-com"># defaults</span>
 <span class="t-cmd">dokwalt</span> domains:add blog.example.com <span class="t-flag">--service</span> web <span class="t-flag">--port</span> 3000    <span class="t-com"># explicit</span></code></pre></div>
@@ -227,7 +227,7 @@ keeps retrying the certificate on its own.</p>
 from Caddy's <strong>internal CA</strong> instead. No Let's Encrypt, and no probe: the
 check reports <code>ok (local name, internal certificate)</code>. Browsers don't
 trust that CA until you import its root certificate:
-<code>ssh pi.home docker cp dokwalt-caddy:/data/caddy/pki/authorities/local/root.crt .</code></li>
+<code>ssh prod docker cp dokwalt-caddy:/data/caddy/pki/authorities/local/root.crt .</code></li>
 <li><strong>Storage</strong>: certificates live in the Docker volume <code>dokwalt-caddy-data</code>
 (<code>/data</code> in the Caddy container). They survive reboots, <code>server upgrade</code>
 and Caddy being recreated. Include that volume in server backups.</li>
@@ -295,7 +295,7 @@ doesn't affect other sites. Delete the DNS record yourself.</p>
 <ul>
 <li><strong>Wildcards</strong> (<code>*.example.com</code>) and wildcard certificates: add each host.</li>
 <li><strong>DNS-01 challenge</strong>: ports 80/443 must reach the server. Behind CGNAT or
-a router you can't configure, see <a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a> (Cloudflare
+a router you can't configure, see <a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a> (Cloudflare
 Tunnel / Tailscale options).</li>
 </ul>
 <h2 id="when-something-goes-wrong">When something goes wrong</h2>
@@ -310,10 +310,10 @@ certificate is obtained. See <a class="xref" href="/docs/alerts/"><code>dokwalt 
 ! Domain api.blog.example.com  no DNS record yet — create an A (and/or AAAA) record pointing to this server</code></pre></div>
 <ul>
 <li>Caddy's own log (ACME errors, config loads):
-<code>ssh pi.home docker logs --since 1h dokwalt-caddy</code>.</li>
+<code>ssh prod docker logs --since 1h dokwalt-caddy</code>.</li>
 </ul>
 <p>See also: <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>, <a class="xref" href="/docs/alerts/"><code>dokwalt docs alerts</code></a>,
-<a class="xref" href="/docs/troubleshooting/"><code>dokwalt docs troubleshooting</code></a>, <a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>, <a class="xref" href="/docs/vps/"><code>dokwalt docs vps</code></a></p>
+<a class="xref" href="/docs/troubleshooting/"><code>dokwalt docs troubleshooting</code></a>, <a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a></p>
 
         </div>
         <nav class="pager" aria-label="Previous and next pages">

@@ -80,7 +80,7 @@ func composeArgs(files []string, rest ...string) []string {
 
 func deploy(ctx context.Context, s *session, app, stage string, o deployOpts) error {
 	if _, err := exec.LookPath("docker"); err != nil {
-		return errors.New("docker is needed on this machine to build images — install Docker Desktop or OrbStack")
+		return errors.New("docker is needed on this machine to build images — install Docker (Docker Engine on Linux, Docker Desktop or OrbStack on macOS)")
 	}
 	wd, _ := os.Getwd()
 	fmt.Println(ui.TitleS.Render("◆ Deploying "+label(app, stage)) + ui.MutedS.Render(fmt.Sprintf("  to %s (linux/%s)", s.name, s.remote.Arch)))
@@ -336,7 +336,7 @@ func uploadImages(ctx context.Context, s *session, platform string, images map[s
 	body := &countReader{r: pr, n: &sent}
 	if err := s.c.Upload(ctx, "/v1/images/load", body); err != nil {
 		if strings.Contains(saveErr.String(), "platform") {
-			return fmt.Errorf("docker save failed (%s) — update Docker Desktop to 28+ for --platform support", strings.TrimSpace(saveErr.String()))
+			return fmt.Errorf("docker save failed (%s) — update Docker to 28+ for --platform support", strings.TrimSpace(saveErr.String()))
 		}
 		return err
 	}

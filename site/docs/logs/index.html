@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <title>Logs · DokWalt docs</title>
-  <meta name="description" content="Stream, filter and search your app&#39;s logs from the Mac, and know where every other log lives.">
+  <meta name="description" content="Stream, filter and search your app&#39;s logs from your computer, and know where every other log lives.">
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -86,7 +86,7 @@
     
       <p class="side-group">Servers</p>
       <ul>
-        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
+        <li><a href="/docs/server/">Setting up a server</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/">Security</a></li>
       </ul>
     
       <p class="side-group">Reference</p>
@@ -101,7 +101,7 @@
         <header class="doc-head">
           <p class="crumbs"><a href="/docs/">Docs</a><span aria-hidden="true">/</span>Operate</p>
           <h1>Logs</h1>
-          <p class="doc-lead">Stream, filter and search your app's logs from the Mac, and know where every other log lives.</p>
+          <p class="doc-lead">Stream, filter and search your app's logs from your computer, and know where every other log lives.</p>
           <div class="doc-meta">
             <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs logs</span>
             <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/logs.md" rel="noopener">Edit on GitHub</a>
@@ -199,7 +199,7 @@ With <code>--since</code>, all lines in that window are shown and <code>-n</code
 <p><code>dokwalt deploy</code> streams its progress live: the local build, the image
 upload, then each step on the server.</p>
 <div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-m</span> <span class="t-str">&#34;fix feed&#34;</span>
-<span class="t-cmd">◆</span> Deploying blog  to pi (linux/arm64)
+<span class="t-cmd">◆</span> Deploying blog  to prod (linux/arm64)
 <span class="t-ok">✓</span> Built migrate, web for linux/arm64
 <span class="t-ok">✓</span> Uploaded 16.6 MiB in 0.6s
 <span class="t-ok">✓</span> Services — db: keeps its data (named volume pgdata), migrate: runs once per deploy, web: zero-downtime swap
@@ -233,11 +233,11 @@ latency percentiles. Individual requests aren't stored: see
 <code>dokwalt metrics</code> and <a class="xref" href="/docs/monitoring/"><code>dokwalt docs monitoring</code></a>. Log requests in your app
 if you need each one.</p>
 <p><strong>Caddy errors</strong> (certificates, config loads), on the server:</p>
-<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">ssh</span> pi.home docker logs <span class="t-flag">--since</span> 1h dokwalt-caddy</code></pre></div>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">ssh</span> prod docker logs <span class="t-flag">--since</span> 1h dokwalt-caddy</code></pre></div>
 <p><strong>The DokWalt daemon</strong> runs under systemd, so its log is in the journal:</p>
-<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">ssh</span> pi.home journalctl <span class="t-flag">-u</span> dokwalt <span class="t-flag">-f</span>
-<span class="t-cmd">ssh</span> pi.home journalctl <span class="t-flag">-u</span> dokwalt <span class="t-flag">--since</span> <span class="t-str">&#34;1 hour ago&#34;</span>
-<span class="t-cmd">ssh</span> pi.home journalctl <span class="t-flag">-u</span> dokwalt <span class="t-flag">-b</span>     <span class="t-com"># since the last boot</span></code></pre></div>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">ssh</span> prod journalctl <span class="t-flag">-u</span> dokwalt <span class="t-flag">-f</span>
+<span class="t-cmd">ssh</span> prod journalctl <span class="t-flag">-u</span> dokwalt <span class="t-flag">--since</span> <span class="t-str">&#34;1 hour ago&#34;</span>
+<span class="t-cmd">ssh</span> prod journalctl <span class="t-flag">-u</span> dokwalt <span class="t-flag">-b</span>     <span class="t-com"># since the last boot</span></code></pre></div>
 <p>The daemon logs reconciliation (what it repaired after a reboot), deploy
 steps, pruned images, alerts (also when no channel is configured), failed
 alert deliveries and errors.</p>

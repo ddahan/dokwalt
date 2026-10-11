@@ -825,7 +825,7 @@ func doctorCmd() *cobra.Command {
 			if out, err := exec.Command("docker", "version", "--format", "{{.Server.Version}}").Output(); err == nil {
 				add("Local Docker", "ok", "Docker "+strings.TrimSpace(string(out))+" (builds run here)", "")
 			} else {
-				add("Local Docker", "warn", "not available — needed to build images for deploy", "install Docker Desktop or OrbStack")
+				add("Local Docker", "warn", "not available — needed to build images for deploy", "install Docker (Docker Engine on Linux, Docker Desktop or OrbStack on macOS)")
 			}
 			var s *session
 			err := ui.Spin("Connecting", func() error {

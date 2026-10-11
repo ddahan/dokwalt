@@ -86,7 +86,7 @@
     
       <p class="side-group">Servers</p>
       <ul>
-        <li><a href="/docs/raspberry-pi/">Raspberry Pi 5</a></li><li><a href="/docs/vps/">VPS</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/" class="active" aria-current="page">Security</a></li>
+        <li><a href="/docs/server/">Setting up a server</a></li><li><a href="/docs/reboot-recovery/">Reboot recovery</a></li><li><a href="/docs/security/" class="active" aria-current="page">Security</a></li>
       </ul>
     
       <p class="side-group">Reference</p>
@@ -132,7 +132,7 @@
 </tr>
 <tr>
 <td>A copied <code>dokwalt.db</code> or backup revealing config values</td>
-<td>A compromised Mac with an unlocked SSH agent</td>
+<td>A compromised computer with an unlocked SSH agent</td>
 </tr>
 <tr>
 <td>One app reaching another app (database or web service)</td>
@@ -164,7 +164,7 @@ checked could be bypassed by that same user with one <code>docker</code> command
 boundary. What actually protects the server is the SSH key, so protect it:</p>
 <ul>
 <li>a passphrase-protected Ed25519 key, or a hardware-backed agent (Secretive, 1Password, YubiKey);</li>
-<li>limited agent lifetimes, e.g. <code>ssh-add -t 8h</code>, so an unattended Mac is not an open door;</li>
+<li>limited agent lifetimes, e.g. <code>ssh-add -t 8h</code>, so an unattended computer is not an open door;</li>
 <li><code>PasswordAuthentication no</code> and <code>PermitRootLogin no</code> on the server;</li>
 <li>no port 22 forwarded from home; reach a home server over a VPN such as Tailscale.</li>
 </ul>
@@ -229,7 +229,7 @@ ufw, so this is what keeps a stray <code>5432:5432</code> from exposing a databa
 <li>Caddy's admin API is a <strong>Unix socket</strong> (<code>/var/lib/dokwalt/caddy/run/admin.sock</code>), never TCP
 port 2019. Its access and TLS logs go to another Unix socket read by the daemon
 (<code>access.sock</code>) and are only aggregated into metrics, never written to disk.</li>
-<li><strong>Databases are never public.</strong> <code>dokwalt db:connect</code> opens a listener on your Mac and tunnels
+<li><strong>Databases are never public.</strong> <code>dokwalt db:connect</code> opens a listener on your computer and tunnels
 it through SSH with <code>dokwalt dial-stdio --tcp</code> to the database container. Client passwords are
 passed through <code>PGPASSWORD</code>, <code>MYSQL_PWD</code> or <code>REDISCLI_AUTH</code>, never on the command line.</li>
 </ul>
@@ -266,7 +266,7 @@ compose definition changes.</li>
 <li><strong>Built images</strong> are tagged by content (<code>dokwalt/&lt;app&gt;-&lt;service&gt;:&lt;12 hex of the image ID&gt;</code>), so a
 rollback runs exactly the same bytes, as long as the image wasn't pruned.</li>
 <li><strong>Registry images</strong> (e.g. <code>postgres:16</code>) are <strong>not</strong> pinned by digest: they get <code>pull_policy: missing</code> and are pulled only if absent on the server. Pin a specific tag if that matters.</li>
-<li><strong>Builds happen on your Mac.</strong> No CI system holds credentials; nothing builds on the server.
+<li><strong>Builds happen on your computer.</strong> No CI system holds credentials; nothing builds on the server.
 Private registries: <code>sudo docker login</code> on the server (the daemon uses root's Docker config).</li>
 </ul>
 <h2 id="no-telemetry">No telemetry</h2>
@@ -280,7 +280,7 @@ the binary and restarts the daemon. Apps keep serving; Caddy is recreated only i
 definition changed (about a 1 s blip). It takes no database backup: make your own first.</li>
 <li><code>dokwalt doctor</code> warns (check <em>Versions</em>) when the CLI and the daemon builds differ.</li>
 <li>OS and Docker security fixes: <code>unattended-upgrades</code> with a nightly reboot window (see
-<a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a> or <a class="xref" href="/docs/vps/"><code>dokwalt docs vps</code></a>).</li>
+<a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a>).</li>
 </ul>
 <h2 id="checklist">Checklist</h2>
 <ol>
@@ -290,8 +290,7 @@ definition changed (about a 1 s blip). It takes no database backup: make your ow
 <li><code>secret.key</code> and backups are stored off the server, apart from each other.</li>
 <li>No <code>.env</code> or <code>apps:export</code> file is committed or lying around.</li>
 </ol>
-<p>See also: <a class="xref" href="/docs/config/"><code>dokwalt docs config</code></a>, <a class="xref" href="/docs/databases/"><code>dokwalt docs databases</code></a>, <a class="xref" href="/docs/raspberry-pi/"><code>dokwalt docs raspberry-pi</code></a>,
-<a class="xref" href="/docs/vps/"><code>dokwalt docs vps</code></a>.</p>
+<p>See also: <a class="xref" href="/docs/config/"><code>dokwalt docs config</code></a>, <a class="xref" href="/docs/databases/"><code>dokwalt docs databases</code></a>, <a class="xref" href="/docs/server/"><code>dokwalt docs server</code></a>.</p>
 
         </div>
         <nav class="pager" aria-label="Previous and next pages">

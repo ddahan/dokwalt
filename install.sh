@@ -141,7 +141,11 @@ if [ -n "$other" ] && [ "$other" != "$dir/dokwalt" ]; then
 fi
 if ! command -v docker >/dev/null 2>&1; then
   warn "Docker isn't installed on this machine: DokWalt builds your images here."
-  say  "    Get Docker Desktop (https://www.docker.com/products/docker-desktop/) or OrbStack (https://orbstack.dev)."
+  if [ "$os" = darwin ]; then
+    say  "    Get Docker Desktop (https://www.docker.com/products/docker-desktop/) or OrbStack (https://orbstack.dev)."
+  else
+    say  "    Install Docker Engine: https://docs.docker.com/engine/install/ (on WSL: Docker Desktop with the WSL 2 backend)."
+  fi
 fi
 
 say ""

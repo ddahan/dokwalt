@@ -54,7 +54,7 @@ Still open:
 
 ## 1. Summary
 
-DokWalt is a single Go binary that turns one small Linux server (a 1 GB VPS or a Raspberry Pi 5) into a Heroku-like host for many websites defined by their existing `docker-compose.yml`. On the developer's Mac, `dokwalt` is a CLI and full-screen terminal dashboard. On the server, `dokwalt daemon` is a systemd service that keeps all state in SQLite, drives Docker Compose, configures a Caddy reverse proxy with automatic Let's Encrypt certificates, collects metrics and sends Discord/Slack alerts. Above all, it keeps reconciling actual state with desired state, so every site comes back by itself after a reboot or power cut. Images are built on the Mac for the server's architecture and streamed over SSH, and the control plane is only reachable through SSH. Apps get:
+DokWalt is a single Go binary that turns one small Linux server (a 1 GB VPS or a small machine at home, amd64 or arm64) into a Heroku-like host for many websites defined by their existing `docker-compose.yml`. On the developer's computer (macOS, Linux, or Windows through WSL), `dokwalt` is a CLI and full-screen terminal dashboard. On the server, `dokwalt daemon` is a systemd service that keeps all state in SQLite, drives Docker Compose, configures a Caddy reverse proxy with automatic Let's Encrypt certificates, collects metrics and sends Discord/Slack alerts. Above all, it keeps reconciling actual state with desired state, so every site comes back by itself after a reboot or power cut. Images are built on the developer's computer for the server's architecture and streamed over SSH, and the control plane is only reachable through SSH. Apps get:
 
 - immutable numbered releases;
 - encrypted config vars;
@@ -102,7 +102,7 @@ Nothing else: no web UI, no cluster, no registry, no extra datastore.
 
 | Component | Where | Runs as | Responsibility |
 |---|---|---|---|
-| `dokwalt` CLI | Mac | user process | Commands, dashboard, builds (`docker compose build`), image export, SSH transport |
+| `dokwalt` CLI | Developer computer | user process | Commands, dashboard, builds (`docker compose build`), image export, SSH transport |
 | `dokwalt daemon` | Server | systemd service `dokwalt.service`, root | API on a Unix socket, state (SQLite), deploy engine, compose transformation, reconciler, Caddy config, metrics, alerts |
 | `dokwalt dial-stdio` | Server | short-lived process per API connection, as the SSH user | Bridges an SSH session's stdin/stdout to the daemon socket (or, with `--tcp`, to a container address for `db:connect`) |
 | SQLite `dokwalt.db` | Server | file in `/var/lib/dokwalt` | Desired state, releases, encrypted config, metrics |
@@ -114,15 +114,15 @@ Nothing else: no web UI, no cluster, no registry, no extra datastore.
 
 ```mermaid
 flowchart LR
-  subgraph Mac["Developer Mac"]
+  subgraph Mac["Developer computer"]
     CLI["dokwalt CLI / dashboard"]
-    DD["Docker Desktop / OrbStack<br/>(buildx, linux/arm64 or amd64)"]
+    DD["Docker Engine / Desktop / OrbStack<br/>(buildx, linux/arm64 or amd64)"]
     CFG["~/.config/dokwalt/config.json"]
     CLI -->|compose config / build / save| DD
     CLI --- CFG
   end
 
-  subgraph Server["Server (VPS or Raspberry Pi)"]
+  subgraph Server["Server (VPS or own machine)"]
     SSHD["sshd :22"]
     DS["dokwalt dial-stdio<br/>(per connection)"]
     SOCK[["/run/dokwalt/dokwalt.sock<br/>0660 root:dokwalt"]]
@@ -174,7 +174,7 @@ flowchart LR
 ### 3.4 Server file layout
 
 ```text
-/usr/local/bin/dokwalt                         binary (same as the Mac's, linux build)
+/usr/local/bin/dokwalt                         binary (same as the CLI, linux build)
 /etc/systemd/system/dokwalt.service            unit (§10.2)
 /etc/docker/daemon.json                        merged: live-restore true, log-driver local (if unset)
 /run/dokwalt/dokwalt.sock                      API socket, root:dokwalt 0660
@@ -196,7 +196,7 @@ Docker volumes dw-<app>-<stage>-<vol>          app data
 
 Rendered compose files never contain config values (§6.4).
 
-### 3.5 Local (Mac) state
+### 3.5 Local state (developer computer)
 
 `~/.config/dokwalt/config.json` (override the path with `DOKWALT_CONFIG`) holds server contexts and folder links, and nothing about app configuration:
 
@@ -213,7 +213,7 @@ Rendered compose files never contain config values (§6.4).
 }
 ```
 
-A target is `user@host`, `user@host:port` or any `~/.ssh/config` alias. `DOKWALT_SSH_CONFIG` selects the ssh config file passed to `ssh -G`. Downloaded server binaries are cached under the user cache dir (`~/Library/Caches/dokwalt/<version>/` on macOS).
+A target is `user@host`, `user@host:port` or any `~/.ssh/config` alias. `DOKWALT_SSH_CONFIG` selects the ssh config file passed to `ssh -G`. Downloaded server binaries are cached under the user cache dir (`~/Library/Caches/dokwalt/<version>/` on macOS, `~/.cache/dokwalt/<version>/` on Linux).
 
 ---
 
@@ -285,7 +285,7 @@ How the v0.1 transfer works:
 3. **Skip.** The CLI calls `POST /v1/images/have` and only sends images the server doesn't have. An unchanged service, or a redeploy of the same code, sends nothing.
 4. **Stream.** `docker save --platform linux/<arch> <missing…>` → zstd (`klauspost/compress`, default level) → `POST /v1/images/load` over one SSH session. The daemon decompresses and loads through the Engine API.
 
-Measured: ~16 MiB compressed for a `python:alpine` app, ~0.6 s on a LAN. `docker save --platform` needs Docker 28+ on the Mac.
+Measured: ~16 MiB compressed for a `python:alpine` app, ~0.6 s on a LAN. `docker save --platform` needs Docker 28+ on the developer's computer.
 
 **Future improvement (§17.4):** layer-aware push to a registry endpoint served by the daemon through `dial-stdio`, backed by Docker's image store, so only missing layers cross the wire.
 
@@ -316,7 +316,7 @@ The daemon renders compose JSON files and runs `docker compose --progress plain 
 
 | Concept | Definition |
 |---|---|
-| **Server (context)** | A named SSH target stored on the Mac. `current` is used when `--server` is absent. |
+| **Server (context)** | A named SSH target stored on the developer's computer. `current` is used when `--server` is absent. |
 | **App** | A name (`^[a-z][a-z0-9-]{0,29}$`, no trailing dash). Its compose model comes with each deploy; its settings live on the server. |
 | **Stage** | An environment of an app: always `production`, plus `staging` when the pipeline is enabled. Everything that "belongs to an app" belongs to a stage, so enabling a pipeline needs no migration. |
 | **Pipeline** | `apps.pipeline=1`. Unlocks `-s staging` and `promote`, and makes stage names appear in output. |
@@ -528,13 +528,13 @@ volumes:
 
 ### 6.2 What DokWalt infers
 
-`dokwalt deploy` runs `docker compose config --no-interpolate --format json` on the Mac (with `-f` files if given). Compose normalises `extends`, profiles, short syntax and relative paths, but `${VAR}` stays literal, so the Mac's `.env` never leaks into production. The CLI sends this model to the daemon unchanged. It is stored as-is in the release, and the daemon transforms it for the target stage at deploy time.
+`dokwalt deploy` runs `docker compose config --no-interpolate --format json` on the developer's computer (with `-f` files if given). Compose normalises `extends`, profiles, short syntax and relative paths, but `${VAR}` stays literal, so the local `.env` never leaks into production. The CLI sends this model to the daemon unchanged. It is stored as-is in the release, and the daemon transforms it for the target stage at deploy time.
 
 | Service | Image | Kind (reason) | Readiness | Public | Project |
 |---|---|---|---|---|---|
-| `migrate` | built on the Mac | **one-shot job** (`web` and `worker` depend on it with `service_completed_successfully`) | exits 0 | never | `dw-blog-production-{blue,green}` |
-| `web` | built on the Mac (same image as `migrate`) | stateless | compose `healthcheck` healthy, then HTTP check on its domain port | after `domains:add` | `dw-blog-production-{blue,green}` |
-| `worker` | built on the Mac | stateless | running | no | `dw-blog-production-{blue,green}` |
+| `migrate` | built on the developer's computer | **one-shot job** (`web` and `worker` depend on it with `service_completed_successfully`) | exits 0 | never | `dw-blog-production-{blue,green}` |
+| `web` | built on the developer's computer (same image as `migrate`) | stateless | compose `healthcheck` healthy, then HTTP check on its domain port | after `domains:add` | `dw-blog-production-{blue,green}` |
+| `worker` | built on the developer's computer | stateless | running | no | `dw-blog-production-{blue,green}` |
 | `db` | `postgres:17-alpine`, pulled on the server if absent | **stateful** (named volume `pgdata`) | compose `healthcheck` healthy | never | `dw-blog-production-data` |
 
 Warnings in the deploy output:
@@ -693,7 +693,7 @@ App state is the rows in `/var/lib/dokwalt/dokwalt.db` (apps, stages, releases, 
 }
 ```
 
-Config is exported **in clear text** (warning printed). Images, releases, metrics and volume data are not included. `dokwalt apps:import <file>` recreates the app, its stages, config, domains and overrides on the current server. Then run `dokwalt deploy` from the source folder and restore volume data separately (§19.1.7).
+Config is exported **in clear text** (warning printed). Images, releases, metrics and volume data are not included. `dokwalt apps:import <file>` recreates the app, its stages, config, domains and overrides on the current server. Then run `dokwalt deploy` from the source folder and restore volume data separately (§19.6).
 
 ---
 
@@ -710,7 +710,7 @@ Config is exported **in clear text** (warning printed). Images, releases, metric
 | `--server <context>` | Target server. Resolution: flag → server recorded with the folder link → `current` |
 | `--json` | Machine-readable output on read commands |
 
-**Environment (Mac).** `DOKWALT_CONFIG` (path of `config.json`), `DOKWALT_SSH_CONFIG` (ssh config file used for `ssh -G`), `SSH_AUTH_SOCK` (agent), `PAGER` (for `docs`).
+**Environment (developer computer).** `DOKWALT_CONFIG` (path of `config.json`), `DOKWALT_SSH_CONFIG` (ssh config file used for `ssh -G`), `SSH_AUTH_SOCK` (agent), `PAGER` (for `docs`).
 
 **Output.** On a TTY: colors, spinners, tables. Otherwise: no ANSI codes, no spinners. Errors say what happened and, where possible, what to run next.
 
@@ -753,7 +753,7 @@ $ dokwalt server init dd@pi.home --name pi --email dd@example.com
 
 #### `dokwalt server add <name> <user@host>` · `server list` · `server use <name>` · `server remove <name>`
 
-`add` registers an already installed server (e.g. from a second Mac). `list` shows contexts. `use` sets the current one. `remove` forgets a context locally and changes nothing on the server.
+`add` registers an already installed server (e.g. from a second computer). `list` shows contexts. `use` sets the current one. `remove` forgets a context locally and changes nothing on the server.
 
 #### `dokwalt server info`
 
@@ -800,7 +800,7 @@ Statuses: `running`, `degraded` (some containers not running or unhealthy), `dow
 
 #### `dokwalt deploy [-m/--message <msg>] [--no-cache] [-f/--file <compose file>]…`
 
-Builds on the Mac, uploads missing images and asks the daemon to deploy. The git SHA is captured automatically (`git rev-parse --short HEAD`, with `-dirty` if the tree has changes); `-m` defaults to the last commit subject. `-f` is repeatable, and defaults to compose's own (`compose.yaml` / `docker-compose.yml`).
+Builds on the developer's computer, uploads missing images and asks the daemon to deploy. The git SHA is captured automatically (`git rev-parse --short HEAD`, with `-dirty` if the tree has changes); `-m` defaults to the last commit subject. `-f` is repeatable, and defaults to compose's own (`compose.yaml` / `docker-compose.yml`).
 
 ```text
 $ dokwalt deploy -m "New pricing page"
@@ -959,7 +959,7 @@ Postgres only. Resolves the target like `db:connect` (`GET …/db`, which also r
 
 - **Target.** Picks the database service (or `--service`; SQL databases are preferred over Redis-like ones) and detects its kind from the image (`postgres`/`postgis`/`timescaledb` → Postgres; `mysql`/`mariadb`/`percona` → MySQL; `mongo`; `redis`/`valkey`/`keydb`/`dragonfly` → Redis).
 - **Credentials.** Read from the container's environment, e.g. `POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB`.
-- **Tunnel.** Opens `127.0.0.1:<--port or random>` on the Mac, tunnelled through SSH with `dokwalt dial-stdio --tcp <container-ip>:<port>`.
+- **Tunnel.** Opens `127.0.0.1:<--port or random>` on the developer's computer, tunnelled through SSH with `dokwalt dial-stdio --tcp <container-ip>:<port>`.
 - **Client.** Runs `psql`, `mysql`, `mongosh` or `redis-cli`. Passwords for psql, mysql and redis-cli are passed through the environment (`PGPASSWORD`, `MYSQL_PWD`, `REDISCLI_AUTH`), not as arguments; `mongosh` receives a `mongodb://user:pass@…` URL.
 - `--tunnel-only` prints the connection URL and waits, for GUI tools. `--remote-port` overrides the detected container port.
 
@@ -1115,7 +1115,7 @@ During a rollback or promote started from the dashboard, the footer shows the en
 
 ## 9. Flows, step by step
 
-Notation: **CLI** = on the Mac, **D** = daemon.
+Notation: **CLI** = on the developer's computer, **D** = daemon.
 
 ### 9.1 Server init
 
@@ -1264,7 +1264,7 @@ Then it deletes the app rows (cascade), removes `dokwalt/<app>-*` images and re-
 | A deploy half-finished at reboot time | Startup recovery marks it failed and tears down the unfinished color |
 | An old color left running after an interrupted drain | Removed by the reconciler (never while still draining) |
 | Docker restarts kill containers | `live-restore: true` |
-| SD card corruption | NVMe recommended (§19); SQLite WAL |
+| SD card or flash corruption | SSD recommended (§19.1); SQLite WAL |
 | Wrong clock at boot → TLS errors | `doctor` clock check; time sync guidance |
 
 ### 10.2 systemd unit
@@ -1353,7 +1353,7 @@ Before the first reconcile, every release still `deploying` is marked `failed` (
 The e2e server is a privileged Debian bookworm container running systemd, Docker and sshd (§18.6).
 - **Reboot**: `docker restart` of the server container. The site must answer again with the latest release, with no command sent. The script prints how long it took.
 - **Power cut**: `docker kill` of the server container, then start it. Same assertion.
-- **Real hardware**: the Pi and VPS checklists (§19.1.8) add `sudo reboot` and pulling the plug.
+- **Real hardware**: the server checklist (§19.7) adds `sudo reboot` and pulling the plug.
 
 ---
 
@@ -1475,7 +1475,7 @@ There's no shared proxy network. Each app stage has a private bridge network `dw
 |---|---|---|
 | App containers | Docker `local` log driver, `max-size 10m`, `max-file 3` per container (set per service unless the compose file sets `logging`) | `/var/lib/docker/containers/…`, bounded |
 | Deploy/rollback/promote progress | NDJSON event stream (`time`, `step`, `status`, `message`, `service`, `release`) | Only the error, in `releases.error` |
-| Build output | Local on the Mac | Terminal |
+| Build output | Local on the developer's computer | Terminal |
 | Daemon | stderr → journald (`journalctl -u dokwalt`), `log/slog` | journald |
 | Caddy access logs | JSON over the Unix socket to the daemon, aggregated into metrics | **Never written to disk**; only `metrics_http` rows |
 | Caddy errors | stderr → `local` driver | `docker logs dokwalt-caddy` |
@@ -1530,7 +1530,7 @@ There's no shared proxy network. Each app stage has a private bridge network `dw
 - Discord: `{"content": "**🔴 <title>** — `<hostname>`\n<message>", "username": "DokWalt"}`. Slack: `{"text": "*🔴 <title>* — `<hostname>`\n<message>"}`. 10 s timeout. Failures are logged by the daemon.
 - `alerts:test` posts "👋 DokWalt test alert" to every channel and reports per-channel errors.
 - With no channel configured, alerts are only logged.
-- Everything is evaluated on the server; nothing depends on the Mac being online.
+- Everything is evaluated on the server; nothing depends on the developer's computer being online.
 
 ```text
 🔴 Site down — pi
@@ -1545,8 +1545,8 @@ blog.example.com is not answering: HTTP 502
 
 - **Who can control DokWalt**: whoever can open `/run/dokwalt/dokwalt.sock` (root:dokwalt, 0660), i.e. root and members of `dokwalt`. `server init` adds the SSH user to `dokwalt` and `docker`. Remote access goes only through sshd.
 - **Why no DokWalt password or token in v1**: the admin user is also in `docker`, which is root-equivalent (it can mount `/` into a container). Any secret DokWalt checked could be bypassed by that same user in one command. It would add prompts without adding a security boundary. A token will matter for a future restricted deploy user or a webhook (§17.2); the API can take an auth middleware then.
-- **What actually protects the server**: SSH key-only auth, a passphrase-protected or hardware-backed key on the Mac, and known_hosts verification.
-- **Risk to state plainly**: a compromised Mac with an unlocked agent means a compromised server.
+- **What actually protects the server**: SSH key-only auth, a passphrase-protected or hardware-backed key on the developer's computer, and known_hosts verification.
+- **Risk to state plainly**: a compromised developer computer with an unlocked agent means a compromised server.
 
 ### 14.2 Secrets
 
@@ -1618,7 +1618,7 @@ Why THP matters: with transparent huge pages set to `always` (a common default),
 | Health check or readiness fails / crash loop during the 3 s window | New color removed, old keeps serving, release `failed`, alert | Last 30 log lines of the failing container |
 | Bad release that passes the health check | Stays live | Crash-loop / site-down alerts; `dokwalt rollback` |
 | Caddy rejects the config at switch | New color removed, previous routes re-applied | "switch traffic: caddy rejected config: …" |
-| Build fails on the Mac | Nothing sent | Build output |
+| Build fails on the developer's computer | Nothing sent | Build output |
 | Registry image has no variant for the server arch / private registry without login | `up` fails → release `failed` | Compose error; hint: other image, `build:`, or `sudo docker login` on the server |
 | Interrupted upload | No release created | Rerun `deploy`; images already on the server are skipped |
 | Laptop disconnects after the deploy request | Daemon completes it | Outcome in `dokwalt releases` |
@@ -1633,7 +1633,7 @@ Why THP matters: with transparent huge pages set to `always` (a common default),
 | Let's Encrypt rate limit / validation failure | Caddy backs off and retries against staging | `cert` alert |
 | Clock not synchronized | TLS failures | `doctor` warning with `timedatectl set-ntp true` |
 | Ports 80/443 taken by another web server | Caddy can't start | `doctor` ✗ Proxy; `docker logs dokwalt-caddy` |
-| `secret.key` lost | Config can't be decrypted | Restore it from backup (§19.1.7) |
+| `secret.key` lost | Config can't be decrypted | Restore it from backup (§19.6) |
 | Config value interpolated into a stateful service changes | Data container recreated at the next release | Brief downtime of that service |
 | Stateful image major upgrade (e.g. `postgres:16` → `17`) | Container recreated on old data; Postgres refuses to start → release fails, **the old DB container is already replaced** | Do major upgrades by dump/restore |
 | Service removed from compose | Removed with the old color, or by `--remove-orphans` in the data project (volume kept) | — |
@@ -1660,7 +1660,7 @@ Stages are already rows keyed by name, and naming (`dw-<app>-<stage>-*`) already
 
 ### 17.4 Layer-aware image transfer (later)
 
-A registry API (`/v2/`) served by the daemon through `dial-stdio`, backed by Docker's image store, so that only missing layers are sent from the Mac. The CLI's upload step (`images/have` + `images/load`) is isolated, so it can be swapped without touching the engine.
+A registry API (`/v2/`) served by the daemon through `dial-stdio`, backed by Docker's image store, so that only missing layers are sent from the developer's computer. The CLI's upload step (`images/have` + `images/load`) is isolated, so it can be swapped without touching the engine.
 
 ### 17.5 Multi-server
 
@@ -1689,7 +1689,7 @@ Acceptance:
 - (A) `db:connect --tunnel-only` gives a working tunnel to the database.
 - (A) Reboot (`docker restart` of the server) and power cut (`docker kill` + start): the site comes back with no manual action.
 - (A) Unit tests: compose transformation (rules, one-shot detection, volume naming, pass-through config), Caddy config, store, alerts.
-- (M) Same flow on a real Pi 5 and a 1 GB VPS, including `sudo reboot` and pulling the plug.
+- (M) Same flow on a real arm64 machine at home and a 1 GB VPS, including `sudo reboot` and pulling the plug.
 
 ### M2 — Pipelines — done
 
@@ -1757,108 +1757,75 @@ LICENSE                 MIT
 
 ---
 
-## 19. Installation guides
+## 19. Server setup guide
 
-The full end-user guides are the embedded topics **`internal/docs/topics/raspberry-pi.md`** (`dokwalt docs raspberry-pi`) and **`internal/docs/topics/vps.md`** (`dokwalt docs vps`). They are the source of truth for wording; this section specifies their required content, the justification of each recommendation, and the split between manual steps and what `dokwalt server init` automates.
+The end-user guide is the embedded topic **`internal/docs/topics/server.md`** (`dokwalt docs server`): one guide for any 64-bit Debian or Ubuntu machine with systemd, rented (VPS) or owned, amd64 or arm64. Where a VPS and a machine at home differ, the guide says so inline instead of splitting into separate guides. It is the source of truth for wording; this section specifies its required content, the justification of each recommendation, and the split between manual steps and what `dokwalt server init` automates.
 
-### 19.1 Raspberry Pi 5
-
-#### 19.1.1 Hardware
+### 19.1 Machine and OS
 
 | Item | Recommendation | Why |
 |---|---|---|
-| Board | Pi 5 **8 GB** (4 GB acceptable) | Overhead ~60 MB; a small Node/Python/PHP site ~80–200 MB, Postgres ~40–100 MB. 4 GB ≈ 8–12 typical sites with DBs; 8 GB ≈ 20–30. RAM, not CPU, is the limit |
-| Power | Official 27 W USB-C PSU | Under-voltage causes throttling, USB/NVMe resets and corruption; the Pi 5 needs 5 V/5 A for full USB/PCIe power |
-| Cooling | Official Active Cooler | Sustained builds are on the Mac, but many containers + HTTPS keep the SoC busy; avoids throttling at 80–85 °C |
-| Storage | **NVMe SSD on an M.2 HAT+** (256 GB+, e.g. a reputable 2230/2242 drive) | SD cards wear out under Docker layers, SQLite WAL and logs; a dying card is the classic "broken after reboot". NVMe is ~10× faster and far more durable |
-| Boot from NVMe | EEPROM `BOOT_ORDER=0xf416` (NVMe first), via `raspi-config` → Advanced → Boot Order; `PCIE_PROBE=1` only for non-HAT+ adapters | Flash the OS directly onto the NVMe (USB enclosure on the Mac, or Imager running on the Pi from a temporary SD) |
-| Optional | RTC battery (official ML-2020 rechargeable) | Correct time before NTP at boot → no TLS/log timestamp surprises after a power cut |
-| Optional | UPS HAT | Rides through short cuts; with a graceful shutdown script it avoids unclean power loss entirely |
+| RAM | 1 GB runs ~4–6 small sites with DBs; 2 GB ~10; 4 GB 10–20; 8 GB+ 20–30+ or heavier stacks | Overhead ~73 MiB (daemon ~27 MiB RSS, Caddy ~46 MiB); a small dynamic site with its own Postgres 150–400 MB, a static site 10–30 MB. RAM, not CPU, is the limit. A deploy briefly runs both versions of the stateless services, so keep headroom for the largest app twice |
+| Disk | 20 GB minimum | Images of the current release and the last 5 per stage are kept |
+| Storage (own hardware) | SSD; never an SD card or USB stick | Docker layers, SQLite WAL, logs and the journal write constantly; flash cards wear out and fail silently — the classic "broken after reboot" |
+| Network (own hardware) | Wired Ethernet | Reliability |
+| OS | Debian 12/13 or Ubuntu 24.04+ LTS, 64-bit, minimal server image; Debian-based board images work too | Docker's official repos; every standard guide applies. 32-bit systems are refused by `server init` and `install.sh` |
 
-#### 19.1.2 OS choice
-
-| | Raspberry Pi OS Lite 64-bit (**recommended**) | Ubuntu Server LTS arm64 (24.04 / 26.04) | DietPi |
-|---|---|---|---|
-| Pi 5 firmware/kernel support | First-party, fastest fixes (EEPROM, PCIe, `vcgencmd`) | Good, slightly behind | Based on Pi OS/Debian, good |
-| Base | Debian 13 "trixie" (12 still fine) — Docker's `debian` repo | Ubuntu — Docker's `ubuntu` repo | Debian |
-| Idle RAM | ~120 MB | ~250 MB (snapd, cloud-init) | ~60 MB |
-| Support horizon | Follows Debian | 5 years standard | Rolling scripts |
-| Surprises | Few | snapd, unattended cloud-init | Custom tooling (dietpi-*) differs from standard Debian guides |
-
-Recommendation: **Raspberry Pi OS Lite (64-bit)**: first-party hardware support for the exact board, standard Debian (every guide applies), light. Flash with **Raspberry Pi Imager** → OS customisation: hostname (`pi`), user (not `pi`), **SSH public-key only**, locale/timezone, no Wi-Fi if on Ethernet.
-
-#### 19.1.3 Steps and who does them
+### 19.2 Steps and who does them
 
 | # | Step | By | Justification |
 |---|---|---|---|
-| 1 | Assemble (HAT+, NVMe, cooler), flash Pi OS Lite 64-bit to NVMe with Imager customisation | hand | — |
-| 2 | First boot, `sudo apt update && sudo apt full-upgrade -y`, `sudo rpi-eeprom-update -a`, reboot | hand | Current kernel/firmware fix PCIe/NVMe and power issues |
-| 3 | Set boot order NVMe first (if not already booting from it) | hand | — |
-| 4 | Check memory cgroup: `grep memory /sys/fs/cgroup/cgroup.controllers`; if absent append `cgroup_enable=memory cgroup_memory=1` to `/boot/firmware/cmdline.txt` (single line) and reboot | hand (bootstrap warns, doctor checks) | Needed for `mem_limit`, `docker stats`, DokWalt's per-container memory |
-| 5 | zram swap (`sudo apt install zram-tools`, `ALGO=zstd`, `PERCENT=25`), disable `dphys-swapfile` | hand | Swap without disk writes; absorbs spikes instead of OOM kills |
-| 6 | journald: `SystemMaxUse=100M`, `RuntimeMaxUse=50M` in `/etc/systemd/journald.conf.d/dokwalt.conf` | hand | Bounded log writes/disk |
-| 7 | Time sync: `timedatectl` shows `System clock synchronized: yes` (systemd-timesyncd) | hand (doctor checks) | ACME and TLS fail with a wrong clock |
-| 8 | Hardware watchdog: `/etc/systemd/system.conf.d/watchdog.conf` with `RuntimeWatchdogSec=15s`, `RebootWatchdogSec=2min` | hand | A frozen kernel/Pi reboots itself; then DokWalt reconciles |
-| 9 | Power-loss behaviour: EEPROM `POWER_OFF_ON_HALT=0` (default), ext4 defaults, nothing else | hand (verify) | Pi boots automatically when power returns |
-| 10 | Hardening (§19.1.6) | hand | — |
-| 11 | Router: DHCP reservation, forward 80/tcp, 443/tcp, 443/udp to the Pi; DDNS if dynamic IP | hand | — |
-| 12 | `dokwalt server init dd@pi.home --name pi --email you@example.com` | **automated**: Docker from get.docker.com (+ compose plugin), `daemon.json` merge (live-restore, `local` log driver), group `dokwalt` + your user in `dokwalt`/`docker`, binary, `/var/lib/dokwalt`, systemd unit; the daemon then creates `secret.key` and starts Caddy | — |
-| 13 | `dokwalt doctor`, deploy a first app, final checklist (§19.1.8) | hand | — |
+| 1 | Install or create the machine; `sudo apt update && sudo apt full-upgrade -y`, reboot | hand | Current kernel and security fixes |
+| 2 | Non-root user with `sudo` and your SSH key (cloud-init user on a VPS, `ssh-copy-id` at home); `~/.ssh/config` alias on your computer; first `ssh` records the host key | hand | DokWalt only talks to the server through your SSH login |
+| 3 | Check memory cgroup: `grep memory /sys/fs/cgroup/cgroup.controllers`; if absent add `cgroup_enable=memory cgroup_memory=1` to the kernel command line and reboot | hand (bootstrap warns, doctor checks) | Needed for `mem_limit`, `docker stats`, DokWalt's per-container memory. On by default with cgroup v2 on Debian 12+/Ubuntu 24.04; some ARM board kernels disable it |
+| 4 | Swap on 1–2 GB machines: swap file (`vm.swappiness=10`), or zram (`zram-tools`, `ALGO=zstd`, `PERCENT=25`) on flash storage | hand | Absorbs deploy spikes instead of OOM kills; zram avoids disk writes |
+| 5 | journald: `SystemMaxUse=100M`, `RuntimeMaxUse=50M` in `/etc/systemd/journald.conf.d/dokwalt.conf` | hand | Bounded log writes/disk |
+| 6 | Time sync: `timedatectl` shows `System clock synchronized: yes` | hand (doctor checks) | ACME and TLS fail with a wrong clock |
+| 7 | Hardware watchdog where `wdctl` finds one: `RuntimeWatchdogSec=15s`, `RebootWatchdogSec=2min` | hand | A frozen kernel resets the machine; then DokWalt reconciles. Usually absent in VMs; DokWalt's unit has its own `WatchdogSec=60` |
+| 8 | Own hardware: firmware "restore on AC power loss" = power on | hand | The machine boots by itself when power returns |
+| 9 | Networking (§19.4) and hardening (§19.5) | hand | — |
+| 10 | `dokwalt server init dd@203.0.113.10 --name prod --email you@example.com` | **automated**: Docker from get.docker.com (+ compose plugin), `daemon.json` merge (live-restore, `local` log driver), group `dokwalt` + your user in `dokwalt`/`docker`, binary, `/var/lib/dokwalt`, systemd unit; the daemon then creates `secret.key` and starts Caddy | — |
+| 11 | `dokwalt doctor`, deploy a first app, final checklist (§19.7) | hand | — |
 
-#### 19.1.4 Docker on ARM & images
+### 19.3 Images on arm64
 
 - Docker Engine from Docker's official repo (what `get.docker.com` configures), never the distro's `docker.io` (older, different compose packaging).
-- Builds on Apple Silicon for `linux/arm64` are native (no emulation), so fast; DokWalt sets `DOCKER_DEFAULT_PLATFORM=linux/arm64` automatically from the detected server arch.
-- Registry images: check `docker manifest inspect <image> | grep arm64`. No arm64 variant → pick an alternative image, or build it from source via `build:` (arm64 native on the Mac). Don't run amd64 images under QEMU on the Pi (slow, fragile).
+- Builds for `linux/arm64` are native on an arm64 computer (Apple Silicon, arm64 Linux), so fast; from an amd64 computer they run under QEMU emulation (built into Docker Desktop; `tonistiigi/binfmt` with Docker Engine on Linux), which is slower; DokWalt sets `DOCKER_DEFAULT_PLATFORM` automatically from the detected server arch.
+- Registry images: check `docker manifest inspect <image> | grep arm64`. No arm64 variant → pick an alternative image, or build it from source via `build:` (native on an arm64 computer). Don't run amd64 images under QEMU on the server (slow, fragile).
 
-#### 19.1.5 Networking at home
+### 19.4 Networking
 
-- **Addressing**: DHCP reservation on the router (simpler and survives OS reinstall) rather than a static IP on the Pi.
-- **Port forwarding**: 80/tcp (HTTP-01 challenge + redirects), 443/tcp, 443/udp (HTTP/3, optional).
-- **Dynamic public IP**: router's built-in DDNS or `ddclient` updating the A record (e.g. Cloudflare API); keep TTL low (300 s).
+- **VPS**: public IP, so no port forwarding, DDNS, CGNAT or hairpin concerns. Provider firewall / security group allows 22 (ideally your IP only), 80/tcp, 443/tcp, 443/udp: it sits outside the VM, so Docker can't bypass it.
+- **At home**: DHCP reservation on the router (simpler and survives OS reinstall) rather than a static IP; port forwarding of 80/tcp (HTTP-01 challenge + redirects), 443/tcp, 443/udp (HTTP/3, optional); a dynamic public IP is handled by the router's DDNS or `ddclient` updating the A record (e.g. Cloudflare API), TTL 300 s.
 - **CGNAT** (router WAN IP ≠ public IP seen by `curl ifconfig.me`, or in 100.64.0.0/10): ports can't be opened. Options: ask the ISP for a public IPv4 (often free); **Cloudflare Tunnel** (`cloudflared`, free); **Tailscale Funnel**. Implication: Let's Encrypt HTTP-01 needs the challenge request to reach Caddy's port 80, and visitors' TLS is terminated at the tunnel's edge. With Cloudflare Tunnel this works with two ingress rules per host: path `^/\.well-known/acme-challenge/` → `http://localhost:80` (Caddy answers the challenge; Let's Encrypt follows Cloudflare's HTTPS redirect), everything else → `https://localhost:443` with `originServerName: <host>` (Caddy's certificate secures the tunnel-to-origin hop). Tailscale Funnel only serves `*.ts.net` names, so it's for demos. The domain check warns about a DNS mismatch (DNS points at Cloudflare) — expected; the domain is added anyway. **v0.1 supports HTTP-01 only**; DNS-01 is open (§20).
-- **IPv6**: add AAAA records only if the router allows inbound 80/443 to the Pi's global IPv6 address (many home routers block inbound IPv6 by default); a wrong AAAA record breaks HTTP-01 for IPv6-preferring validators. Caddy's published ports listen on IPv6 without Docker IPv6 networking.
+- **IPv6**: add AAAA records only if inbound 80/443 really reaches the server over IPv6 (provider firewall on a VPS; many home routers block inbound IPv6 by default); a wrong AAAA record breaks HTTP-01 for IPv6-preferring validators. Caddy's published ports listen on IPv6 without Docker IPv6 networking.
 
-#### 19.1.6 Security hardening
+### 19.5 Security hardening
 
-- Non-default user created by Imager; `/etc/ssh/sshd_config.d/10-dokwalt.conf`: `PasswordAuthentication no`, `KbdInteractiveAuthentication no`, `PermitRootLogin no`.
-- `ufw default deny incoming; ufw allow 22/tcp; ufw allow 80/tcp; ufw allow 443/tcp; ufw allow 443/udp; ufw enable`.
+- Non-root user; `/etc/ssh/sshd_config.d/10-dokwalt.conf` (named `10-` so it wins over cloud-init's `50-cloud-init.conf`): `PasswordAuthentication no`, `KbdInteractiveAuthentication no`, `PermitRootLogin no`, `MaxAuthTries 3`.
+- `ufw default deny incoming; ufw limit 22/tcp; ufw allow 80/tcp; ufw allow 443/tcp; ufw allow 443/udp; ufw enable`.
 - **Docker bypasses ufw** for published ports (its iptables rules are evaluated before ufw's). DokWalt's answer: no app or DB port is ever published (compose `ports:` stripped); the only published ports are Caddy's 80/443, which are public by intent. So ufw's policy and reality agree.
 - `unattended-upgrades` with `Automatic-Reboot "true"` at `04:00`: safe because DokWalt restores every site after a reboot (that's the point of G1); security patches matter more than a 1-minute nightly-at-most blip.
 - fail2ban costs ~40–60 MB (Python) — ~5 % of a 1 GB box; with key-only SSH brute force can't succeed, so it's optional. Lighter: OpenSSH ≥ 9.8 `PerSourcePenalties` (Debian 13+, Ubuntu 25.04+), or restrict SSH to Tailscale.
-- Disable unused: `dtoverlay=disable-bt` and (on Ethernet) `dtoverlay=disable-wifi` in `/boot/firmware/config.txt`; `systemctl disable --now avahi-daemon bluetooth ModemManager cups` where present.
+- Disable unused services where present (`avahi-daemon`, `bluetooth`, `ModemManager`, `cups`; `snapd` on Ubuntu if unused).
 - DokWalt's own surface: no listening port; see §14.
 
-#### 19.1.7 Pi health, backups, restore
+### 19.6 Health, backups, restore
 
-- `vcgencmd measure_temp`, `vcgencmd get_throttled` (bits: 0 under-voltage now, 1 freq capped, 2 throttled, 3 soft temp limit; 16–19 = "has occurred since boot"). Temperature is shown in `server info`, `doctor`, `top` and the dashboard header; throttling in `doctor` and `top`; alerts `temperature` (threshold) and throttling (always on).
-- **Back up**: `/var/lib/dokwalt/dokwalt.db` (online copy: `sudo sqlite3 /var/lib/dokwalt/dokwalt.db ".backup /backup/dokwalt.db"`), **`secret.key` (separately, offline)**, the Docker volume `dokwalt-caddy-data` (certificates; avoids re-issuance), Docker volumes `dw-*` (`docker run --rm -v dw-blog-production-pgdata:/v -v /backup:/b alpine tar czf /b/pgdata.tgz -C /v .` with the DB stopped, or logical dumps via `dokwalt exec --service db -- pg_dump …`). Images are not backed up (redeploy).
-- **Restore on a fresh Pi**: prepare the Pi (steps 1–11), `server init`, `sudo systemctl stop dokwalt`, restore `dokwalt.db` (remove stale `-wal`/`-shm` files), `secret.key`, the `dokwalt-caddy-data` volume and the `dw-*` volumes, `sudo systemctl start dokwalt`. The daemon now knows every app, domain and config var, and Caddy serves the restored certificates. Built images aren't in the backup, so the reconciler can't start those apps yet ("Self-healing failed" alert): run `dokwalt deploy` once from each app folder. Alternative per app: `apps:export` / `apps:import` + `deploy` + volume restore.
+- Temperature is read from `/sys/class/thermal` where a sensor exists (most physical machines, rarely VMs) and shown in `server info`, `doctor`, `top` and the dashboard header, with the `temperature` alert (threshold). Boards whose firmware reports throttling (`vcgencmd get_throttled`) also get it in `doctor` and `top` and the always-on throttling alert. Without a sensor these are omitted; disk and memory alerts apply everywhere.
+- **Off-site**: nightly backups of every Postgres database and DokWalt's state (§7.7.1); on a VPS, provider snapshots as the simplest whole-disk backup.
+- **By hand**: `/var/lib/dokwalt/dokwalt.db` (online copy: `sudo sqlite3 /var/lib/dokwalt/dokwalt.db ".backup /backup/dokwalt.db"`), **`secret.key` (separately, offline)**, the Docker volume `dokwalt-caddy-data` (certificates; avoids re-issuance), Docker volumes `dw-*` (tar with the DB stopped, or logical dumps via `dokwalt exec --service db -- pg_dump …`). Images are not backed up (redeploy).
+- **Restore on a fresh server**: prepare it (§19.2 steps 1–9), `server init`, `sudo systemctl stop dokwalt`, restore `dokwalt.db` (remove stale `-wal`/`-shm` files), `secret.key`, the `dokwalt-caddy-data` volume and the `dw-*` volumes, `sudo systemctl start dokwalt`. The daemon now knows every app, domain and config var, and Caddy serves the restored certificates. Built images aren't in the backup, so the reconciler can't start those apps yet ("Self-healing failed" alert): run `dokwalt deploy` once from each app folder. Alternative per app: `apps:export` / `apps:import` + `deploy` + volume restore.
 
-#### 19.1.8 Final checklist
+### 19.7 Final checklist
 
-1. `dokwalt doctor` all ✓ (memory cgroup, clock, temperature, Caddy, domains).
-2. `https://<domain>` from a phone on mobile data (not Wi-Fi: avoids hairpin illusions).
+1. `dokwalt doctor` all ✓ (memory cgroup, clock, temperature where available, Caddy, domains).
+2. `https://<domain>` from outside; for a server at home, from a phone on mobile data (not Wi-Fi: avoids hairpin illusions).
 3. `dokwalt alerts:test` received on Discord/Slack.
-4. **Hard reboot**: `ssh pi sudo reboot`; start a timer; site must be back over HTTPS < 2 min with no command; `dokwalt doctor` ✓.
-5. **Power cut**: pull the power plug while serving traffic, wait 10 s, plug back; site back < 2 min; `doctor` ✓; `sudo sqlite3 /var/lib/dokwalt/dokwalt.db 'PRAGMA integrity_check'` = ok.
-6. Optional watchdog test: `echo c | sudo tee /proc/sysrq-trigger` (kernel crash) → Pi reboots by itself within ~15 s + boot.
-7. `vcgencmd get_throttled` = `0x0` after a day of normal load.
-8. Backups scheduled and one restore rehearsed.
-
-### 19.2 Debian/Ubuntu VPS — what differs
-
-| Topic | VPS |
-|---|---|
-| OS | Debian 12/13 or Ubuntu 24.04/26.04 LTS minimal image |
-| Size | 1 GB RAM runs ~4–6 small sites with DBs; add a 1–2 GB swap file (`fallocate`, `vm.swappiness=10`) — disk writes are not a concern on VPS storage |
-| Storage/hardware/cooling/watchdog/EEPROM/`vcgencmd` | Not applicable (hypervisor handles it); temperature checks are skipped automatically |
-| Networking | Public IP: no port forwarding, DDNS, CGNAT or hairpin concerns; IPv6 usually provided — add AAAA if the provider routes it |
-| Firewall | Provider firewall/security group: allow 22, 80, 443/tcp, 443/udp; plus ufw as on the Pi (same Docker-bypass reasoning) |
-| Users | Cloud-init creates the user with your key; ensure it's not root: create a user, add key, disable root login |
-| Updates | `unattended-upgrades` with automatic reboot at a quiet hour |
-| Backups | Provider snapshots (whole disk, simplest restore) + nightly off-site backups (§7.7.1) |
-| Init | `dokwalt server init deploy@203.0.113.10 --name prod --email you@example.com` — identical |
+4. **Reboot**: `ssh prod sudo reboot`; start a timer; site must be back over HTTPS < 2 min with no command; `dokwalt doctor` ✓.
+5. **Power cut**: pull the power plug (on a VPS, a hard reset from the provider panel) while serving traffic, wait 10 s, power back; site back < 2 min; `doctor` ✓; `sudo sqlite3 /var/lib/dokwalt/dokwalt.db 'PRAGMA integrity_check'` = ok.
+6. Optional watchdog test where one is set up: `echo c | sudo tee /proc/sysrq-trigger` (kernel crash) → the machine reboots by itself.
+7. Backups scheduled and one restore rehearsed.
 
 ---
 
@@ -1868,7 +1835,7 @@ Recommendation: **Raspberry Pi OS Lite (64-bit)**: first-party hardware support 
 2. **Resource limits set server-side.** The brief lists them among server-side overrides; v0.1 only honours `deploy.resources` / `mem_limit` from the compose file. *Proposal:* `services:set <svc> --memory 256m --cpus 0.5` (two more columns in `service_overrides`).
 3. **Schema migrations.** The schema is `CREATE TABLE IF NOT EXISTS`. The first incompatible change needs versioned migrations (`PRAGMA user_version`) and a pre-upgrade DB backup in `server upgrade`.
 4. **Registry image pinning.** Registry images use `pull_policy: missing` and aren't pinned by digest, so a rollback reuses whatever image is present locally for that tag. *Proposal:* record the resolved image ID in the release and warn when it changed.
-5. **DNS-01 / CGNAT.** HTTP-01 only. Cloudflare Tunnel works with the two-rule setup (§19.1.5). *Proposal:* Cloudflare DNS-01, which needs a Caddy image built with the DNS module.
+5. **DNS-01 / CGNAT.** HTTP-01 only. Cloudflare Tunnel works with the two-rule setup (§19.4). *Proposal:* Cloudflare DNS-01, which needs a Caddy image built with the DNS module.
 6. **Export encryption.** `apps:export` writes config in clear text. *Proposal:* optional passphrase encryption.
 7. **Alert webhook URLs at rest.** They're bearer secrets but stored unencrypted. *Proposal:* seal them with the same key as config.
 8. **Certificate expiry alert.** v0.1 alerts on issuance errors reported by Caddy; there's no alert based on the served certificate's expiry date.

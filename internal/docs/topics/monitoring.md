@@ -15,7 +15,7 @@ extra database. Three ways to look at them:
 
 ```text
 $ dokwalt top
-◆ pi  10:42:07
+◆ prod  10:42:07
 
 CPU  ███░░░░░░░░░░░░░░░░░░░░░  11.4%  load 0.42 · 4 cores
 MEM  ██████░░░░░░░░░░░░░░░░░░  26.9%  2.1 GiB / 7.9 GiB
@@ -106,10 +106,10 @@ socket read by the daemon, with nothing on disk. The daemon counts
 requests and 2xx/3xx/4xx/5xx, and computes p50/p95/p99 latency from
 histogram buckets.
 
-Memory metrics need the cgroup memory controller. If it is disabled (older
-Raspberry Pi OS images), `dokwalt doctor` says so and how to enable it:
-append `cgroup_enable=memory cgroup_memory=1` to
-`/boot/firmware/cmdline.txt` and reboot.
+Memory metrics need the cgroup memory controller. If it is disabled (some
+kernels built for ARM boards), `dokwalt doctor` says so: add
+`cgroup_enable=memory cgroup_memory=1` to the kernel command line and reboot
+(`dokwalt docs server`).
 
 ## Storage and retention
 
@@ -131,9 +131,9 @@ total, under the 100 MB target. Check your own numbers:
 
 ```text
 $ dokwalt server info
-◆ pi  dd@pi.home
+◆ prod  deploy@203.0.113.10
 
-Host            pi (linux/arm64), up 12d
+Host            prod (linux/arm64), up 12d
 DokWalt         0.1.0 (API 1.0) · CLI 0.1.0
 Docker          28.4.0 · compose 2.39.1
 Apps            2
@@ -175,4 +175,4 @@ dokwalt metrics -s staging --since 24h       # staging (pipeline apps)
 ```
 
 See also: `dokwalt docs alerts`, `dokwalt docs logs`,
-`dokwalt docs raspberry-pi`, `dokwalt docs troubleshooting`
+`dokwalt docs server`, `dokwalt docs troubleshooting`

@@ -671,7 +671,7 @@ func (d *Daemon) getBackup(w http.ResponseWriter, r *http.Request) error {
 	return writeJSON(w, m)
 }
 
-// getBackupFile streams one file of a backup, so the Mac never needs the
+// getBackupFile streams one file of a backup, so the client never needs the
 // bucket's credentials.
 func (d *Daemon) getBackupFile(w http.ResponseWriter, r *http.Request) error {
 	c, prefix, err := d.backupStorage()

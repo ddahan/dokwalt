@@ -3,20 +3,20 @@
 *Symptom → cause → fix for the problems you are most likely to hit, with the exact commands.*
 
 Start with `dokwalt doctor`: most failures show up there with a `→` hint. Commands marked
-`# on the server` run over `ssh`; everything else runs on your Mac.
+`# on the server` run over `ssh`; everything else runs on your computer.
 
 ## Connecting
 
 ### `HOST KEY MISMATCH`, `host key … not trusted`, or authentication fails
 
-DokWalt uses your SSH settings, so first make plain `ssh` work: `ssh -v dd@pi.home true`.
+DokWalt uses your SSH settings, so first make plain `ssh` work: `ssh -v deploy@203.0.113.10 true`.
 
-- **Host key changed** (reinstalled server): always refused; `ssh-keygen -R pi.home`, reconnect.
+- **Host key changed** (reinstalled server): always refused; `ssh-keygen -R 203.0.113.10`, reconnect.
 - **Unknown host:** DokWalt shows the fingerprint and asks. `StrictHostKeyChecking accept-new` (or
   `no`) accepts it without asking; `StrictHostKeyChecking yes` refuses it: add it with `ssh` first.
 - **No key offered:** `ssh-add -l` lists agent keys; `ssh-add ~/.ssh/id_ed25519` adds one.
 - **Wrong host/user/port/jump host:** DokWalt reads `ssh -G`; check what it will use with
-  `ssh -G pi.home | grep -E '^(hostname|user|port|identityfile|proxyjump|stricthostkeychecking) '`.
+  `ssh -G prod | grep -E '^(hostname|user|port|identityfile|proxyjump|stricthostkeychecking) '`.
   A non-default config file must be exported as `DOKWALT_SSH_CONFIG=/path/to/config`.
 
 ### `permission denied` on `/run/dokwalt/dokwalt.sock`
@@ -34,7 +34,7 @@ sudo usermod -aG dokwalt,docker $USER   # if missing; then log out and back in
 ### `dokwalt: command not found` on the server, or daemon unreachable
 
 `server init` did not finish (it prints the daemon's last 30 journal lines if it failed to start),
-or the service is down: `ssh pi.home systemctl status dokwalt`. Re-running `server init` is safe.
+or the service is down: `ssh prod systemctl status dokwalt`. Re-running `server init` is safe.
 
 ### Version mismatch between CLI and daemon
 
@@ -59,17 +59,17 @@ RUN curl -fsSL -o /usr/local/bin/tool https://example.com/tool-linux-${TARGETARC
 
 The server's `docker compose up` fails and the release is `failed`. Check with
 `docker manifest inspect image:tag | grep -c arm64`. Pick another tag or image, or build it from
-source with `build:` (native arm64 on Apple Silicon). Avoid QEMU on the Pi.
+source with `build:`. Avoid running amd64 images under QEMU on the server.
 
 ### Private registry: `pull access denied` / `unauthorized`
 
 Registry images are pulled on the server (only if absent). Log in there, as root:
-`ssh -t pi.home sudo docker login registry.example.com`. The daemon runs with `HOME=/root`,
+`ssh -t prod sudo docker login registry.example.com`. The daemon runs with `HOME=/root`,
 so it uses root's Docker credentials.
 
-### `docker save failed (…) — update Docker Desktop to 28+ for --platform support`
+### `docker save failed (…) — update Docker to 28+ for --platform support`
 
-Uploads use `docker save --platform linux/<arch>`: update Docker on the Mac to 28 or newer.
+Uploads use `docker save --platform linux/<arch>`: update Docker on your computer to 28 or newer.
 
 ### Transfer interrupted, or a deploy waits before starting
 
@@ -170,8 +170,8 @@ Outbound UDP 123 must be allowed. On a Pi, the RTC battery keeps time across pow
 
 ```bash
 dokwalt doctor
-ssh pi.home 'systemctl status docker dokwalt; journalctl -u dokwalt -b --no-pager | tail -50'
-ssh pi.home 'docker ps -a --filter label=dokwalt.app'
+ssh prod 'systemctl status docker dokwalt; journalctl -u dokwalt -b --no-pager | tail -50'
+ssh prod 'docker ps -a --filter label=dokwalt.app'
 ```
 
 - 503 `<app> is temporarily unavailable for maintenance.`: stopped on purpose, which survives
@@ -188,7 +188,7 @@ ssh pi.home 'docker ps -a --filter label=dokwalt.app'
 
 ```bash
 dokwalt logs --service worker -n 100
-ssh pi.home "docker inspect --format '{{.State.OOMKilled}} {{.State.ExitCode}}' <container>"
+ssh prod "docker inspect --format '{{.State.OOMKilled}} {{.State.ExitCode}}' <container>"
 ```
 
 Usual causes: a missing config variable, the database not ready yet after a reboot (make the app
@@ -212,7 +212,7 @@ rollbacks, the second can delete app data. Container logs are capped by the `loc
 
 ```bash
 dokwalt top                            # which service uses what
-ssh pi.home 'free -h; journalctl -k -b | grep -i -e oom -e "killed process"'
+ssh prod 'free -h; journalctl -k -b | grep -i -e oom -e "killed process"'
 ```
 
 Set limits in compose (`mem_limit: 256m`), reduce workers (e.g. Gunicorn/Puma processes), add zram
@@ -224,15 +224,19 @@ run side by side for a few seconds. An "Out of memory" alert fires on OOM kills.
 The local client is missing. Install it, or use `--tunnel-only` with a GUI tool:
 
 ```bash
+# macOS (Homebrew)
 brew install libpq && brew link --force libpq    # psql
 brew install mysql-client mongosh redis           # mysql, mongosh, redis-cli
+# Debian / Ubuntu / WSL (mongosh: from MongoDB's repository)
+sudo apt install postgresql-client default-mysql-client redis-tools
 dokwalt db:connect --tunnel-only --port 5433
 ```
 
-### Pi: throttling or high temperature
+### Throttling or high temperature
 
-`vcgencmd get_throttled`: `0x50000` = under-voltage since boot (official 27 W PSU and cable),
-`0x80008` = heat (Active Cooler, fan, airflow). The throttling alert is always on; tune the
+Check cooling and airflow first. On boards whose firmware reports throttling
+(`vcgencmd get_throttled`): `0x50000` = under-voltage since boot (power supply or cable),
+`0x80008` = heat (cooler, fan, airflow). The throttling alert is always on; tune the
 temperature one with `dokwalt alerts:set temperature=75`.
 
 ## Collecting information for a bug report
@@ -241,12 +245,12 @@ temperature one with `dokwalt alerts:set temperature=75`.
 dokwalt version
 dokwalt doctor --json > doctor.json
 dokwalt server info --json > server-info.json
-ssh pi.home 'journalctl -u dokwalt -b --no-pager -n 500' > dokwalt.log
-ssh pi.home 'docker logs --tail 200 dokwalt-caddy' > caddy.log 2>&1
+ssh prod 'journalctl -u dokwalt -b --no-pager -n 500' > dokwalt.log
+ssh prod 'docker logs --tail 200 dokwalt-caddy' > caddy.log 2>&1
 ```
 
 Include the command you ran and its full output. Review the files first: they contain domain
 names. Config values are masked; never attach `config --reveal` output or `apps:export` files.
 
 See also: `dokwalt docs reboot-recovery`, `dokwalt docs domains`, `dokwalt docs deploy`,
-`dokwalt docs raspberry-pi`, `dokwalt docs commands`.
+`dokwalt docs server`, `dokwalt docs commands`.
