@@ -29,9 +29,7 @@ var templatesFS embed.FS
 //go:embed diagrams/*.svg
 var diagramsFS embed.FS
 
-var tmpl = template.Must(template.New("").Funcs(template.FuncMap{
-	"inc": func(i int) int { return i + 1 },
-}).ParseFS(templatesFS, "templates.html"))
+var tmpl = template.Must(template.New("").ParseFS(templatesFS, "templates.html"))
 
 type page struct {
 	Slug        string
@@ -52,12 +50,6 @@ type tocItem struct {
 type navGroup struct {
 	Title string
 	Pages []*page
-}
-
-type indexData struct {
-	Version string
-	Groups  []navGroup
-	Page    *page // always nil: the index is no topic
 }
 
 type topicData struct {

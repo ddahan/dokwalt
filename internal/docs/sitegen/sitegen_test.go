@@ -13,14 +13,14 @@ const siteDocs = "../../../site/docs"
 
 // The website's docs must match the topics: this fails until `make docs-site` is run.
 func TestSiteDocsUpToDate(t *testing.T) {
-	index, err := os.ReadFile(filepath.Join(siteDocs, "index.html"))
+	first, err := os.ReadFile(filepath.Join(siteDocs, groups[0].Topics[0], "index.html"))
 	if err != nil {
 		t.Fatalf("site/docs not generated: run `make docs-site` (%v)", err)
 	}
 	// The release the pages describe is chosen at generation time; compare with that one.
-	m := regexp.MustCompile(`<meta name="dokwalt-version" content="([^"]+)">`).FindSubmatch(index)
+	m := regexp.MustCompile(`<meta name="dokwalt-version" content="([^"]+)">`).FindSubmatch(first)
 	if m == nil {
-		t.Fatal("site/docs/index.html has no dokwalt-version meta: run `make docs-site`")
+		t.Fatal("site/docs has no dokwalt-version meta: run `make docs-site`")
 	}
 	files, err := generate(string(m[1]))
 	if err != nil {
@@ -32,11 +32,8 @@ func TestSiteDocsUpToDate(t *testing.T) {
 			t.Errorf("site/docs/%s is out of date with internal/docs/topics: run `make docs-site`", rel)
 		}
 	}
-	entries, _ := os.ReadDir(siteDocs)
-	for _, e := range entries {
-		if _, ok := files[e.Name()+"/index.html"]; e.IsDir() && !ok {
-			t.Errorf("site/docs/%s/ has no topic anymore: run `make docs-site`", e.Name())
-		}
+	for _, name := range stale(siteDocs, files) {
+		t.Errorf("site/docs/%s is no longer generated: run `make docs-site`", name)
 	}
 }
 

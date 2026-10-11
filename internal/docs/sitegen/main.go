@@ -1,5 +1,6 @@
 // Command sitegen renders the `dokwalt docs` topics into the website's docs pages
-// (site/docs): one page per topic, an index, and a search index.
+// (site/docs): one page per topic and a search index. There is no docs home page:
+// links to the docs go to the first topic.
 //
 // The topics in internal/docs/topics are the single source: the website and the CLI
 // always show the same text. Run `make docs-site` after changing a topic; `go test`
@@ -21,7 +22,7 @@ import (
 	"github.com/ddahan/dokwalt/internal/docs"
 )
 
-// Groups shape the sidebar, the index and the previous/next links. Every topic must
+// Groups shape the sidebar and the previous/next links. Every topic must
 // appear in exactly one group: generation fails otherwise, so a new topic is never
 // silently missing from the website.
 var groups = []struct {
@@ -112,11 +113,6 @@ func generate(version string) (map[string][]byte, error) {
 	}
 
 	files := map[string][]byte{}
-	var buf bytes.Buffer
-	if err := tmpl.ExecuteTemplate(&buf, "index", indexData{Version: version, Groups: nav}); err != nil {
-		return nil, err
-	}
-	files["index.html"] = buf.Bytes()
 	for i, p := range pages {
 		d := topicData{Version: version, Groups: nav, Page: p}
 		if i > 0 {
@@ -144,17 +140,15 @@ func generate(version string) (map[string][]byte, error) {
 	return files, nil
 }
 
-// write replaces the generated files in dir. Hand-written assets (docs.css, docs.js)
-// are left alone; topic folders that no longer exist are removed.
+// handWritten files of site/docs that generation never touches.
+var handWritten = map[string]bool{"docs.css": true, "docs.js": true}
+
+// write replaces the generated files in dir and removes the ones it no longer generates
+// (a deleted topic's folder, for instance). Hand-written assets are left alone.
 func write(dir string, files map[string][]byte) error {
-	entries, _ := os.ReadDir(dir)
-	for _, e := range entries {
-		if e.IsDir() {
-			if _, ok := files[e.Name()+"/index.html"]; !ok {
-				if err := os.RemoveAll(filepath.Join(dir, e.Name())); err != nil {
-					return err
-				}
-			}
+	for _, name := range stale(dir, files) {
+		if err := os.RemoveAll(filepath.Join(dir, name)); err != nil {
+			return err
 		}
 	}
 	for rel, b := range files {
@@ -167,4 +161,19 @@ func write(dir string, files map[string][]byte) error {
 		}
 	}
 	return nil
+}
+
+// stale lists the entries of dir that generation no longer produces.
+func stale(dir string, files map[string][]byte) []string {
+	var out []string
+	entries, _ := os.ReadDir(dir)
+	for _, e := range entries {
+		name := e.Name()
+		_, file := files[name]
+		_, topic := files[name+"/index.html"]
+		if !handWritten[name] && !file && !(e.IsDir() && topic) {
+			out = append(out, name)
+		}
+	}
+	return out
 }
