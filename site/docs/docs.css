@@ -81,7 +81,7 @@ kbd {
 .doc-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding-bottom: 30px; border-bottom: 1px solid var(--line); }
 .term-chip {
   padding: 5px 11px; border-radius: 8px; font: 12.5px var(--mono);
-  background: linear-gradient(180deg, #14151f, #0e0f17); border: 1px solid var(--line-2);
+  background: var(--code-bg); border: 1px solid var(--code-border); color: var(--code-text);
 }
 .doc-edit { font-size: 13.5px; color: var(--muted); transition: color .2s; }
 .doc-edit::after { content: " ↗"; }
@@ -127,33 +127,33 @@ kbd {
 .prose tbody tr { transition: background .15s; }
 .prose tbody tr:hover { background: var(--hover); }
 
-/* Code panels stay dark in both themes (dark ink: see the top of /styles.css). */
+/* Code panels: colors from the --code-* and --tk-* tokens in /styles.css (gray in the light theme). */
 .code {
   margin: 6px 0 24px; border-radius: 14px; overflow: hidden;
-  background: linear-gradient(180deg, #11121c, #0c0d15); border: 1px solid var(--line-2);
-  box-shadow: var(--shadow-snippet);
+  background: var(--code-bg); border: 1px solid var(--code-border);
+  box-shadow: var(--code-shadow);
 }
-[data-theme="light"] .code, [data-theme="light"] .term-chip { border-color: rgba(24,24,60,.2); }
+[data-theme="light"] .code .copy { background: rgba(255,255,255,.7); }
 .code-bar {
   display: flex; align-items: center; justify-content: space-between; min-height: 36px;
-  padding: 4px 6px 4px 14px; border-bottom: 1px solid var(--line); font: 11.5px var(--mono); color: #6b7180;
+  padding: 4px 6px 4px 14px; border-bottom: 1px solid var(--code-border); font: 11.5px var(--mono); color: var(--code-faint);
 }
 .code-bar::before { content: ""; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: var(--violet); box-shadow: 0 0 8px var(--violet); }
-.code[data-lang="output"] .code-bar::before { background: #4b5563; box-shadow: none; }
+.code[data-lang="output"] .code-bar::before { background: var(--code-faint); box-shadow: none; }
 .code-bar span { margin-right: auto; }
 .code .copy { width: 28px; height: 28px; border-radius: 7px; color: var(--muted); }
 .code .copy svg { width: 14px; height: 14px; }
-.code pre { margin: 0; padding: 14px 18px 16px; overflow-x: auto; font: 13.2px/1.7 var(--mono); color: #dcdcea; scrollbar-width: thin; scrollbar-color: #2a2b3d transparent; }
+.code pre { margin: 0; padding: 14px 18px 16px; overflow-x: auto; font: 13.2px/1.7 var(--mono); color: var(--code-text); scrollbar-width: thin; scrollbar-color: var(--code-scroll) transparent; }
 .code code { font: inherit; background: none; padding: 0; color: inherit; }
-.code[data-lang="output"] pre { color: #b8bccb; }
-.t-cmd { color: #a78bfa; font-weight: 500; }
-.t-flag { color: #60a5fa; }
-.t-str { color: #34d399; }
-.t-com { color: #6b7180; }
-.t-key { color: #93c5fd; }
-.t-num { color: #fbbf24; }
-.t-ok { color: #34d399; }
-.t-err { color: #f87171; }
+.code[data-lang="output"] pre { color: var(--code-dim); }
+.t-cmd { color: var(--tk-cmd); font-weight: 500; }
+.t-flag { color: var(--tk-flag); }
+.t-str { color: var(--tk-str); }
+.t-com { color: var(--code-faint); }
+.t-key { color: var(--tk-key); }
+.t-num { color: var(--tk-num); }
+.t-ok { color: var(--tk-str); }
+.t-err { color: var(--tk-err); }
 
 /* Previous / next */
 .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 72px; }

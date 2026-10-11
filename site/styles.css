@@ -9,10 +9,9 @@
 
 /* Theme. Dark is the default; <html data-theme="light"> switches (set before first paint by
    the script in <head>, from the saved choice or the system setting).
-   Ink: text, accents and lines. Terminal-like surfaces (.term, snippets, mini terminals) stay
-   dark in both themes, so they redeclare the dark ink for everything inside them. */
-:root,
-.term, .install-box, .mini-term, .yaml, .logs, .code, .term-chip {
+   Ink: text, accents and lines. Terminals and code snippets follow the theme too: dark panels
+   here, soft gray ones in the light theme (--term-* and --code-* tokens). */
+:root {
   --text: #ececf4;
   --muted: #9ca3af;
   --faint: #4b5563;
@@ -28,7 +27,6 @@
   --line-2: rgba(255, 255, 255, .14);
   --hover: rgba(255, 255, 255, .05);
 }
-.term, .install-box, .mini-term, .yaml, .logs, .code, .term-chip { color: var(--text); color-scheme: dark; }
 
 /* Surfaces, glows and shadows: page level only. */
 :root {
@@ -64,6 +62,27 @@
   --aurora-opacity: .55;
   --blob-blend: screen;
   --noise: .045;
+  /* Code snippets (install box, docs code blocks): dark here, soft gray in the light theme. */
+  --code-bg: linear-gradient(180deg, #11121c, #0c0d15);
+  --code-border: rgba(255,255,255,.14);
+  --code-shadow: 0 20px 40px -20px rgba(0,0,0,.6);
+  --code-text: #dcdcea;
+  --code-dim: #b8bccb;
+  --code-faint: #6b7180;
+  --code-scroll: #2a2b3d;
+  --tk-cmd: #a78bfa;
+  --tk-flag: #60a5fa;
+  --tk-str: #34d399;
+  --tk-key: #93c5fd;
+  --tk-num: #fbbf24;
+  --tk-err: #f87171;
+  /* Terminal windows (deploy demo, dashboard, command tour, card snippets). */
+  --term-bg: linear-gradient(180deg, #11121c, #0c0d15);
+  --term-bar: rgba(255,255,255,.015);
+  --term-text: #e5e7f0;
+  --term-dim: #c9cbd8;
+  --term-well: #090a11;
+  --term-track: #374151;
   color-scheme: dark;
 }
 
@@ -115,6 +134,25 @@
   --aurora-opacity: .3;
   --blob-blend: multiply;
   --noise: .03;
+  --code-bg: #efeff5;
+  --code-border: rgba(24,24,60,.11);
+  --code-shadow: 0 1px 2px rgba(24,24,60,.04);
+  --code-text: #2b2e3c;
+  --code-dim: #474c5e;
+  --code-faint: #8a8fa0;
+  --code-scroll: #c9cad6;
+  --tk-cmd: #7c3aed;
+  --tk-flag: #2563eb;
+  --tk-str: #047857;
+  --tk-key: #1d4ed8;
+  --tk-num: #b45309;
+  --tk-err: #dc2626;
+  --term-bg: #efeff5;
+  --term-bar: rgba(24,24,60,.03);
+  --term-text: #2b2e3c;
+  --term-dim: #474c5e;
+  --term-well: #efeff5;
+  --term-track: #d9dae4;
   color-scheme: light;
 }
 
@@ -146,7 +184,7 @@ button { font: inherit; color: inherit; }
 .c-blue { color: var(--blue); }
 .c-yellow { color: var(--yellow); }
 .c-red { color: var(--red); }
-.c-hwnk { color: var(--pink); }
+.c-pink { color: var(--pink); }
 
 .noise {
   position: fixed; inset: 0; z-index: 100; pointer-events: none; opacity: var(--noise);
@@ -294,14 +332,14 @@ button { font: inherit; color: inherit; }
 .install-box {
   position: relative; display: flex; align-items: center; gap: 12px;
   padding: 12px 12px 12px 16px; border-radius: 14px;
-  background: rgba(15,16,25,.8); border: 1px solid var(--line-2);
-  box-shadow: 0 0 0 1px rgba(167,139,250,0), var(--shadow-snippet);
+  background: var(--code-bg); border: 1px solid var(--code-border);
+  box-shadow: 0 0 0 1px rgba(167,139,250,0), var(--code-shadow);
   transition: border-color .3s, box-shadow .3s;
 }
-.install-box:hover { border-color: rgba(167,139,250,.45); box-shadow: 0 0 0 4px rgba(167,139,250,.08), var(--shadow-snippet); }
+.install-box:hover { border-color: rgba(167,139,250,.45); box-shadow: 0 0 0 4px rgba(167,139,250,.08), var(--code-shadow); }
 .install-box .prompt { color: var(--violet); font-family: var(--mono); }
 .install-box code {
-  flex: 1; min-width: 0; font-size: 13.5px; color: #dcdcea;
+  flex: 1; min-width: 0; font-size: 13.5px; color: var(--code-text);
   overflow-x: auto; white-space: nowrap; scrollbar-width: none;
 }
 .install-box code::-webkit-scrollbar { display: none; }
@@ -318,7 +356,7 @@ button { font: inherit; color: inherit; }
 .hstep-label { margin: 1px 0 6px; font-size: 13.5px; font-weight: 620; color: var(--text); }
 .hstep-label span { margin-left: 6px; font-weight: 400; font-size: 12.5px; color: var(--faint); }
 .hstep .install-box { padding: 6px 6px 6px 12px; gap: 10px; border-radius: 11px; font-size: 12.5px; }
-.hstep .install-box code { font-size: 12.5px; padding: 0; border-radius: 0; background: none; color: #dcdcea; }
+.hstep .install-box code { font-size: 12.5px; padding: 0; border-radius: 0; background: none; color: var(--code-text); }
 .hstep .copy { width: 28px; height: 28px; border-radius: 7px; }
 .hstep .copy svg { width: 14px; height: 14px; }
 .install-multi { align-items: flex-start; }
@@ -338,19 +376,19 @@ button { font: inherit; color: inherit; }
 
 /* Terminal */
 .term {
-  border-radius: 16px; background: linear-gradient(180deg, #11121c, #0c0d15);
+  border-radius: 16px; background: var(--term-bg);
   border: 1px solid var(--line-2);
   box-shadow: var(--shadow-term);
   overflow: hidden;
 }
-.term-bar { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.015); }
+.term-bar { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--line); background: var(--term-bar); }
 .dots { display: flex; gap: 7px; }
 .dots i { width: 11px; height: 11px; border-radius: 50%; background: #ff5f57; }
 .dots i:nth-child(2) { background: #febc2e; }
 .dots i:nth-child(3) { background: #28c840; }
 .term-title { font: 12.5px var(--mono); color: var(--faint); margin-inline: auto; transform: translateX(-26px); }
 .term-body {
-  margin: 0; padding: 18px 20px 22px; font: 13.4px/1.75 var(--mono); color: #e5e7f0;
+  margin: 0; padding: 18px 20px 22px; font: 13.4px/1.75 var(--mono); color: var(--term-text);
   white-space: pre-wrap; word-break: break-word;
 }
 .term-hero .term-body { min-height: 404px; }
@@ -499,7 +537,7 @@ h2 em { font-style: normal; color: var(--violet-2); }
 .card p { margin: 0; color: var(--muted); font-size: 15px; }
 .card em { font-style: normal; color: var(--text); }
 
-.mini-term { background: #090a11; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-size: 12.8px; line-height: 1.8; margin-top: auto; }
+.mini-term { background: var(--term-well); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-size: 12.8px; line-height: 1.8; margin-top: auto; }
 .rel-head, .rel-row { display: grid; grid-template-columns: 80px 120px 1fr; gap: 10px; white-space: nowrap; }
 .rel-head { color: var(--muted); }
 .bk-row { display: grid; grid-template-columns: 150px 90px 70px 1fr; gap: 10px; white-space: nowrap; }
@@ -525,13 +563,13 @@ h2 em { font-style: normal; color: var(--violet-2); }
 .chip.go { animation: chip-go 1.6s var(--ease) forwards; }
 @keyframes chip-go { from { left: 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } to { left: 100%; transform: translate(-90%, -50%); opacity: 0; } }
 
-.yaml { margin: auto 0 0; background: #090a11; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-size: 12.6px; line-height: 1.7; color: #c9cbd8; white-space: pre; overflow-x: auto; }
+.yaml { margin: auto 0 0; background: var(--term-well); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-size: 12.6px; line-height: 1.7; color: var(--term-dim); white-space: pre; overflow-x: auto; }
 .yaml .k { color: var(--pink); }
 .y-line { display: block; position: relative; border-radius: 6px; padding: 2px 6px; margin: 0 -6px; transition: background .4s; }
 .y-line::after { content: attr(data-tag); position: absolute; right: 6px; top: 3px; font-size: 11px; padding: 1px 8px; border-radius: 999px; background: rgba(52,211,153,.15); color: var(--green); border: 1px solid rgba(52,211,153,.35); opacity: 0; transform: translateX(8px); transition: opacity .4s, transform .4s var(--ease); }
 .y-line:nth-child(1)::after { background: rgba(167,139,250,.15); color: var(--violet-2); border-color: rgba(167,139,250,.4); }
 .y-line:nth-child(2)::after { background: rgba(251,191,36,.12); color: var(--yellow); border-color: rgba(251,191,36,.35); }
-.y-line.on { background: rgba(255,255,255,.04); }
+.y-line.on { background: var(--hover); }
 .y-line.on::after { opacity: 1; transform: none; }
 
 .https { margin-top: auto; display: grid; gap: 12px; }
@@ -555,7 +593,7 @@ h2 em { font-style: normal; color: var(--violet-2); }
 .m-row b { font-size: 20px; margin-right: 18px; font-variant-numeric: tabular-nums; }
 .bars { display: flex; align-items: flex-end; gap: 3px; height: 64px; }
 .bars i { flex: 1; border-radius: 3px 3px 0 0; background: linear-gradient(180deg, var(--violet), rgba(124,58,237,.35)); transition: height .6s var(--ease); min-height: 3px; }
-.logs { margin: 0; background: #090a11; border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; font-size: 12px; line-height: 1.75; height: calc(1.75em * 4 + 20px); overflow: hidden; white-space: pre; color: #c9cbd8; }
+.logs { margin: 0; background: var(--term-well); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; font-size: 12px; line-height: 1.75; height: calc(1.75em * 4 + 20px); overflow: hidden; white-space: pre; color: var(--term-dim); }
 
 .alerts { margin-top: auto; display: grid; gap: 8px; min-height: 132px; align-content: end; }
 .alert { display: grid; grid-template-columns: auto 1fr; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--alert-bg); box-shadow: var(--card-shadow); border: 1px solid var(--line); border-left: 3px solid var(--red); font-size: 13px; animation: alert-in .6s var(--ease) both; }
@@ -578,16 +616,16 @@ h2 em { font-style: normal; color: var(--violet-2); }
 .tui-top { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
 .gauges { display: flex; gap: 22px; flex-wrap: wrap; }
 .gauges em { font-style: normal; display: inline-block; min-width: 3ch; text-align: right; font-variant-numeric: tabular-nums; }
-.gauge { display: inline-block; width: 90px; height: 3px; background: #374151; vertical-align: middle; margin: 0 8px; border-radius: 2px; overflow: hidden; }
+.gauge { display: inline-block; width: 90px; height: 3px; background: var(--term-track); vertical-align: middle; margin: 0 8px; border-radius: 2px; overflow: hidden; }
 .gauge b { display: block; height: 100%; background: var(--green); width: 6%; transition: width .8s var(--ease); }
 .tui-cols { display: grid; grid-template-columns: 300px 1fr; gap: 16px; min-height: 340px; }
 .tui-apps { border: 1.5px solid var(--violet); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
 .app-row { display: grid; grid-template-columns: auto auto 1fr auto; gap: 8px; align-items: center; text-align: left; background: none; border: 0; padding: 3px 6px; margin: 0 -6px; border-radius: 4px; cursor: pointer; font: inherit; color: var(--text); }
 .app-row .c-mute { margin-left: 2px; }
 .app-row .r { text-align: right; grid-column: 4; color: var(--muted); }
-.app-row:hover { background: rgba(255,255,255,.05); }
+.app-row:hover { background: var(--hover); }
 .app-row.active { background: rgba(167,139,250,.16); }
-.tui-detail { border: 1px solid #374151; border-radius: 8px; padding: 12px 16px; overflow: hidden; }
+.tui-detail { border: 1px solid var(--term-track); border-radius: 8px; padding: 12px 16px; overflow: hidden; }
 .tui-tabs { display: flex; gap: 14px; color: var(--muted); margin-bottom: 12px; }
 .tui-tabs .on { color: var(--violet); text-decoration: underline; text-underline-offset: 4px; }
 .tui-table { display: grid; grid-template-columns: 1.1fr .7fr .7fr 1fr 1.4fr; column-gap: 12px; margin: 12px 0; white-space: nowrap; }
@@ -688,7 +726,7 @@ h2 em { font-style: normal; color: var(--violet-2); }
 @media (max-width: 760px) { .yaml { font-size: 11.2px; } .y-line::after { top: 2px; font-size: 10px; } }
 
 /* Command tour: wide CLI tables scroll sideways like a real terminal. */
-.tour-term .term-body { white-space: pre; overflow-x: auto; word-break: normal; scrollbar-width: thin; scrollbar-color: #2a2b3d transparent; }
+.tour-term .term-body { white-space: pre; overflow-x: auto; word-break: normal; scrollbar-width: thin; scrollbar-color: var(--code-scroll) transparent; }
 
 .c-tall .yaml { margin: auto 0; font-size: 13px; }
 /* Hardware card: one row, laptop → server on the right */
@@ -719,5 +757,5 @@ h2 em { font-style: normal; color: var(--violet-2); }
 [data-theme="light"] .final-mark { filter: drop-shadow(0 10px 24px rgba(124,58,237,.35)); }
 [data-theme="light"] ::selection { background: rgba(124,58,237,.2); }
 /* Snippets are translucent over the dark page; on white they need their own solid dark. */
-[data-theme="light"] .install-box { background: linear-gradient(180deg, #14151f, #0e0f17); border-color: rgba(24,24,60,.2); }
+[data-theme="light"] .install-box .copy { background: rgba(255,255,255,.7); }
 
