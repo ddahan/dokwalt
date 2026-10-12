@@ -295,8 +295,7 @@ for v in dokwalt-caddy-data $(docker volume ls -q --filter name=dw-); do
 done
 ```
 
-A tar of a live database may be inconsistent: also `pg_dump` the URL printed by `dokwalt db:connect
--a blog --service db --tunnel-only`. Copy backups off the server; treat `secret.key` like a password.
+A tar of a live database may be inconsistent: also take a dump with `dokwalt db:backup -a blog`. Copy backups off the server; treat `secret.key` like a password.
 
 **Restore onto a fresh server:** steps 1–7 (`ssh-keygen -R <host>` on your computer), backup in `$B`, then:
 

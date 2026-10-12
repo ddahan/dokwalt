@@ -1,10 +1,10 @@
 package cli
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"io"
-	"net"
 	"net/url"
 	"os"
 	"os/exec"
@@ -132,24 +132,7 @@ func execCmd() *cobra.Command {
 			if err := s.c.Get(cmd.Context(), client.StagePath(app, stage, "/exec?service="+url.QueryEscape(service)), &t); err != nil {
 				return err
 			}
-			quoted := make([]string, len(args))
-			for i, a := range args {
-				quoted[i] = shellQuote(a)
-			}
-			// A terminal only when both ends are one: with piped input
-			// (`cat dump | dokwalt exec -- pg_restore …`), `docker exec -t`
-			// would refuse ("the input device is not a TTY").
-			flags := "-i"
-			if ui.IsTTY() && term.IsTerminal(int(os.Stdin.Fd())) {
-				flags = "-it"
-			}
-			remote := fmt.Sprintf("docker exec %s %s %s", flags, t.Container, strings.Join(quoted, " "))
-			if s.ssh == nil {
-				c := exec.CommandContext(cmd.Context(), "sh", "-c", remote)
-				c.Stdin, c.Stdout, c.Stderr = os.Stdin, os.Stdout, os.Stderr
-				return c.Run()
-			}
-			return s.ssh.Interactive(remote)
+			return runInContainer(cmd.Context(), s, t.Container, nil, args)
 		},
 	}
 	cmd.Flags().StringVar(&service, "service", "", "service (default: the first stateless one)")
@@ -158,17 +141,45 @@ func execCmd() *cobra.Command {
 
 func shellQuote(s string) string { return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'" }
 
+// runInContainer runs argv in a container on the server, on this terminal.
+// env ("NAME=value") reaches the container through docker's own environment
+// (`-e NAME`), never as an argument of docker exec.
+func runInContainer(ctx context.Context, s *session, container string, env, argv []string) error {
+	// A terminal only when both ends are one: with piped input
+	// (`cat dump | dokwalt exec -- pg_restore …`), `docker exec -t`
+	// would refuse ("the input device is not a TTY").
+	flags := "-i"
+	if ui.IsTTY() && term.IsTerminal(int(os.Stdin.Fd())) {
+		flags = "-it"
+	}
+	var prefix string
+	for _, kv := range env {
+		k, v, _ := strings.Cut(kv, "=")
+		prefix += k + "=" + shellQuote(v) + " "
+		flags += " -e " + k
+	}
+	quoted := make([]string, len(argv))
+	for i, a := range argv {
+		quoted[i] = shellQuote(a)
+	}
+	remote := fmt.Sprintf("%sdocker exec %s %s %s", prefix, flags, container, strings.Join(quoted, " "))
+	if s.ssh == nil {
+		c := exec.CommandContext(ctx, "sh", "-c", remote)
+		c.Stdin, c.Stdout, c.Stderr = os.Stdin, os.Stdout, os.Stderr
+		return c.Run()
+	}
+	return s.ssh.Interactive(remote)
+}
+
 func dbConnectCmd() *cobra.Command {
-	var (
-		service    string
-		tunnelOnly bool
-		port       int
-		remotePort int
-	)
+	var service, database string
 	cmd := &cobra.Command{
-		Use: "db:connect", Short: "Open a database shell (or a tunnel for a GUI) over SSH",
-		Long:    "Open a secure tunnel to a database service through SSH — nothing is exposed publicly — and launch psql, mysql, mongosh or redis-cli. With --tunnel-only, print a local URL for your GUI tool instead.",
-		Example: "  dokwalt db:connect\n  dokwalt db:connect --service db --tunnel-only --port 5433",
+		Use: "db:connect", Short: "Open a database shell (psql, mysql, mongosh, redis-cli) in the database's container",
+		Long: "Run the database's own client inside its container on the server, logged in with the app's " +
+			"credentials: psql, mysql (or mariadb), mongosh (or mongo), redis-cli (or valkey-cli). Nothing to " +
+			"install on this machine, nothing exposed. Pipe a script to run it without a prompt. Works for the " +
+			"app's own database service and for a shared one (x-dokwalt.uses).",
+		Example: "  dokwalt db:connect\n  dokwalt db:connect -a postgres --database blog\n  echo 'SELECT count(*) FROM posts;' | dokwalt db:connect",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s, app, stage, err := appStage(cmd.Context())
@@ -180,51 +191,94 @@ func dbConnectCmd() *cobra.Command {
 			if service != "" {
 				q.Set("service", service)
 			}
-			if remotePort > 0 {
-				q.Set("port", strconv.Itoa(remotePort))
-			}
 			var t api.DBTarget
 			if err := s.c.Get(cmd.Context(), client.StagePath(app, stage, "/db?"+q.Encode()), &t); err != nil {
 				return err
 			}
-			ln, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
+			if t.Container == "" {
+				return fmt.Errorf("the server's DokWalt is too old for db:connect — run `dokwalt server upgrade`")
+			}
+			if database != "" {
+				t.Database = database
+			}
+			env, argv, err := dbShell(t)
 			if err != nil {
 				return err
 			}
-			defer ln.Close()
-			local := ln.Addr().(*net.TCPAddr).Port
-			go serveTunnel(cmd.Context(), ln, s.c, t.Address)
-
-			dbURL := dbURL(t, local)
-			tool, toolArgs, env := dbClient(t, local)
-			if !tunnelOnly {
-				if _, err := exec.LookPath(tool); err != nil {
-					ui.Warn("%s not found on this machine — keeping the tunnel open instead", tool)
-					tunnelOnly = true
+			if term.IsTerminal(int(os.Stdin.Fd())) {
+				from := t.Service
+				if t.Provider != "" {
+					from += " of " + t.Provider
 				}
+				ui.Info("%s on %s (%s) — exit the shell to come back", t.Kind, ui.Bold.Render(from), label(app, stage))
 			}
-			if t.Provider != "" {
-				t.Service += " of " + t.Provider
-			}
-			if tunnelOnly || t.Kind == "unknown" {
-				fmt.Println(ui.TitleS.Render("◆ Tunnel to " + t.Service + " (" + t.Kind + ")"))
-				fmt.Println(ui.KV("Local address", fmt.Sprintf("127.0.0.1:%d", local), "URL", ui.Bold.Render(dbURL)))
-				ui.Hint("Press Ctrl+C to close the tunnel")
-				<-cmd.Context().Done()
-				return nil
-			}
-			ui.Info("Connected to %s (%s) through SSH — exit the shell to close the tunnel", ui.Bold.Render(t.Service), t.Kind)
-			c := exec.CommandContext(cmd.Context(), tool, toolArgs...)
-			c.Env = append(os.Environ(), env...)
-			c.Stdin, c.Stdout, c.Stderr = os.Stdin, os.Stdout, os.Stderr
-			return c.Run()
+			return runInContainer(cmd.Context(), s, t.Container, env, argv)
 		},
 	}
-	cmd.Flags().StringVar(&service, "service", "", "database service (default: detected)")
-	cmd.Flags().BoolVar(&tunnelOnly, "tunnel-only", false, "only open the tunnel and print its URL")
-	cmd.Flags().IntVar(&port, "port", 0, "local port (default: random free port)")
-	cmd.Flags().IntVar(&remotePort, "remote-port", 0, "database port in the container (default: detected)")
+	cmd.Flags().StringVar(&service, "service", "", "database service (default: detected, or the shared one)")
+	cmd.Flags().StringVar(&database, "database", "", "database to open (default: the app's)")
 	return cmd
+}
+
+// dbClients are the shells tried in a database's container, in order.
+var dbClients = map[string][]string{
+	"postgres": {"psql"},
+	"mysql":    {"mysql", "mariadb"},
+	"mongo":    {"mongosh", "mongo"},
+	"redis":    {"redis-cli", "valkey-cli", "keydb-cli"},
+}
+
+// dbShell builds the command run in the database's container: the first
+// client it has, logged in with the target's credentials. Passwords go in
+// env, never in arguments.
+func dbShell(t api.DBTarget) (env, argv []string, err error) {
+	clients, ok := dbClients[t.Kind]
+	if !ok {
+		return nil, nil, fmt.Errorf("%s isn't a database DokWalt knows (postgres, mysql, mongo, redis) — open its client with `dokwalt exec --service %s -- <client>`", t.Service, t.Service)
+	}
+	var args []string
+	target := `"$@"`
+	switch t.Kind {
+	case "postgres":
+		// Through the container's Unix socket, where the official images
+		// trust local users; the password covers images that don't.
+		args = []string{"-U", t.User}
+		if t.Database != "" {
+			args = append(args, "-d", t.Database)
+		}
+		if t.Port != 0 {
+			args = append(args, "-p", strconv.Itoa(t.Port))
+		}
+		if t.Password != "" {
+			env = append(env, "PGPASSWORD="+t.Password)
+		}
+	case "mysql":
+		args = []string{"-u", t.User}
+		if t.Database != "" {
+			args = append(args, t.Database)
+		}
+		if t.Password != "" {
+			env = append(env, "MYSQL_PWD="+t.Password)
+		}
+	case "mongo":
+		u := url.URL{Scheme: "mongodb", Host: fmt.Sprintf("127.0.0.1:%d", cmp.Or(t.Port, 27017)), Path: "/" + t.Database}
+		if t.User != "" {
+			u.User = url.UserPassword(t.User, t.Password)
+			u.RawQuery = "authSource=admin"
+		}
+		env = append(env, "DOKWALT_DB_URL="+u.String())
+		target = `"$DOKWALT_DB_URL" "$@"`
+	case "redis":
+		if t.Port != 0 {
+			args = []string{"-p", strconv.Itoa(t.Port)}
+		}
+		if t.Password != "" {
+			env = append(env, "REDISCLI_AUTH="+t.Password)
+		}
+	}
+	script := fmt.Sprintf(`for c in %s; do command -v "$c" >/dev/null 2>&1 && exec "$c" %s; done; echo "no %s in the %s container" >&2; exit 127`,
+		strings.Join(clients, " "), target, clients[0], t.Service)
+	return env, append([]string{"sh", "-c", script, "sh"}, args...), nil
 }
 
 func dbBackupCmd() *cobra.Command {
@@ -326,80 +380,6 @@ func checkDumpHeader(path string) error {
 		return fmt.Errorf("the dump is not a valid pg_dump archive")
 	}
 	return nil
-}
-
-func serveTunnel(ctx context.Context, ln net.Listener, c *client.Client, addr string) {
-	go func() { <-ctx.Done(); ln.Close() }()
-	for {
-		conn, err := ln.Accept()
-		if err != nil {
-			return
-		}
-		go func() {
-			defer conn.Close()
-			remote, err := c.Tunnel(addr)
-			if err != nil {
-				ui.Fail("tunnel: %v", err)
-				return
-			}
-			defer remote.Close()
-			// When the local client half-closes, forward the EOF and keep
-			// reading: the server's reply may still be on its way.
-			go func() { _, _ = io.Copy(remote, conn); closeWrite(remote) }()
-			_, _ = io.Copy(conn, remote)
-		}()
-	}
-}
-
-func closeWrite(c net.Conn) {
-	if cw, ok := c.(interface{ CloseWrite() error }); ok {
-		_ = cw.CloseWrite()
-	}
-}
-
-func dbURL(t api.DBTarget, port int) string {
-	userinfo := ""
-	if t.User != "" {
-		userinfo = url.UserPassword(t.User, t.Password).String() + "@"
-		if t.Password == "" {
-			userinfo = url.User(t.User).String() + "@"
-		}
-	}
-	switch t.Kind {
-	case "postgres":
-		return fmt.Sprintf("postgres://%s127.0.0.1:%d/%s", userinfo, port, t.Database)
-	case "mysql":
-		return fmt.Sprintf("mysql://%s127.0.0.1:%d/%s", userinfo, port, t.Database)
-	case "mongo":
-		return fmt.Sprintf("mongodb://%s127.0.0.1:%d/%s?authSource=admin", userinfo, port, t.Database)
-	case "redis":
-		if t.Password != "" {
-			return fmt.Sprintf("redis://:%s@127.0.0.1:%d", url.PathEscape(t.Password), port)
-		}
-		return fmt.Sprintf("redis://127.0.0.1:%d", port)
-	}
-	return fmt.Sprintf("tcp://127.0.0.1:%d", port)
-}
-
-// dbClient builds the local client command; passwords go through env vars
-// rather than arguments (visible in `ps`).
-func dbClient(t api.DBTarget, port int) (string, []string, []string) {
-	p := strconv.Itoa(port)
-	switch t.Kind {
-	case "postgres":
-		return "psql", []string{"-h", "127.0.0.1", "-p", p, "-U", t.User, t.Database}, []string{"PGPASSWORD=" + t.Password}
-	case "mysql":
-		args := []string{"-h", "127.0.0.1", "-P", p, "-u", t.User}
-		if t.Database != "" {
-			args = append(args, t.Database)
-		}
-		return "mysql", args, []string{"MYSQL_PWD=" + t.Password}
-	case "mongo":
-		return "mongosh", []string{dbURL(t, port)}, nil
-	case "redis":
-		return "redis-cli", []string{"-h", "127.0.0.1", "-p", p}, []string{"REDISCLI_AUTH=" + t.Password}
-	}
-	return "", nil, nil
 }
 
 // ---- top ----

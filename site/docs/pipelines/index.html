@@ -247,7 +247,7 @@ then <code>y</code> to confirm.</p>
 <p>Staging's containers, <strong>volumes</strong>, network, config, domains and releases
 are deleted; production keeps running untouched and the stage disappears
 from output again. If staging's database holds anything you need, dump it
-first with <code>dokwalt db:connect -s staging --tunnel-only</code>.</p>
+first with <code>dokwalt db:backup -s staging</code>.</p>
 <p>See also: <a class="xref" href="/docs/deploy/"><code>dokwalt docs deploy</code></a>, <a class="xref" href="/docs/releases/"><code>dokwalt docs releases</code></a>,
 <a class="xref" href="/docs/config/"><code>dokwalt docs config</code></a>, <a class="xref" href="/docs/domains/"><code>dokwalt docs domains</code></a>, <a class="xref" href="/docs/concepts/"><code>dokwalt docs concepts</code></a>.</p>
 

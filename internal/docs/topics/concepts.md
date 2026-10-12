@@ -10,7 +10,7 @@
 │ dokwalt (CLI, TUI) │  connection    │ dokwalt dial-stdio                   │
 │ docker compose     │ ─────────────→ │   ↓ /run/dokwalt/dokwalt.sock        │
 │   build (buildx)   │  images, API,  │ dokwalt daemon (systemd)             │
-│ ~/.config/dokwalt  │  logs, tunnels │   SQLite · reconciler · metrics      │
+│ ~/.config/dokwalt  │  logs, shells  │   SQLite · reconciler · metrics      │
 └────────────────────┘                │   ↓ Docker Engine API                │
                                       │ ┌─────────────┐─→ dw-blog-production │
           Internet ── 80/443 ───────→ │ │dokwalt-caddy│     web, worker, db  │

@@ -1063,15 +1063,14 @@ func (d *Daemon) dbTarget(w http.ResponseWriter, r *http.Request) error {
 		return badRequest("%s is not deployed", st.Key())
 	}
 	service := r.URL.Query().Get("service")
-	port, _ := strconv.Atoi(r.URL.Query().Get("port"))
 	if service == "" && len(dbCandidates(plan)) == 0 && len(plan.Uses) > 0 {
-		t, err := d.sharedDBTarget(r.Context(), st, plan, port)
+		t, err := d.sharedDBTarget(r.Context(), st, plan)
 		if err != nil {
 			return err
 		}
 		return writeJSON(w, t)
 	}
-	t, err := d.dbTargetOf(r.Context(), st, plan, service, port)
+	t, err := d.dbTargetOf(r.Context(), st, plan, service)
 	if err != nil {
 		return err
 	}
@@ -1095,7 +1094,7 @@ func dbCandidates(plan *compose.Plan) []string {
 
 // dbTargetOf resolves a database service of a stage, with the credentials
 // found in its container's environment.
-func (d *Daemon) dbTargetOf(ctx context.Context, st store.Stage, plan *compose.Plan, service string, port int) (api.DBTarget, error) {
+func (d *Daemon) dbTargetOf(ctx context.Context, st store.Stage, plan *compose.Plan, service string) (api.DBTarget, error) {
 	if service == "" {
 		cands := dbCandidates(plan)
 		if len(cands) == 0 {
@@ -1120,17 +1119,12 @@ func (d *Daemon) dbTargetOf(ctx context.Context, st store.Stage, plan *compose.P
 		return api.DBTarget{}, err
 	}
 	kind := dbKind(svc.Image)
-	if port == 0 {
-		port = dbPorts[compose.ImageKind(svc.Image)]
-	}
+	port := dbPorts[compose.ImageKind(svc.Image)]
 	if port == 0 && len(svc.Ports) > 0 {
 		port = svc.Ports[0]
 	}
-	if port == 0 {
-		return api.DBTarget{}, badRequest("unknown port for %s — pass --remote-port", service)
-	}
 	env := ci.EnvMap()
-	t := api.DBTarget{Service: service, Kind: kind, Address: fmt.Sprintf("%s:%d", cs[0].IP, port), Container: cs[0].Name}
+	t := api.DBTarget{Service: service, Kind: kind, Port: port, Container: cs[0].Name}
 	switch kind {
 	case "postgres":
 		t.User = firstSet(env["POSTGRES_USER"], "postgres")

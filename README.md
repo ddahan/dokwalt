@@ -133,7 +133,7 @@ DNS points to your server. Then type `dokwalt` for the live dashboard.
 | `dokwalt domains:add` · `domains:redirect` | routing with automatic HTTPS |
 | `dokwalt logs -f` | merged, colored, live logs of every service |
 | `dokwalt top` · `metrics` | live CPU / RAM / network / traffic, and 7-day history |
-| `dokwalt db:connect` | psql / mysql / mongosh / redis-cli over SSH, or a tunnel for a GUI |
+| `dokwalt db:connect` | psql / mysql / mongosh / redis-cli in the database's container, nothing to install |
 | `dokwalt exec -- sh` | a shell in a running container |
 | `dokwalt pipeline:enable` · `promote` | staging → production with the same images |
 | `dokwalt alerts:add discord <url>` | alerts: site down, crash loop, disk, temperature… |
@@ -233,7 +233,7 @@ make docs-site  # website docs (site/docs) from internal/docs/topics
 
 The e2e suite installs DokWalt on a privileged Debian container and checks deploys
 under load (0 failed requests), config releases, rollback, pipelines, failed
-deploys, the DB tunnel, reboot and power-cut recovery, and the daemon's memory budget.
+deploys, `db:connect`, reboot and power-cut recovery, and the daemon's memory budget.
 
 ---
 

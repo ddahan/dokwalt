@@ -219,17 +219,14 @@ Set limits in compose (`mem_limit: 256m`), reduce workers (e.g. Gunicorn/Puma pr
 (Pi) or a swap file (VPS), and remember that during a deploy the old and new stateless services
 run side by side for a few seconds. An "Out of memory" alert fires on OOM kills.
 
-### `db:connect`: client not found
+### `db:connect`: `no <client> in the <service> container`
 
-The local client is missing. Install it, or use `--tunnel-only` with a GUI tool:
+`db:connect` runs the client that ships in the database's image, and this
+image has none (some Dragonfly images have no `redis-cli`). Run a client from
+another container that has one, for example the app's own:
 
 ```bash
-# macOS (Homebrew)
-brew install libpq && brew link --force libpq    # psql
-brew install mysql-client mongosh redis           # mysql, mongosh, redis-cli
-# Debian / Ubuntu / WSL (mongosh: from MongoDB's repository)
-sudo apt install postgresql-client default-mysql-client redis-tools
-dokwalt db:connect --tunnel-only --port 5433
+dokwalt exec --service web -- redis-cli -h cache
 ```
 
 ### Throttling or high temperature

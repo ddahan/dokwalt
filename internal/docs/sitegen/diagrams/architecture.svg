@@ -1,6 +1,6 @@
 <svg class="dg" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dg-arch-title dg-arch-desc">
   <title id="dg-arch-title">DokWalt architecture</title>
-  <desc id="dg-arch-desc">Your computer runs the dokwalt CLI and builds images with Docker. One SSH connection carries images, API calls, logs and tunnels to the server, where dokwalt dial-stdio forwards them to the dokwalt daemon over a Unix socket. The daemon keeps its state in SQLite and drives Docker. Visitors reach dokwalt-caddy on ports 80 and 443, which routes to each app on its own private network.</desc>
+  <desc id="dg-arch-desc">Your computer runs the dokwalt CLI and builds images with Docker. One SSH connection carries images, API calls, logs and shells to the server, where dokwalt dial-stdio forwards them to the dokwalt daemon over a Unix socket. The daemon keeps its state in SQLite and drives Docker. Visitors reach dokwalt-caddy on ports 80 and 443, which routes to each app on its own private network.</desc>
   <style>
     .dg text { font-family: var(--sans); }
     .dg .dg-mono { font-family: var(--mono); }
@@ -56,7 +56,7 @@
   <path class="dg-ssh dg-flow" d="M272 110 H 428" marker-start="url(#dg-arch-violet)" marker-end="url(#dg-arch-violet)"/>
   <text class="dg-t" x="350" y="96" text-anchor="middle" style="font-size: 14px">one SSH connection</text>
   <text class="dg-s" x="350" y="131" text-anchor="middle">images · API</text>
-  <text class="dg-s" x="350" y="148" text-anchor="middle">logs · tunnels</text>
+  <text class="dg-s" x="350" y="148" text-anchor="middle">logs · shells</text>
 
   <!-- Server -->
   <text class="dg-label" x="402" y="34">SERVER · A VPS OR YOUR OWN MACHINE</text>

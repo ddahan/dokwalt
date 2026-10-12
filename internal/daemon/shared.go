@@ -18,7 +18,7 @@ import (
 // reached with the consumer's own role and database when its connection URL
 // can be found. Otherwise the provider's superuser is used, on a database
 // named after the app.
-func (d *Daemon) sharedDBTarget(ctx context.Context, st store.Stage, plan *compose.Plan, port int) (api.DBTarget, error) {
+func (d *Daemon) sharedDBTarget(ctx context.Context, st store.Stage, plan *compose.Plan) (api.DBTarget, error) {
 	for _, p := range plan.Uses {
 		pst, err := d.engine.ProviderStage(p, st.Name)
 		if err != nil {
@@ -31,7 +31,7 @@ func (d *Daemon) sharedDBTarget(ctx context.Context, st store.Stage, plan *compo
 		if pplan == nil || len(dbCandidates(pplan)) == 0 {
 			continue
 		}
-		t, err := d.dbTargetOf(ctx, pst, pplan, "", port)
+		t, err := d.dbTargetOf(ctx, pst, pplan, "")
 		if err != nil {
 			return t, err
 		}

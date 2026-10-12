@@ -1,6 +1,6 @@
 # Databases
 
-*Databases are ordinary compose services: kept in one stable place, never exposed, reachable through an SSH tunnel.*
+*Databases are ordinary compose services: kept in one stable place, never exposed, opened with their own client inside the container.*
 
 DokWalt has no managed add-ons. A database is a service in your compose
 file, and DokWalt handles it correctly because it detects it as
@@ -79,7 +79,7 @@ reference as `${VAR}`. So:
   init. Changing it later does **not** change the real password: run
   `ALTER USER` first, then update the config.
 
-## Connecting from your computer
+## Opening a database shell
 
 ```bash
 dokwalt db:connect
@@ -88,67 +88,52 @@ dokwalt db:connect
 1. **Service**: `--service`, or else the first service with a recognised
    database image. SQL databases are preferred over Redis-like ones. The
    stage must be deployed and the service running.
-2. **Port**: `--remote-port`, or else the kind's default port (5432, 3306,
-   27017, 6379), or else the service's first declared port.
-3. **Tunnel**: a local port (`--port`, default a random free port) on
-   `127.0.0.1`, tunnelled through SSH to the container. Nothing is exposed
-   on the server.
-4. **Client**: the matching local client starts with credentials read from
-   the container's environment. The tunnel closes when you exit it.
+2. **Client**: the database's own client runs **inside its container** on
+   the server (`docker exec` over SSH), logged in with the credentials read
+   from the container's environment. Nothing to install on your computer,
+   and nothing is exposed. Exit the client to come back.
 
 ```text
 $ dokwalt db:connect
-◆ Connected to db (postgres) through SSH — exit the shell to close the tunnel
+◆ postgres on db (blog) — exit the shell to come back
 psql (17.2)
 blog=# \dt
 ```
 
-### GUI tools (TablePlus, DBeaver, Postico…)
+Pipe a script to run it without a prompt:
 
-```text
-$ dokwalt db:connect --tunnel-only --port 5433
-◆ Tunnel to db (postgres)
-Local address   127.0.0.1:5433
-URL             postgres://blog:s3cr3t@127.0.0.1:5433/blog
-  Press Ctrl+C to close the tunnel
+```bash
+echo "SELECT count(*) FROM posts;" | dokwalt db:connect
+dokwalt db:connect < fix.sql
 ```
 
-Use `--port` for a fixed local port so a saved GUI connection keeps working.
-The URL contains the password in clear text. If the local client isn't
-installed, DokWalt says `psql not found on this machine — keeping the
-tunnel open instead` and behaves like `--tunnel-only`.
-
-### Other services and stages
+### Other services, databases and stages
 
 ```bash
 dokwalt db:connect --service cache               # the redis service
 dokwalt db:connect -s staging                    # staging's database
-dokwalt db:connect --service search --remote-port 7700 --tunnel-only
+dokwalt db:connect -a postgres --database blog   # another database of the server
 ```
 
-For an image DokWalt doesn't recognise, you get a plain `tcp://` tunnel
-(always tunnel-only). If no port is known, it fails with
-`unknown port for <svc> — pass --remote-port`.
+For an image DokWalt doesn't recognise, `db:connect` stops and points to
+`dokwalt exec --service <svc> -- <client>`.
 
 ## Supported kinds
 
-| Kind     | Images                               | Client      | Credentials from the container env                    |
+| Kind     | Images                               | Client (in the container) | Credentials from the container env      |
 |----------|--------------------------------------|-------------|--------------------------------------------------------|
 | postgres | postgres, postgis, timescaledb       | `psql`      | `POSTGRES_USER` (default `postgres`), `POSTGRES_PASSWORD`, `POSTGRES_DB` (default: the user) |
-| mysql    | mysql, mariadb, percona              | `mysql`     | `MYSQL_USER`/`MARIADB_USER` + `*_PASSWORD`, else `root` + `MYSQL_ROOT_PASSWORD`/`MARIADB_ROOT_PASSWORD`; `MYSQL_DATABASE`/`MARIADB_DATABASE` |
-| mongo    | mongo                                | `mongosh`   | `MONGO_INITDB_ROOT_USERNAME`/`PASSWORD`, `MONGO_INITDB_DATABASE` |
-| redis    | redis, valkey, keydb, dragonfly      | `redis-cli` | `REDIS_PASSWORD` or `VALKEY_PASSWORD`, if set          |
+| mysql    | mysql, mariadb, percona              | `mysql`, else `mariadb` | `MYSQL_USER`/`MARIADB_USER` + `*_PASSWORD`, else `root` + `MYSQL_ROOT_PASSWORD`/`MARIADB_ROOT_PASSWORD`; `MYSQL_DATABASE`/`MARIADB_DATABASE` |
+| mongo    | mongo                                | `mongosh`, else `mongo` | `MONGO_INITDB_ROOT_USERNAME`/`PASSWORD`, `MONGO_INITDB_DATABASE` |
+| redis    | redis, valkey, keydb, dragonfly      | `redis-cli`, else `valkey-cli`, `keydb-cli` | `REDIS_PASSWORD` or `VALKEY_PASSWORD`, if set          |
 
-Passwords reach `psql`, `mysql` and `redis-cli` through the environment
-(`PGPASSWORD`, `MYSQL_PWD`, `REDISCLI_AUTH`), not command-line arguments.
-`mongosh` is the exception: it gets a `mongodb://` URL that includes the
-password (with `authSource=admin`).
-
-Install the clients with your package manager. On macOS (Homebrew):
-`brew install libpq` (psql), `brew install mysql-client`, `brew install mongosh`,
-`brew install redis`. On Debian or Ubuntu (and WSL):
-`sudo apt install postgresql-client default-mysql-client redis-tools`; `mongosh`
-comes from MongoDB's own repository.
+Passwords reach the client through its environment (`PGPASSWORD`,
+`MYSQL_PWD`, `REDISCLI_AUTH`; for `mongosh`, a `mongodb://` URL with
+`authSource=admin`), set with `docker exec -e`: they are never arguments of
+`docker exec`. Postgres connects through the container's Unix socket, where the
+official images trust local users. An image without its kind's client (some
+Dragonfly images have no `redis-cli`) fails with `no redis-cli in the cache
+container`.
 
 ## Migrations: one-shot jobs
 
@@ -213,8 +198,8 @@ $ dokwalt db:backup
   file that looks good.
 - `-o <file>` picks the file, `--service` the database service, and
   `--database` another database of the same server.
-- Postgres only. For other kinds, dump through `db:connect --tunnel-only`
-  with the kind's own tool.
+- Postgres only. For other kinds, run the kind's own dump tool with
+  `dokwalt exec --service <db> -- …`.
 
 `dokwalt exec` allocates a terminal, so never redirect binary output (a dump)
 through it.
@@ -300,7 +285,9 @@ Instead:
 1. Dump the database (above).
 2. In compose, change the image **and** the volume name (`pgdata17`).
 3. `dokwalt deploy` creates a fresh, empty `dw-blog-production-pgdata17`.
-4. Restore the dump through `db:connect --tunnel-only`.
+4. Restore the dump into it, piped through `exec` (piped input gets no
+   terminal, so the file arrives intact):
+   `dokwalt exec --service db -- pg_restore --no-owner -U postgres -d blog < blog.dump`.
 5. Once verified, delete the old volume on the server:
    `ssh prod docker volume rm dw-blog-production-pgdata`.
 

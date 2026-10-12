@@ -162,7 +162,7 @@ dokwalt pipeline:disable --confirm blog    # non-interactive
 Staging's containers, **volumes**, network, config, domains and releases
 are deleted; production keeps running untouched and the stage disappears
 from output again. If staging's database holds anything you need, dump it
-first with `dokwalt db:connect -s staging --tunnel-only`.
+first with `dokwalt db:backup -s staging`.
 
 See also: `dokwalt docs deploy`, `dokwalt docs releases`,
 `dokwalt docs config`, `dokwalt docs domains`, `dokwalt docs concepts`.

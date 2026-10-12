@@ -63,19 +63,15 @@ func daemonCmd() *cobra.Command {
 	return cmd
 }
 
-// dialStdioCmd bridges stdin/stdout to the daemon socket (or a TCP address,
-// for db:connect). The CLI runs it over SSH: no port forwarding needed.
+// dialStdioCmd bridges stdin/stdout to the daemon socket. The CLI runs it
+// over SSH: no port forwarding needed.
 func dialStdioCmd() *cobra.Command {
-	var socket, tcp string
+	var socket string
 	cmd := &cobra.Command{
 		Use: "dial-stdio", Short: "Bridge stdio to the daemon socket", Hidden: true,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			network, addr := "unix", socket
-			if tcp != "" {
-				network, addr = "tcp", tcp
-			}
-			conn, err := net.Dial(network, addr)
+			conn, err := net.Dial("unix", socket)
 			if err != nil {
 				return err
 			}
@@ -94,6 +90,5 @@ func dialStdioCmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVar(&socket, "socket", daemon.DefaultSocket, "daemon socket")
-	cmd.Flags().StringVar(&tcp, "tcp", "", "connect to this TCP address instead")
 	return cmd
 }

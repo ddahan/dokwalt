@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <title>Databases · DokWalt docs</title>
-  <meta name="description" content="Databases are ordinary compose services: kept in one stable place, never exposed, reachable through an SSH tunnel.">
+  <meta name="description" content="Databases are ordinary compose services: kept in one stable place, never exposed, opened with their own client inside the container.">
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -98,7 +98,7 @@
         <header class="doc-head">
           <p class="crumbs"><a href="/docs/getting-started/">Docs</a><span aria-hidden="true">/</span>Data</p>
           <h1>Databases</h1>
-          <p class="doc-lead">Databases are ordinary compose services: kept in one stable place, never exposed, reachable through an SSH tunnel.</p>
+          <p class="doc-lead">Databases are ordinary compose services: kept in one stable place, never exposed, opened with their own client inside the container.</p>
           <div class="doc-meta">
             <span class="term-chip" title="The same page in your terminal"><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> docs databases</span>
             <a class="doc-edit" href="https://github.com/ddahan/dokwalt/blob/main/internal/docs/topics/databases.md" rel="noopener">Edit on GitHub</a>
@@ -172,47 +172,37 @@ means a short restart, not zero downtime.</li>
 init. Changing it later does <strong>not</strong> change the real password: run
 <code>ALTER USER</code> first, then update the config.</li>
 </ul>
-<h2 id="connecting-from-your-computer">Connecting from your computer</h2>
+<h2 id="opening-a-database-shell">Opening a database shell</h2>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> db:connect</code></pre></div>
 <ol>
 <li><strong>Service</strong>: <code>--service</code>, or else the first service with a recognised
 database image. SQL databases are preferred over Redis-like ones. The
 stage must be deployed and the service running.</li>
-<li><strong>Port</strong>: <code>--remote-port</code>, or else the kind's default port (5432, 3306,
-27017, 6379), or else the service's first declared port.</li>
-<li><strong>Tunnel</strong>: a local port (<code>--port</code>, default a random free port) on
-<code>127.0.0.1</code>, tunnelled through SSH to the container. Nothing is exposed
-on the server.</li>
-<li><strong>Client</strong>: the matching local client starts with credentials read from
-the container's environment. The tunnel closes when you exit it.</li>
+<li><strong>Client</strong>: the database's own client runs <strong>inside its container</strong> on
+the server (<code>docker exec</code> over SSH), logged in with the credentials read
+from the container's environment. Nothing to install on your computer,
+and nothing is exposed. Exit the client to come back.</li>
 </ol>
 <div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> db:connect
-<span class="t-cmd">◆</span> Connected to db (postgres) through SSH — exit the shell to close the tunnel
+<span class="t-cmd">◆</span> postgres on db (blog) — exit the shell to come back
 psql (17.2)
 blog=# \dt</code></pre></div>
-<h3 id="gui-tools-tableplus-dbeaver-postico">GUI tools (TablePlus, DBeaver, Postico…)</h3>
-<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> db:connect <span class="t-flag">--tunnel-only</span> <span class="t-flag">--port</span> 5433
-<span class="t-cmd">◆</span> Tunnel to db (postgres)
-Local address   127.0.0.1:5433
-URL             postgres://blog:s3cr3t@127.0.0.1:5433/blog
-  Press Ctrl+C to close the tunnel</code></pre></div>
-<p>Use <code>--port</code> for a fixed local port so a saved GUI connection keeps working.
-The URL contains the password in clear text. If the local client isn't
-installed, DokWalt says <code>psql not found on this machine — keeping the tunnel open instead</code> and behaves like <code>--tunnel-only</code>.</p>
-<h3 id="other-services-and-stages">Other services and stages</h3>
+<p>Pipe a script to run it without a prompt:</p>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">echo</span> <span class="t-str">&#34;SELECT count(*) FROM posts;&#34;</span> | <span class="t-cmd">dokwalt</span> db:connect
+<span class="t-cmd">dokwalt</span> db:connect &lt; fix.sql</code></pre></div>
+<h3 id="other-services-databases-and-stages">Other services, databases and stages</h3>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> db:connect <span class="t-flag">--service</span> cache               <span class="t-com"># the redis service</span>
 <span class="t-cmd">dokwalt</span> db:connect <span class="t-flag">-s</span> staging                    <span class="t-com"># staging&#39;s database</span>
-<span class="t-cmd">dokwalt</span> db:connect <span class="t-flag">--service</span> search <span class="t-flag">--remote-port</span> 7700 <span class="t-flag">--tunnel-only</span></code></pre></div>
-<p>For an image DokWalt doesn't recognise, you get a plain <code>tcp://</code> tunnel
-(always tunnel-only). If no port is known, it fails with
-<code>unknown port for &lt;svc&gt; — pass --remote-port</code>.</p>
+<span class="t-cmd">dokwalt</span> db:connect <span class="t-flag">-a</span> postgres <span class="t-flag">--database</span> blog   <span class="t-com"># another database of the server</span></code></pre></div>
+<p>For an image DokWalt doesn't recognise, <code>db:connect</code> stops and points to
+<code>dokwalt exec --service &lt;svc&gt; -- &lt;client&gt;</code>.</p>
 <h2 id="supported-kinds">Supported kinds</h2>
 <table>
 <thead>
 <tr>
 <th>Kind</th>
 <th>Images</th>
-<th>Client</th>
+<th>Client (in the container)</th>
 <th>Credentials from the container env</th>
 </tr>
 </thead>
@@ -226,32 +216,29 @@ installed, DokWalt says <code>psql not found on this machine — keeping the tun
 <tr>
 <td>mysql</td>
 <td>mysql, mariadb, percona</td>
-<td><code>mysql</code></td>
+<td><code>mysql</code>, else <code>mariadb</code></td>
 <td><code>MYSQL_USER</code>/<code>MARIADB_USER</code> + <code>*_PASSWORD</code>, else <code>root</code> + <code>MYSQL_ROOT_PASSWORD</code>/<code>MARIADB_ROOT_PASSWORD</code>; <code>MYSQL_DATABASE</code>/<code>MARIADB_DATABASE</code></td>
 </tr>
 <tr>
 <td>mongo</td>
 <td>mongo</td>
-<td><code>mongosh</code></td>
+<td><code>mongosh</code>, else <code>mongo</code></td>
 <td><code>MONGO_INITDB_ROOT_USERNAME</code>/<code>PASSWORD</code>, <code>MONGO_INITDB_DATABASE</code></td>
 </tr>
 <tr>
 <td>redis</td>
 <td>redis, valkey, keydb, dragonfly</td>
-<td><code>redis-cli</code></td>
+<td><code>redis-cli</code>, else <code>valkey-cli</code>, <code>keydb-cli</code></td>
 <td><code>REDIS_PASSWORD</code> or <code>VALKEY_PASSWORD</code>, if set</td>
 </tr>
 </tbody>
 </table>
-<p>Passwords reach <code>psql</code>, <code>mysql</code> and <code>redis-cli</code> through the environment
-(<code>PGPASSWORD</code>, <code>MYSQL_PWD</code>, <code>REDISCLI_AUTH</code>), not command-line arguments.
-<code>mongosh</code> is the exception: it gets a <code>mongodb://</code> URL that includes the
-password (with <code>authSource=admin</code>).</p>
-<p>Install the clients with your package manager. On macOS (Homebrew):
-<code>brew install libpq</code> (psql), <code>brew install mysql-client</code>, <code>brew install mongosh</code>,
-<code>brew install redis</code>. On Debian or Ubuntu (and WSL):
-<code>sudo apt install postgresql-client default-mysql-client redis-tools</code>; <code>mongosh</code>
-comes from MongoDB's own repository.</p>
+<p>Passwords reach the client through its environment (<code>PGPASSWORD</code>,
+<code>MYSQL_PWD</code>, <code>REDISCLI_AUTH</code>; for <code>mongosh</code>, a <code>mongodb://</code> URL with
+<code>authSource=admin</code>), set with <code>docker exec -e</code>: they are never arguments of
+<code>docker exec</code>. Postgres connects through the container's Unix socket, where the
+official images trust local users. An image without its kind's client (some
+Dragonfly images have no <code>redis-cli</code>) fails with <code>no redis-cli in the cache container</code>.</p>
 <h2 id="migrations-one-shot-jobs">Migrations: one-shot jobs</h2>
 <p>During a deploy, the old version keeps serving until traffic switches.
 DokWalt's release phase is a <strong>one-shot job</strong>: a service that another
@@ -305,8 +292,8 @@ succeeded and the file is a valid archive, so a failed dump never leaves a
 file that looks good.</li>
 <li><code>-o &lt;file&gt;</code> picks the file, <code>--service</code> the database service, and
 <code>--database</code> another database of the same server.</li>
-<li>Postgres only. For other kinds, dump through <code>db:connect --tunnel-only</code>
-with the kind's own tool.</li>
+<li>Postgres only. For other kinds, run the kind's own dump tool with
+<code>dokwalt exec --service &lt;db&gt; -- …</code>.</li>
 </ul>
 <p><code>dokwalt exec</code> allocates a terminal, so never redirect binary output (a dump)
 through it.</p>
@@ -377,7 +364,9 @@ Instead:</p>
 <li>Dump the database (above).</li>
 <li>In compose, change the image <strong>and</strong> the volume name (<code>pgdata17</code>).</li>
 <li><code>dokwalt deploy</code> creates a fresh, empty <code>dw-blog-production-pgdata17</code>.</li>
-<li>Restore the dump through <code>db:connect --tunnel-only</code>.</li>
+<li>Restore the dump into it, piped through <code>exec</code> (piped input gets no
+terminal, so the file arrives intact):
+<code>dokwalt exec --service db -- pg_restore --no-owner -U postgres -d blog &lt; blog.dump</code>.</li>
 <li>Once verified, delete the old volume on the server:
 <code>ssh prod docker volume rm dw-blog-production-pgdata</code>.</li>
 </ol>
@@ -399,7 +388,7 @@ are pulled only if the tag is missing on the server. So a floating tag like
       
         <p>On this page</p>
         <ul>
-          <li class="toc-2"><a href="#how-dokwalt-treats-a-database">How DokWalt treats a database</a></li><li class="toc-2"><a href="#config-and-restarts">Config and restarts</a></li><li class="toc-2"><a href="#connecting-from-your-computer">Connecting from your computer</a></li><li class="toc-3"><a href="#gui-tools-tableplus-dbeaver-postico">GUI tools (TablePlus, DBeaver, Postico…)</a></li><li class="toc-3"><a href="#other-services-and-stages">Other services and stages</a></li><li class="toc-2"><a href="#supported-kinds">Supported kinds</a></li><li class="toc-2"><a href="#migrations-one-shot-jobs">Migrations: one-shot jobs</a></li><li class="toc-2"><a href="#backups">Backups</a></li><li class="toc-2"><a href="#one-database-server-for-several-apps">One database server for several apps</a></li><li class="toc-2"><a href="#major-version-upgrades">Major version upgrades</a></li>
+          <li class="toc-2"><a href="#how-dokwalt-treats-a-database">How DokWalt treats a database</a></li><li class="toc-2"><a href="#config-and-restarts">Config and restarts</a></li><li class="toc-2"><a href="#opening-a-database-shell">Opening a database shell</a></li><li class="toc-3"><a href="#other-services-databases-and-stages">Other services, databases and stages</a></li><li class="toc-2"><a href="#supported-kinds">Supported kinds</a></li><li class="toc-2"><a href="#migrations-one-shot-jobs">Migrations: one-shot jobs</a></li><li class="toc-2"><a href="#backups">Backups</a></li><li class="toc-2"><a href="#one-database-server-for-several-apps">One database server for several apps</a></li><li class="toc-2"><a href="#major-version-upgrades">Major version upgrades</a></li>
         </ul>
       
     </aside>

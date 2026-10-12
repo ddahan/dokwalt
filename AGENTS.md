@@ -45,7 +45,7 @@ A change is done when:
 
 1. `make lint` and `make test` pass.
 2. New behavior has tests. Run `make e2e` too when the change touches what it covers: deploys,
-   config releases, rollbacks, pipelines, the database tunnel, reboot recovery.
+   config releases, rollbacks, pipelines, `db:connect`, reboot recovery.
 3. Docs are in sync: the topics in `internal/docs/topics/` (and `--help` texts, the README and
    `docs/SPEC.md` where relevant) describe the new behavior, and no document describes the old one.
 4. **The docs website is up to date.** `make docs-site` regenerated `site/docs/` from the topics:

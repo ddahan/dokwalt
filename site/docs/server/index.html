@@ -341,7 +341,7 @@ is regenerated.</p>
 <span class="t-cmd">for</span> v in dokwalt-caddy-data $(docker volume ls <span class="t-flag">-q</span> <span class="t-flag">--filter</span> name=dw-); <span class="t-cmd">do</span>
   <span class="t-cmd">docker</span> run <span class="t-flag">--rm</span> <span class="t-flag">-v</span> $v:/v:ro <span class="t-flag">-v</span> $B:/b alpine tar czf /b/$v.tgz <span class="t-flag">-C</span> /v .
 <span class="t-cmd">done</span></code></pre></div>
-<p>A tar of a live database may be inconsistent: also <code>pg_dump</code> the URL printed by <code>dokwalt db:connect -a blog --service db --tunnel-only</code>. Copy backups off the server; treat <code>secret.key</code> like a password.</p>
+<p>A tar of a live database may be inconsistent: also take a dump with <code>dokwalt db:backup -a blog</code>. Copy backups off the server; treat <code>secret.key</code> like a password.</p>
 <p><strong>Restore onto a fresh server:</strong> steps 1–7 (<code>ssh-keygen -R &lt;host&gt;</code> on your computer), backup in <code>$B</code>, then:</p>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">sudo</span> <span class="t-cmd">systemctl</span> stop dokwalt &amp;&amp; <span class="t-cmd">docker</span> stop dokwalt-caddy
 <span class="t-cmd">sudo</span> <span class="t-cmd">rm</span> <span class="t-flag">-f</span> /var/lib/dokwalt/dokwalt.db-wal /var/lib/dokwalt/dokwalt.db-shm

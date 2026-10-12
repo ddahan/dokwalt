@@ -2,7 +2,7 @@
 # End-to-end test: installs DokWalt on a throwaway Linux server (a privileged
 # Debian container running systemd + Docker + sshd) and exercises the real
 # workflows: deploy, zero downtime under load, config, rollback, pipeline,
-# failed deploy, db tunnel, shared Postgres, off-site backups (S3), reboot
+# failed deploy, db:connect, shared Postgres, off-site backups (S3), reboot
 # and power-cut recovery.
 #
 #   make e2e            # build + run
@@ -117,13 +117,10 @@ $D promote >/dev/null
 get shop.localhost | grep -q "^v3 .*greeting=bonjour" || fail "promote failed: $(get shop.localhost)"
 pass "staging v3 promoted with production config"
 
-step "DB tunnel"
-$D db:connect --tunnel-only --port 16399 >/dev/null 2>&1 &
-TPID=$!
-sleep 3
-printf 'PING\r\nQUIT\r\n' | nc -w 3 127.0.0.1 16399 | grep -q PONG || fail "redis tunnel"
-kill $TPID 2>/dev/null || true
-pass "redis answered PONG through SSH"
+step "db:connect"
+out=$(echo PING | $D db:connect 2>&1) || fail "db:connect failed: $out"
+grep -q PONG <<<"$out" || fail "redis didn't answer through db:connect: $out"
+pass "redis-cli in the cache container answered PONG"
 
 step "Shared Postgres (x-dokwalt.uses) and db:backup"
 srv() { docker exec $SERVER "$@"; }
@@ -162,6 +159,9 @@ printf "CREATE ROLE blog LOGIN PASSWORD 'blogpw';\nCREATE DATABASE blog OWNER bl
 printf "CREATE TABLE posts (id int); INSERT INTO posts VALUES (1);\n" \
   | (cd "$WORK/pg" && $D exec --service db -- psql -qU blog -d blog -v ON_ERROR_STOP=1) >/dev/null || fail "piped exec (blog table)"
 (cd "$WORK/blog" && $D deploy >/dev/null) || fail "consumer deploy failed"
+out=$(echo "SELECT 'rows=' || count(*) FROM posts;" | (cd "$WORK/blog" && $D db:connect) 2>&1) || fail "db:connect (shared) failed: $out"
+grep -q "rows=1" <<<"$out" || fail "db:connect didn't open the blog database: $out"
+pass "db:connect opens psql on the shared postgres with the app's own role"
 srv docker exec "$(webof blog)" nc -z -w 3 pg 5432 || fail "consumer can't reach the shared postgres"
 srv docker exec "$(webof blog)" nc -z -w 3 cache 6379 2>/dev/null && fail "consumer reaches another app's service"
 srv docker exec "$(webof shop)" python -c "import socket; socket.create_connection(('pg', 5432), 3)" 2>/dev/null \

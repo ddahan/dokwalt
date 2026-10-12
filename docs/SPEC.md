@@ -104,7 +104,7 @@ Nothing else: no web UI, no cluster, no registry, no extra datastore.
 |---|---|---|---|
 | `dokwalt` CLI | Developer computer | user process | Commands, dashboard, builds (`docker compose build`), image export, SSH transport |
 | `dokwalt daemon` | Server | systemd service `dokwalt.service`, root | API on a Unix socket, state (SQLite), deploy engine, compose transformation, reconciler, Caddy config, metrics, alerts |
-| `dokwalt dial-stdio` | Server | short-lived process per API connection, as the SSH user | Bridges an SSH session's stdin/stdout to the daemon socket (or, with `--tcp`, to a container address for `db:connect`) |
+| `dokwalt dial-stdio` | Server | short-lived process per API connection, as the SSH user | Bridges an SSH session's stdin/stdout to the daemon socket |
 | SQLite `dokwalt.db` | Server | file in `/var/lib/dokwalt` | Desired state, releases, encrypted config, metrics |
 | Docker Engine + compose plugin | Server | `docker.service` | Runs app containers and Caddy |
 | `dokwalt-caddy` | Server | container `caddy:2-alpine` in compose project `dokwalt-system` | TLS termination, ACME, routing, access logs to the daemon |
@@ -955,19 +955,20 @@ dokwalt exec --service web -- python manage.py migrate
 
 Postgres only. Resolves the target like `db:connect` (`GET …/db`, which also returns the container name), then runs `docker exec <container> pg_dump --format=custom --username=<user> --dbname=<db>` over an SSH session **without a PTY**, so the binary stream arrives intact, into `<file>.part`. pg_dump connects through the container's Unix socket (trusted by the official images), so no password is sent. The file is renamed to `<file>` (default `<database>-<stage>-<YYYYMMDD-HHMMSS>.dump`) only if pg_dump exited 0 and the file starts with the `PGDMP` magic.
 
-#### `dokwalt db:connect [--service <svc>] [--tunnel-only] [--port <n>] [--remote-port <n>]`
+#### `dokwalt db:connect [--service <svc>] [--database <name>]`
 
 - **Target.** Picks the database service (or `--service`; SQL databases are preferred over Redis-like ones) and detects its kind from the image (`postgres`/`postgis`/`timescaledb` → Postgres; `mysql`/`mariadb`/`percona` → MySQL; `mongo`; `redis`/`valkey`/`keydb`/`dragonfly` → Redis).
 - **Credentials.** Read from the container's environment, e.g. `POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB`.
-- **Tunnel.** Opens `127.0.0.1:<--port or random>` on the developer's computer, tunnelled through SSH with `dokwalt dial-stdio --tcp <container-ip>:<port>`.
-- **Client.** Runs `psql`, `mysql`, `mongosh` or `redis-cli`. Passwords for psql, mysql and redis-cli are passed through the environment (`PGPASSWORD`, `MYSQL_PWD`, `REDISCLI_AUTH`), not as arguments; `mongosh` receives a `mongodb://user:pass@…` URL.
-- `--tunnel-only` prints the connection URL and waits, for GUI tools. `--remote-port` overrides the detected container port.
+- **Client, in the container.** Runs `docker exec [-it] -e <VAR> <container> sh -c '<first client found>' …` over SSH, like `exec`: `psql -U <user> -d <db> -p <port>` (through the container's Unix socket); `mysql`, else `mariadb`, `-u <user> <db>`; `mongosh`, else `mongo`, with a `mongodb://user:pass@127.0.0.1:<port>/<db>?authSource=admin` URL; `redis-cli`, else `valkey-cli`/`keydb-cli`, `-p <port>`. Nothing runs or listens on the developer's computer, so no client needs to be installed there.
+- **Passwords.** In the client's environment (`PGPASSWORD`, `MYSQL_PWD`, `REDISCLI_AUTH`, `DOKWALT_DB_URL` for mongo), passed as `NAME=value docker exec -e NAME`: never an argument of `docker exec`.
+- **Terminal.** `-it` when stdin and stdout are terminals, else `-i` with no PTY, so a piped script (`dokwalt db:connect < fix.sql`) runs without a prompt.
+- An unknown database kind, or an image without its kind's client, fails with a message pointing to `dokwalt exec`.
 
 ```text
-$ dokwalt db:connect --tunnel-only --port 5433
-✓ Tunnel to db (postgres) open
-  postgres://blog:••••@127.0.0.1:5433/blog
-  Press Ctrl+C to close.
+$ dokwalt db:connect
+◆ postgres on db (blog) — exit the shell to come back
+psql (17.2)
+blog=#
 ```
 
 #### 7.7.1 Off-site backups
@@ -1228,10 +1229,9 @@ Then, for each **public stateless** service (it has a non-redirect domain), each
 
 ### 9.7 Database connection
 
-1. **CLI** `GET …/db?service=&port=` → D picks the service (given, or the first service with a recognised database image, SQL databases preferred over Redis-like ones), its kind, the container IP on the stage network, the port (`--remote-port`, the kind's default port, or the first declared port), and user/password/database from the container's environment.
-2. **CLI** listens on `127.0.0.1:<--port or random>`. For each connection it opens an SSH session running `dokwalt dial-stdio --tcp <ip>:<port>` and copies bytes both ways.
-3. Without `--tunnel-only`: runs the local client (password in its environment, except mongosh which gets a URL) and closes the tunnel when the client exits. With `--tunnel-only`: prints the URL and waits for Ctrl+C.
-4. **Shared database.** If the stage has no database service of its own and no `--service` is given, but it uses other apps (`x-dokwalt.uses`), D resolves the first provider stage with a database service instead. User, password and database come from the consumer's connection URL whose host is one of the provider's aliases (config vars first, `DATABASE_URL` preferred, then the compose environment interpolated with config). Without one, D falls back to the provider's credentials and a database named after the consumer app. The response's `provider` field names the provider stage.
+1. **CLI** `GET …/db?service=` → D picks the service (given, or the first service with a recognised database image, SQL databases preferred over Redis-like ones), its kind, its running container, the port inside it (the kind's default port, or the first declared port), and user/password/database from the container's environment.
+2. **CLI** opens an SSH session running `docker exec` on that container with the kind's client (§7.7 `db:connect`), bound to the local terminal, and returns when the client exits.
+3. **Shared database.** If the stage has no database service of its own and no `--service` is given, but it uses other apps (`x-dokwalt.uses`), D resolves the first provider stage with a database service instead. User, password and database come from the consumer's connection URL whose host is one of the provider's aliases (config vars first, `DATABASE_URL` preferred, then the compose environment interpolated with config). Without one, D falls back to the provider's credentials and a database named after the consumer app. The response's `provider` field names the provider stage.
 
 ### 9.8 Remove app
 
@@ -1576,7 +1576,7 @@ blog.example.com is not answering: HTTP 502
 | anything else | — | nothing is published |
 
 - `ports:` are removed from every app service, so there are no Docker-published app ports. The Docker/ufw bypass (Docker's iptables rules are evaluated before ufw's) therefore can't expose an app or database. Only Caddy publishes, and 80/443 are meant to be public.
-- Databases are only on their stage network; `db:connect` reaches them through SSH and `dial-stdio --tcp`.
+- Databases are only on their stage network; `db:connect` runs their own client inside the container (`docker exec` over SSH).
 - The daemon socket and the Caddy admin API are Unix sockets only.
 
 ### 14.4 Container isolation
@@ -1696,7 +1696,7 @@ Acceptance:
 - (A) A config change creates a release and restarts with the new value.
 - (A) Rollback returns to the previous release.
 - (A) A failing deploy keeps the old version serving and marks the release failed.
-- (A) `db:connect --tunnel-only` gives a working tunnel to the database.
+- (A) `db:connect` opens the database's client in its container, also with a piped script.
 - (A) Reboot (`docker restart` of the server) and power cut (`docker kill` + start): the site comes back with no manual action.
 - (A) Unit tests: compose transformation (rules, one-shot detection, volume naming, pass-through config), Caddy config, store, alerts.
 - (M) Same flow on a real arm64 machine at home and a 1 GB VPS, including `sudo reboot` and pulling the plug.
@@ -1762,7 +1762,7 @@ LICENSE                 MIT
 - `make dist`: release binaries for linux/amd64, linux/arm64, darwin/arm64 and darwin/amd64, plus `checksums.txt`, published on GitHub Releases. The version is embedded with `-ldflags -X …cli.Build=<git describe>`.
 - Install: `curl -fsSL https://raw.githubusercontent.com/ddahan/dokwalt/main/install.sh | sh` (macOS/Linux/WSL; detects platform, verifies the checksum, picks a writable directory on `PATH`, sudo only if needed; re-run to upgrade). From source: `make build`. A Homebrew tap is planned. The server daemon is installed and updated only by `server init` / `server upgrade`, which upload the CLI's own version.
 - `make test`: `go test ./...` (unit tests). `make lint`: `go vet` + `gofmt`.
-- `make e2e` → `test/e2e/run.sh`: builds the binaries, starts a **privileged Debian bookworm container running systemd, Docker and sshd** as a throwaway server (`KEEP=1` keeps it), then drives the real CLI over SSH. It checks: install, deploy, zero downtime under load (0 failed requests out of ~4,000 during a deploy), config release, rollback, pipeline/promote, a failed deploy keeping the old version, the db tunnel, reboot recovery (`docker restart`) and power-cut recovery (`docker kill`). Everything runs locally; no paid service.
+- `make e2e` → `test/e2e/run.sh`: builds the binaries, starts a **privileged Debian bookworm container running systemd, Docker and sshd** as a throwaway server (`KEEP=1` keeps it), then drives the real CLI over SSH. It checks: install, deploy, zero downtime under load (0 failed requests out of ~4,000 during a deploy), config release, rollback, pipeline/promote, a failed deploy keeping the old version, `db:connect` (Redis, shared Postgres), reboot recovery (`docker restart`) and power-cut recovery (`docker kill`). Everything runs locally; no paid service.
 - Docs: `internal/docs/topics/*.md` is the single source for end-user docs (embedded with `go:embed`, readable on GitHub). This spec is contributor-facing.
 
 ---

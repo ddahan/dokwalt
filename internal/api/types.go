@@ -265,12 +265,12 @@ type DoctorCheck struct {
 	Hint    string `json:"hint,omitempty"`
 }
 
-// DBTarget tells the CLI where to tunnel for db:connect, and where to run
-// pg_dump for db:backup.
+// DBTarget tells the CLI which container runs a database, and how to log in
+// with the client inside it: db:connect and db:backup.
 type DBTarget struct {
 	Service   string `json:"service"`
-	Kind      string `json:"kind"`    // postgres | mysql | mongo | redis | unknown
-	Address   string `json:"address"` // ip:port reachable from the server
+	Kind      string `json:"kind"` // postgres | mysql | mongo | redis | unknown
+	Port      int    `json:"port"` // inside the container
 	User      string `json:"user,omitempty"`
 	Password  string `json:"password,omitempty"`
 	Database  string `json:"database,omitempty"`

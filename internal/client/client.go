@@ -236,14 +236,6 @@ func (c *Client) Upload(ctx context.Context, path string, body io.Reader) error 
 	return nil
 }
 
-// Tunnel opens a TCP connection to addr as seen from the server.
-func (c *Client) Tunnel(addr string) (net.Conn, error) {
-	if c.SSH == nil {
-		return net.Dial("tcp", addr)
-	}
-	return c.SSH.Exec(c.RemoteBin + " dial-stdio --tcp " + sshx.ShellQuote(addr))
-}
-
 // StagePath builds /v1/apps/{app}/stages/{stage}{suffix}.
 func StagePath(app, stage, suffix string) string {
 	return "/v1/apps/" + url.PathEscape(app) + "/stages/" + url.PathEscape(stage) + suffix

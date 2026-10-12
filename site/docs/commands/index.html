@@ -284,14 +284,12 @@ substring), <code>-n, --lines</code> (default 100), <code>--since &lt;duration&g
 service that isn't a one-shot job, and the default command is <code>sh</code>.</li>
 </ul>
 <h2 id="databases">Databases</h2>
-<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Tunnel to the database and open psql / mysql / mongosh / redis-cli</span>
+<div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># psql / mysql / mongosh / redis-cli, inside the database&#39;s container</span>
 <span class="t-cmd">dokwalt</span> db:connect
-<span class="t-com"># Keep a tunnel open on a fixed local port for a GUI tool</span>
-<span class="t-cmd">dokwalt</span> db:connect <span class="t-flag">--tunnel-only</span> <span class="t-flag">--port</span> 5433</code></pre></div>
+<span class="t-com"># Run a script without a prompt</span>
+<span class="t-cmd">dokwalt</span> db:connect &lt; fix.sql</code></pre></div>
 <p>Flags: <code>--service</code> (default: the first recognised database image, SQL
-preferred), <code>--tunnel-only</code> (print the URL and wait), <code>--port</code> (local port,
-default random), <code>--remote-port</code> (container port, default: the database's
-standard port or the first declared port).</p>
+preferred, or the shared one), <code>--database</code> (default: the app's).</p>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Download a Postgres dump (pg_dump -Fc) to this folder</span>
 <span class="t-cmd">dokwalt</span> db:backup
 <span class="t-cmd">dokwalt</span> db:backup <span class="t-flag">-o</span> ~/Backups/blog.dump</code></pre></div>

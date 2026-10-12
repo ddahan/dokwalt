@@ -183,16 +183,14 @@ dokwalt exec --service web -- sh
 ## Databases
 
 ```bash
-# Tunnel to the database and open psql / mysql / mongosh / redis-cli
+# psql / mysql / mongosh / redis-cli, inside the database's container
 dokwalt db:connect
-# Keep a tunnel open on a fixed local port for a GUI tool
-dokwalt db:connect --tunnel-only --port 5433
+# Run a script without a prompt
+dokwalt db:connect < fix.sql
 ```
 
 Flags: `--service` (default: the first recognised database image, SQL
-preferred), `--tunnel-only` (print the URL and wait), `--port` (local port,
-default random), `--remote-port` (container port, default: the database's
-standard port or the first declared port).
+preferred, or the shared one), `--database` (default: the app's).
 
 ```bash
 # Download a Postgres dump (pg_dump -Fc) to this folder

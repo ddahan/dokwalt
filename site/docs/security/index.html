@@ -226,9 +226,10 @@ ufw, so this is what keeps a stray <code>5432:5432</code> from exposing a databa
 <li>Caddy's admin API is a <strong>Unix socket</strong> (<code>/var/lib/dokwalt/caddy/run/admin.sock</code>), never TCP
 port 2019. Its access and TLS logs go to another Unix socket read by the daemon
 (<code>access.sock</code>) and are only aggregated into metrics, never written to disk.</li>
-<li><strong>Databases are never public.</strong> <code>dokwalt db:connect</code> opens a listener on your computer and tunnels
-it through SSH with <code>dokwalt dial-stdio --tcp</code> to the database container. Client passwords are
-passed through <code>PGPASSWORD</code>, <code>MYSQL_PWD</code> or <code>REDISCLI_AUTH</code>, never on the command line.</li>
+<li><strong>Databases are never public.</strong> <code>dokwalt db:connect</code> runs the database's own client inside its
+container (<code>docker exec</code> over SSH): no port is opened, on the server or on your computer. Client
+passwords are passed through <code>PGPASSWORD</code>, <code>MYSQL_PWD</code> or <code>REDISCLI_AUTH</code> with <code>docker exec -e</code>,
+never on the command line.</li>
 </ul>
 <p>Check it yourself on the server:</p>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">sudo</span> <span class="t-cmd">ss</span> <span class="t-flag">-tlnup</span>     <span class="t-com"># expect: sshd on 22, docker-proxy on 80 and 443 (tcp + udp), nothing else</span></code></pre></div>

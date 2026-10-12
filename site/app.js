@@ -654,11 +654,10 @@ async function stepLine(term, text, ms, dur = "", token) {
       },
     },
     {
-      cmd: "dokwalt db:connect", desc: "psql over SSH, never public",
+      cmd: "dokwalt db:connect", desc: "psql in the container, never public",
       run: async (t) => {
-        line(t, title("Tunnel to db (postgres)"));
         await sleep(500);
-        line(t, `${muted("•")} Connected to <b>db</b> (postgres) through SSH — exit the shell to close the tunnel`);
+        line(t, `${muted("◆")} postgres on <b>db</b> (shop) — exit the shell to come back`);
         await sleep(400);
         line(t, "psql (17.2)");
         line(t, 'Type "help" for help.\n');

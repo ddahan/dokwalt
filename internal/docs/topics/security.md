@@ -84,9 +84,10 @@ boundary. What actually protects the server is the SSH key, so protect it:
 - Caddy's admin API is a **Unix socket** (`/var/lib/dokwalt/caddy/run/admin.sock`), never TCP
   port 2019. Its access and TLS logs go to another Unix socket read by the daemon
   (`access.sock`) and are only aggregated into metrics, never written to disk.
-- **Databases are never public.** `dokwalt db:connect` opens a listener on your computer and tunnels
-  it through SSH with `dokwalt dial-stdio --tcp` to the database container. Client passwords are
-  passed through `PGPASSWORD`, `MYSQL_PWD` or `REDISCLI_AUTH`, never on the command line.
+- **Databases are never public.** `dokwalt db:connect` runs the database's own client inside its
+  container (`docker exec` over SSH): no port is opened, on the server or on your computer. Client
+  passwords are passed through `PGPASSWORD`, `MYSQL_PWD` or `REDISCLI_AUTH` with `docker exec -e`,
+  never on the command line.
 
 Check it yourself on the server:
 
