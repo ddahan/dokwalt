@@ -3,25 +3,19 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"io"
-	"os"
-	"os/exec"
 	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"golang.org/x/term"
 
 	"github.com/ddahan/dokwalt/internal/api"
-	"github.com/ddahan/dokwalt/internal/ui"
 )
 
 // Command annotations read by the dashboard's command bar.
 const (
-	annNoApp      = "dokwalt/no-app"     // -a is not added: the command is not about the selected app
-	annAppArg     = "dokwalt/app-arg"    // the first argument is an existing app (tab completes app names)
-	annFullScreen = "dokwalt/fullscreen" // the command owns the screen: no "press a key" after it
+	annNoApp  = "dokwalt/no-app"  // -a is not added: the command is not about the selected app
+	annAppArg = "dokwalt/app-arg" // the first argument is an existing app (tab completes app names)
 )
 
 // candidate is one completion shown under the command bar.
@@ -331,42 +325,4 @@ func quoteArgs(args []string) string {
 		out[i] = a
 	}
 	return strings.Join(out, " ")
-}
-
-// barRun runs a dokwalt command on the real terminal while the dashboard is
-// suspended, then waits for a key so its output can be read.
-type barRun struct {
-	cmd   *exec.Cmd
-	title string
-	pause bool
-}
-
-// The command uses the real terminal, not bubbletea's wrappers, so that it
-// sees a TTY.
-func (r *barRun) SetStdin(io.Reader)  {}
-func (r *barRun) SetStdout(io.Writer) {}
-func (r *barRun) SetStderr(io.Writer) {}
-
-func (r *barRun) Run() error {
-	r.cmd.Stdin, r.cmd.Stdout, r.cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	fmt.Println("\n" + ui.AccentS.Render("$ ") + r.title)
-	err := r.cmd.Run()
-	if r.pause {
-		fmt.Print("\n" + ui.FaintS.Render("press any key to return to the dashboard"))
-		waitKey()
-		fmt.Println()
-	}
-	return err
-}
-
-func waitKey() {
-	fd := int(os.Stdin.Fd())
-	if !term.IsTerminal(fd) {
-		return
-	}
-	if st, err := term.MakeRaw(fd); err == nil {
-		defer func() { _ = term.Restore(fd, st) }()
-	}
-	var b [16]byte
-	_, _ = os.Stdin.Read(b[:])
 }

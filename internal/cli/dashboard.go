@@ -39,8 +39,9 @@ func runDashboard(ctx context.Context, root *cobra.Command) error {
 		return err
 	}
 	defer s.Close()
-	// Ctrl+C in a command run from the command bar must not end the
-	// dashboard: bubbletea handles its own keys and signals from here on.
+	// From here on bubbletea reads ctrl+c as a key (and commands run from the
+	// bar get it through their own terminal): the CLI's SIGINT handler must
+	// not end the dashboard.
 	ctx = context.WithoutCancel(ctx)
 	m := newDash(ctx, s)
 	m.root = root
@@ -51,6 +52,9 @@ func runDashboard(ctx context.Context, root *cobra.Command) error {
 	m.send = p.Send
 	_, err = p.Run()
 	m.stopLogs()
+	if m.pane != nil {
+		m.pane.close()
+	}
 	if err == nil {
 		err = m.fatal
 	}
@@ -98,6 +102,8 @@ type dash struct {
 	bar     string         // what is typed in it
 	history []string       // command bar lines run, oldest first
 	histAt  int            // position while browsing history with ↑↓
+	pane    *termPane      // the command run from the bar, in its own terminal
+	paneSeq int
 }
 
 type (
@@ -109,13 +115,9 @@ type (
 		rels []api.Release
 		doms []api.Domain
 	}
-	logMsg     struct{ key, line string }
-	tickMsg    struct{}
-	errMsg     struct{ err error }
-	barDoneMsg struct {
-		title string
-		err   error
-	}
+	logMsg  struct{ key, line string }
+	tickMsg struct{}
+	errMsg  struct{ err error }
 )
 
 func newDash(ctx context.Context, s *session) *dash {
@@ -236,6 +238,9 @@ func (m *dash) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.w, m.h = msg.Width, msg.Height
+		if m.pane != nil {
+			m.pane.resize(m.paneSize())
+		}
 	case errMsg:
 		m.status = ui.RedS.Render("✗ " + msg.err.Error())
 	case appsMsg:
@@ -273,13 +278,15 @@ func (m *dash) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tickMsg:
 		return m, tea.Batch(m.loadApps(), m.loadTop(), tick())
-	case barDoneMsg:
-		if msg.err != nil {
-			m.status = ui.RedS.Render("✗ " + msg.title + ": " + firstLine(msg.err.Error()))
-		} else {
-			m.status = ui.GreenS.Render("✓ ") + ui.MutedS.Render(msg.title)
+	case paneOutMsg:
+		if m.pane != nil && m.pane.seq == msg.seq {
+			m.pane.dirty.Store(false) // redrawn now
 		}
-		return m, tea.Batch(m.loadApps(), m.loadTop(), m.loadDetail())
+	case paneDoneMsg:
+		if m.pane != nil && m.pane.seq == msg.seq {
+			m.pane.done(msg.err)
+			return m, tea.Batch(m.loadApps(), m.loadTop(), m.loadDetail())
+		}
 	case tea.KeyMsg:
 		return m.key(msg)
 	}
@@ -287,6 +294,16 @@ func (m *dash) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *dash) key(k tea.KeyMsg) (tea.Model, tea.Cmd) {
+	if p := m.pane; p != nil && p.running {
+		if k.String() == paneEscape {
+			p.focus = !p.focus
+			return m, nil
+		}
+		if p.focus {
+			p.key(k)
+			return m, nil
+		}
+	}
 	if m.barOn {
 		return m, m.barKey(k)
 	}
@@ -300,7 +317,15 @@ func (m *dash) key(k tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "?":
 		m.help = true
 	case ":":
+		if m.pane != nil && m.pane.running {
+			m.status = ui.YellowS.Render("a command is still running: " + paneEscape + " to go back to it")
+			break
+		}
 		m.barOn, m.bar, m.histAt, m.status = true, "", len(m.history), ""
+	case "esc":
+		if m.pane != nil && !m.pane.running {
+			m.pane = nil
+		}
 	case "1", "2", "3":
 		m.tab = dashTab(k.String()[0] - '1')
 		if m.tab == tabLogs {
@@ -408,10 +433,27 @@ func (m *dash) runBar() tea.Cmd {
 		m.status = ui.RedS.Render("✗ " + err.Error())
 		return nil
 	}
-	title := "dokwalt " + quoteArgs(args)
-	run := &barRun{cmd: exec.Command(exe, args...), title: title, pause: c.Annotations[annFullScreen] == ""}
-	return tea.Exec(run, func(err error) tea.Msg { return barDoneMsg{title: title, err: err} })
+	_ = c
+	if m.pane != nil {
+		m.pane.close()
+	}
+	m.paneSeq++
+	w, h := m.paneSize()
+	p, err := startPane(m.paneSeq, "dokwalt "+quoteArgs(args), append([]string{exe}, args...), w, h, lipgloss.HasDarkBackground(), m.send)
+	if err != nil {
+		m.status = ui.RedS.Render("✗ " + err.Error())
+		return nil
+	}
+	m.pane = p
+	return nil
 }
+
+// paneHeight is the command pane's share of the screen, border included: the
+// app list and overview keep the rest.
+func (m *dash) paneHeight() int { return max(8, (m.h-2)*55/100) }
+
+// paneSize is the command's terminal size inside the pane.
+func (m *dash) paneSize() (int, int) { return max(10, m.w-4), max(3, m.paneHeight()-3) }
 
 // appNames lists the apps once each, for completion.
 func (m *dash) appNames() []string {
@@ -450,8 +492,11 @@ func (m *dash) View() string {
 	header := m.header()
 	footer := m.footer()
 	panel := ""
-	if m.barOn {
+	switch {
+	case m.barOn:
 		panel = m.barPanel()
+	case m.pane != nil:
+		panel = m.panePanel()
 	}
 	bodyH := m.h - lipgloss.Height(header) - lipgloss.Height(footer)
 	if panel != "" {
@@ -464,6 +509,9 @@ func (m *dash) View() string {
 	rightW := m.w - leftW - 1
 	rb := lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(ui.Faint).Padding(0, 1)
 	lb := rb.BorderForeground(ui.Accent)
+	if m.pane != nil && m.pane.focus {
+		lb = rb // the keys go to the command
+	}
 	left := lb.Width(leftW - 2).Height(bodyH - 2).Render(clipLines(m.appList(leftW-4, bodyH-2), leftW-4, bodyH-2))
 	right := rb.Width(rightW - 2).Height(bodyH - 2).Render(clipLines(m.detail(rightW-4, bodyH-2), rightW-4, bodyH-2))
 	body := lipgloss.JoinHorizontal(lipgloss.Top, left, " ", right)
@@ -497,6 +545,8 @@ func helpText() string {
 		{"↑↓ / j k", "select an app"}, {"1 2 3 / ← →", "overview · logs · releases"}, {"l", "live logs"},
 		{":", "run any dokwalt command on the selected app (tab completes),"},
 		{"", "e.g. :rollback, :promote, :restart, :db:connect"},
+		{paneEscape, "switch the keys between a running command and the dashboard"},
+		{"esc", "close a finished command's output"},
 		{"o", "open the site in your browser"}, {"q", "quit"},
 	}
 	var b strings.Builder
@@ -535,12 +585,30 @@ func (m *dash) footer() string {
 	switch {
 	case m.barOn:
 		line = ui.AccentS.Render(" :") + m.bar + lipgloss.NewStyle().Reverse(true).Render(" ")
+	case m.pane != nil && m.pane.focus:
+		line = ui.FaintS.Render(" keys go to the command · " + paneEscape + " dashboard · ctrl+c stops the command")
 	case m.status != "":
 		line = " " + m.status
+	case m.pane != nil && m.pane.running:
+		line = ui.FaintS.Render(" ↑↓ select · 1/2/3 tabs · " + paneEscape + " back to the command · ? help · q quit")
+	case m.pane != nil:
+		line = ui.FaintS.Render(" ↑↓ select · 1/2/3 tabs · : command · esc close the output · ? help · q quit")
 	default:
 		line = ui.FaintS.Render(" ↑↓ select · 1/2/3 tabs · : command · o open · ? help · q quit")
 	}
 	return lipgloss.NewStyle().MaxWidth(m.w).Render(line)
+}
+
+// panePanel frames the command's terminal under the app list and overview.
+func (m *dash) panePanel() string {
+	border := ui.Faint
+	if m.pane.focus {
+		border = ui.Accent
+	}
+	_, h := m.paneSize()
+	content := clipLines(m.pane.view(m.w-4), m.w-4, h+1)
+	return lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(border).Padding(0, 1).
+		Width(m.w - 2).Height(h + 1).Render(content)
 }
 
 // barPanel shows what the command bar can complete: every matching command,

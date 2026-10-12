@@ -96,9 +96,16 @@ pass your own.
   (after `-a`, and for `link`, `apps:rename` and `apps:destroy`), docs topics.
 - `↑↓` go through the commands already run, `ctrl+w` erases a word,
   `ctrl+u` the line, `esc` closes the prompt.
-- `enter` hands the whole terminal to the command. When it ends, press any
-  key to come back (`top` comes back right away); the dashboard reloads.
-  `ctrl+c` stops the command, not the dashboard.
+- `enter` runs the command in a terminal pane under the app list and
+  overview, which stay on screen. Everything works there, including prompts
+  and full-screen programs: `db:connect` (psql), `exec -- sh`, `logs -f`,
+  `top`. While it runs, keys go to the command: `ctrl+c` stops it, not the
+  dashboard.
+- `ctrl+]` switches the keys between the running command and the dashboard,
+  to look at other apps meanwhile; `ctrl+]` again to go back to it.
+- When the command ends, its output stays in the pane with `✓ done` (or the
+  exit code) and its duration, and the dashboard reloads. `esc` closes the
+  pane; `:` runs the next command in its place.
 - `deploy` and the commands that are not about one app (`apps`,
   `apps:create`, `apps:import`, `link`, `top`, `docs`, `server …`) get no
   `-a`: `deploy` builds the folder you opened the dashboard from and ships it

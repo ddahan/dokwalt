@@ -154,9 +154,6 @@ func TestCommandArgs(t *testing.T) {
 	if _, _, err := commandArgs(root, "nope", prod, ""); err == nil {
 		t.Error("an unknown command must fail before running anything")
 	}
-	if _, c, _ := commandArgs(root, "top", prod, ""); c.Annotations[annFullScreen] == "" {
-		t.Error("top owns the screen: no pause after it")
-	}
 }
 
 func TestQuoteArgs(t *testing.T) {

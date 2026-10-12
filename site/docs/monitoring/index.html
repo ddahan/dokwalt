@@ -229,9 +229,16 @@ command once it is chosen.</li>
 (after <code>-a</code>, and for <code>link</code>, <code>apps:rename</code> and <code>apps:destroy</code>), docs topics.</li>
 <li><code>↑↓</code> go through the commands already run, <code>ctrl+w</code> erases a word,
 <code>ctrl+u</code> the line, <code>esc</code> closes the prompt.</li>
-<li><code>enter</code> hands the whole terminal to the command. When it ends, press any
-key to come back (<code>top</code> comes back right away); the dashboard reloads.
-<code>ctrl+c</code> stops the command, not the dashboard.</li>
+<li><code>enter</code> runs the command in a terminal pane under the app list and
+overview, which stay on screen. Everything works there, including prompts
+and full-screen programs: <code>db:connect</code> (psql), <code>exec -- sh</code>, <code>logs -f</code>,
+<code>top</code>. While it runs, keys go to the command: <code>ctrl+c</code> stops it, not the
+dashboard.</li>
+<li><code>ctrl+]</code> switches the keys between the running command and the dashboard,
+to look at other apps meanwhile; <code>ctrl+]</code> again to go back to it.</li>
+<li>When the command ends, its output stays in the pane with <code>✓ done</code> (or the
+exit code) and its duration, and the dashboard reloads. <code>esc</code> closes the
+pane; <code>:</code> runs the next command in its place.</li>
 <li><code>deploy</code> and the commands that are not about one app (<code>apps</code>,
 <code>apps:create</code>, <code>apps:import</code>, <code>link</code>, <code>top</code>, <code>docs</code>, <code>server …</code>) get no
 <code>-a</code>: <code>deploy</code> builds the folder you opened the dashboard from and ships it
