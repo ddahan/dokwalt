@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
@@ -76,39 +75,29 @@ type row struct {
 }
 
 type dash struct {
-	ctx     context.Context
-	s       *session
-	send    func(tea.Msg)
-	w, h    int
-	rows    []row
-	sel     int
-	tab     dashTab
-	focusR  bool
-	top     api.TopSnapshot
-	svcs    []api.Service
-	rels    []api.Release
-	relSel  int
-	doms    []api.Domain
-	logs    []string
-	logKey  string
-	cancel  context.CancelFunc
-	spin    spinner.Model
-	busy    string // running action label
-	status  string // last status line
-	confirm *pending
-	help    bool
-	fatal   error
+	ctx    context.Context
+	s      *session
+	send   func(tea.Msg)
+	w, h   int
+	rows   []row
+	sel    int
+	tab    dashTab
+	top    api.TopSnapshot
+	svcs   []api.Service
+	rels   []api.Release
+	doms   []api.Domain
+	logs   []string
+	logKey string
+	cancel context.CancelFunc
+	status string // last status line
+	help   bool
+	fatal  error
 
 	root    *cobra.Command // the command tree, for the command bar
 	barOn   bool           // the `:` command bar is open
 	bar     string         // what is typed in it
 	history []string       // command bar lines run, oldest first
 	histAt  int            // position while browsing history with ↑↓
-}
-
-type pending struct {
-	question string
-	run      func() tea.Cmd
 }
 
 type (
@@ -120,26 +109,17 @@ type (
 		rels []api.Release
 		doms []api.Domain
 	}
-	logMsg    struct{ key, line string }
-	tickMsg   struct{}
-	actionMsg struct {
-		label string
-		err   error
-		ev    api.Event
-	}
-	progressMsg string
-	errMsg      struct{ err error }
-	barDoneMsg  struct {
+	logMsg     struct{ key, line string }
+	tickMsg    struct{}
+	errMsg     struct{ err error }
+	barDoneMsg struct {
 		title string
 		err   error
 	}
 )
 
 func newDash(ctx context.Context, s *session) *dash {
-	sp := spinner.New()
-	sp.Spinner = spinner.MiniDot
-	sp.Style = ui.AccentS
-	return &dash{ctx: ctx, s: s, spin: sp}
+	return &dash{ctx: ctx, s: s}
 }
 
 // snapshot prints one fully loaded frame with colors, for docs and
@@ -181,7 +161,7 @@ func (m *dash) cur() (row, bool) {
 }
 
 func (m *dash) Init() tea.Cmd {
-	return tea.Batch(m.loadApps(), m.loadTop(), m.spin.Tick, tick())
+	return tea.Batch(m.loadApps(), m.loadTop(), tick())
 }
 
 func tick() tea.Cmd { return tea.Tick(2*time.Second, func(time.Time) tea.Msg { return tickMsg{} }) }
@@ -283,9 +263,6 @@ func (m *dash) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case detailMsg:
 		if r, ok := m.cur(); ok && r.app+"/"+r.stage == msg.key {
 			m.svcs, m.rels, m.doms = msg.svcs, msg.rels, msg.doms
-			if m.relSel >= len(m.rels) {
-				m.relSel = 0
-			}
 		}
 	case logMsg:
 		if msg.key == m.logKey {
@@ -296,8 +273,6 @@ func (m *dash) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tickMsg:
 		return m, tea.Batch(m.loadApps(), m.loadTop(), tick())
-	case progressMsg:
-		m.status = string(msg)
 	case barDoneMsg:
 		if msg.err != nil {
 			m.status = ui.RedS.Render("✗ " + msg.title + ": " + firstLine(msg.err.Error()))
@@ -305,21 +280,6 @@ func (m *dash) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.status = ui.GreenS.Render("✓ ") + ui.MutedS.Render(msg.title)
 		}
 		return m, tea.Batch(m.loadApps(), m.loadTop(), m.loadDetail())
-	case actionMsg:
-		m.busy = ""
-		if msg.err != nil {
-			m.status = ui.RedS.Render("✗ " + msg.label + ": " + firstLine(msg.err.Error()))
-		} else {
-			m.status = ui.GreenS.Render("✓ " + msg.label + " done")
-			if msg.ev.Release > 0 {
-				m.status += ui.MutedS.Render(fmt.Sprintf(" — v%d is live", msg.ev.Release))
-			}
-		}
-		return m, tea.Batch(m.loadApps(), m.loadDetail())
-	case spinner.TickMsg:
-		var cmd tea.Cmd
-		m.spin, cmd = m.spin.Update(msg)
-		return m, cmd
 	case tea.KeyMsg:
 		return m.key(msg)
 	}
@@ -329,18 +289,6 @@ func (m *dash) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *dash) key(k tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if m.barOn {
 		return m, m.barKey(k)
-	}
-	if m.confirm != nil {
-		switch k.String() {
-		case "y", "Y":
-			p := m.confirm
-			m.confirm = nil
-			return m, p.run()
-		default:
-			m.confirm = nil
-			m.status = ui.MutedS.Render("cancelled")
-		}
-		return m, nil
 	}
 	if m.help {
 		m.help = false
@@ -353,8 +301,6 @@ func (m *dash) key(k tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.help = true
 	case ":":
 		m.barOn, m.bar, m.histAt, m.status = true, "", len(m.history), ""
-	case "tab":
-		m.focusR = !m.focusR
 	case "1", "2", "3":
 		m.tab = dashTab(k.String()[0] - '1')
 		if m.tab == tabLogs {
@@ -374,53 +320,15 @@ func (m *dash) key(k tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.startLogs()
 		}
 	case "up", "k":
-		if m.focusR && m.tab == tabReleases {
-			m.relSel = max(0, m.relSel-1)
-		} else if m.sel > 0 {
+		if m.sel > 0 {
 			m.sel--
 			return m, m.selected()
 		}
 	case "down", "j":
-		if m.focusR && m.tab == tabReleases {
-			m.relSel = min(len(m.rels)-1, m.relSel+1)
-		} else if m.sel < len(m.rows)-1 {
+		if m.sel < len(m.rows)-1 {
 			m.sel++
 			return m, m.selected()
 		}
-	case "R":
-		if r, ok := m.cur(); ok {
-			m.ask(fmt.Sprintf("Restart %s?", label(r.app, r.stage)), func() tea.Cmd {
-				return m.action("Restart "+label(r.app, r.stage), func(emit func(api.Event)) (api.Event, error) {
-					return api.Event{}, m.s.c.Post(m.ctx, client.StagePath(r.app, r.stage, "/restart"), nil, nil)
-				})
-			})
-		}
-	case "r":
-		r, ok := m.cur()
-		if !ok || r.st.CurrentRelease == 0 {
-			break
-		}
-		version, what := 0, "the previous release"
-		if m.tab == tabReleases && m.relSel < len(m.rels) && !m.rels[m.relSel].Current {
-			version = m.rels[m.relSel].Version
-			what = fmt.Sprintf("v%d", version)
-		}
-		m.ask(fmt.Sprintf("Roll back %s to %s?", label(r.app, r.stage), what), func() tea.Cmd {
-			return m.action("Rollback "+label(r.app, r.stage), func(emit func(api.Event)) (api.Event, error) {
-				return m.s.c.Operation(m.ctx, "POST", client.StagePath(r.app, r.stage, "/rollback"), api.RollbackRequest{Version: version}, emit)
-			})
-		})
-	case "p":
-		r, ok := m.cur()
-		if !ok || !r.pipeline {
-			m.status = ui.MutedS.Render("promote needs a pipeline (dokwalt pipeline:enable)")
-			break
-		}
-		m.ask(fmt.Sprintf("Promote %s staging → production?", r.app), func() tea.Cmd {
-			return m.action("Promote "+r.app, func(emit func(api.Event)) (api.Event, error) {
-				return m.s.c.Operation(m.ctx, "POST", "/v1/apps/"+r.app+"/promote", nil, emit)
-			})
-		})
 	case "o":
 		for _, d := range m.doms {
 			if d.RedirectTo == "" {
@@ -517,32 +425,11 @@ func (m *dash) appNames() []string {
 }
 
 func (m *dash) selected() tea.Cmd {
-	m.svcs, m.rels, m.doms, m.relSel = nil, nil, nil, 0
+	m.svcs, m.rels, m.doms = nil, nil, nil
 	if m.tab == tabLogs {
 		m.startLogs()
 	}
 	return m.loadDetail()
-}
-
-func (m *dash) ask(q string, run func() tea.Cmd) {
-	if m.busy != "" {
-		m.status = ui.YellowS.Render("wait: " + m.busy + " is running")
-		return
-	}
-	m.confirm = &pending{question: q, run: run}
-}
-
-func (m *dash) action(label string, fn func(emit func(api.Event)) (api.Event, error)) tea.Cmd {
-	m.busy, m.status = label, ""
-	send := m.send
-	return func() tea.Msg {
-		ev, err := fn(func(e api.Event) {
-			if e.Status != "log" && send != nil {
-				send(progressMsg(ui.MutedS.Render(e.Message)))
-			}
-		})
-		return actionMsg{label: label, err: err, ev: ev}
-	}
 }
 
 func openURL(u string) {
@@ -575,12 +462,8 @@ func (m *dash) View() string {
 		leftW = 26
 	}
 	rightW := m.w - leftW - 1
-	border := lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(ui.Faint).Padding(0, 1)
-	focus := border.BorderForeground(ui.Accent)
-	lb, rb := focus, border
-	if m.focusR {
-		lb, rb = border, focus
-	}
+	rb := lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(ui.Faint).Padding(0, 1)
+	lb := rb.BorderForeground(ui.Accent)
 	left := lb.Width(leftW - 2).Height(bodyH - 2).Render(clipLines(m.appList(leftW-4, bodyH-2), leftW-4, bodyH-2))
 	right := rb.Width(rightW - 2).Height(bodyH - 2).Render(clipLines(m.detail(rightW-4, bodyH-2), rightW-4, bodyH-2))
 	body := lipgloss.JoinHorizontal(lipgloss.Top, left, " ", right)
@@ -591,9 +474,6 @@ func (m *dash) View() string {
 	view := lipgloss.JoinVertical(lipgloss.Left, append(parts, footer)...)
 	if m.help {
 		return m.overlay(helpText())
-	}
-	if m.confirm != nil {
-		return m.overlay(ui.YellowS.Render("? ") + m.confirm.question + "\n\n" + ui.MutedS.Render("y confirm · any other key cancels"))
 	}
 	return view
 }
@@ -614,11 +494,10 @@ func (m *dash) overlay(content string) string {
 
 func helpText() string {
 	keys := [][2]string{
-		{"↑↓ / j k", "select app (or release when focused)"}, {"tab", "focus list / detail"},
-		{"1 2 3 / ← →", "overview · logs · releases"}, {"l", "live logs"},
-		{"r", "roll back (selected release in Releases)"}, {"p", "promote staging → production"},
-		{"R", "restart"}, {"o", "open the site in your browser"},
-		{":", "run any dokwalt command on the selected app (tab completes)"}, {"q", "quit"},
+		{"↑↓ / j k", "select an app"}, {"1 2 3 / ← →", "overview · logs · releases"}, {"l", "live logs"},
+		{":", "run any dokwalt command on the selected app (tab completes),"},
+		{"", "e.g. :rollback, :promote, :restart, :db:connect"},
+		{"o", "open the site in your browser"}, {"q", "quit"},
 	}
 	var b strings.Builder
 	b.WriteString(ui.TitleS.Render("◆ Keys") + "\n\n")
@@ -656,12 +535,10 @@ func (m *dash) footer() string {
 	switch {
 	case m.barOn:
 		line = ui.AccentS.Render(" :") + m.bar + lipgloss.NewStyle().Reverse(true).Render(" ")
-	case m.busy != "":
-		line = " " + m.spin.View() + " " + m.busy + "  " + m.status
 	case m.status != "":
 		line = " " + m.status
 	default:
-		line = ui.FaintS.Render(" ↑↓ select · 1/2/3 tabs · : command · r rollback · p promote · R restart · o open · ? help · q quit")
+		line = ui.FaintS.Render(" ↑↓ select · 1/2/3 tabs · : command · o open · ? help · q quit")
 	}
 	return lipgloss.NewStyle().MaxWidth(m.w).Render(line)
 }
@@ -905,16 +782,9 @@ func (m *dash) releaseView(w, h int) string {
 		}
 		line := fmt.Sprintf("%s%-5s %-11s %s %s", mark, fmt.Sprintf("v%d", r.Version), statusWord(r), ui.MutedS.Render(fmt.Sprintf("%-8s", ui.Ago(r.CreatedAt))), desc)
 		line = lipgloss.NewStyle().MaxWidth(w).Render(line)
-		if i == m.relSel && m.focusR {
-			line = lipgloss.NewStyle().Background(ui.Surface).Width(w).Render(line)
-		}
 		b.WriteString(line + "\n")
 	}
-	if m.focusR {
-		b.WriteString("\n" + ui.FaintS.Render("r roll back to the selected release"))
-	} else {
-		b.WriteString("\n" + ui.FaintS.Render("tab to select a release"))
-	}
+	b.WriteString("\n" + ui.FaintS.Render(":rollback vN to roll back"))
 	return b.String()
 }
 

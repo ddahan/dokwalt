@@ -86,7 +86,7 @@ dokwalt rollback v12      # to a specific release
 
 Without an argument, the target is the most recent `succeeded` or
 `superseded` release older than the current one. The CLI asks **no
-confirmation** (the dashboard's `r` key asks with `y`).
+confirmation**, from the dashboard (`:rollback`) too.
 
 ```text
 $ dokwalt rollback v12

@@ -72,18 +72,15 @@ seconds. Keys:
 
 | Key                | Action                                              |
 |--------------------|-----------------------------------------------------|
-| `↑↓` / `j k`       | select an app (or a release when that list is focused) |
-| `tab`              | switch focus between the list and the detail pane   |
+| `↑↓` / `j k`       | select an app                                       |
 | `1 2 3` / `← →`    | overview · logs · releases                          |
 | `l`                | live logs                                           |
-| `r`                | roll back (to the selected release in Releases, else the previous one) |
-| `p`                | promote staging to production                       |
-| `R`                | restart                                             |
-| `o`                | open the site in the browser                        |
 | `:`                | run any `dokwalt` command (see below)               |
+| `o`                | open the site in the browser                        |
 | `?` / `q`          | help / quit                                         |
 
-Rollback, promote and restart ask for confirmation with `y`.
+Everything else goes through `:`: `:rollback` (or `:rollback v12`, a version
+from the Releases tab), `:promote`, `:restart`, `:db:connect`…
 
 ### Running commands from the dashboard
 

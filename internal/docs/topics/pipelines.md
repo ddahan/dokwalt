@@ -102,7 +102,7 @@ dokwalt promote
 ✓ Promoted — production is now v31
 ```
 
-There is no confirmation prompt in the CLI (the dashboard asks with `y`).
+There is no confirmation prompt.
 What promote does:
 
 - Takes the images and the stored compose model of **staging's current
@@ -143,8 +143,7 @@ dokwalt promote                            # same images, prod config
 dokwalt rollback                           # if production misbehaves
 ```
 
-In the dashboard (`dokwalt`), select an app and press `p` to promote,
-then `y` to confirm.
+In the dashboard (`dokwalt`), select the app and type `:promote`.
 
 ## Disable the pipeline
 

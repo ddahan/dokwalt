@@ -206,7 +206,7 @@ wildcards are not supported.</p>
 <span class="t-ok">✓</span> v31 is live
 <span class="t-ok">✓</span> Previous version stops in 10s (in-flight requests finish)
 <span class="t-ok">✓</span> Promoted — production is now v31</code></pre></div>
-<p>There is no confirmation prompt in the CLI (the dashboard asks with <code>y</code>).
+<p>There is no confirmation prompt.
 What promote does:</p>
 <ul>
 <li>Takes the images and the stored compose model of <strong>staging's current
@@ -236,8 +236,7 @@ goes back to its previous images, staging keeps what it has.</p>
 <span class="t-com"># test https://staging.blog.example.com</span>
 <span class="t-cmd">dokwalt</span> promote                            <span class="t-com"># same images, prod config</span>
 <span class="t-cmd">dokwalt</span> rollback                           <span class="t-com"># if production misbehaves</span></code></pre></div>
-<p>In the dashboard (<code>dokwalt</code>), select an app and press <code>p</code> to promote,
-then <code>y</code> to confirm.</p>
+<p>In the dashboard (<code>dokwalt</code>), select the app and type <code>:promote</code>.</p>
 <h2 id="disable-the-pipeline">Disable the pipeline</h2>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-cmd">dokwalt</span> pipeline:disable
 <span class="t-cmd">dokwalt</span> pipeline:disable <span class="t-flag">--confirm</span> blog    <span class="t-com"># non-interactive</span></code></pre></div>

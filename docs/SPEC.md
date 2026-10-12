@@ -716,7 +716,7 @@ Config is exported **in clear text** (warning printed). Images, releases, metric
 
 **Stage display.** For apps without a pipeline, the stage never appears in output.
 
-**Confirmations.** `apps:destroy` and `pipeline:disable` require typing the app name, or `--confirm <name>` for scripts. The dashboard asks before rollback, promote and restart.
+**Confirmations.** `apps:destroy` and `pipeline:disable` require typing the app name, or `--confirm <name>` for scripts. Rollback, promote and restart run without asking, from the CLI and from the dashboard's command bar alike.
 
 ### 7.2 Servers
 
@@ -1073,22 +1073,18 @@ $ dokwalt doctor
 | App list (left) | Apps (staging rows under pipeline apps) with status and live CPU/RAM sparklines |
 | Detail (right), tab 1 **Overview** | Services and containers, domains, current release |
 | Tab 2 **Logs** | Live merged logs of the selected app |
-| Tab 3 **Releases** | Release list; select one to roll back to it |
+| Tab 3 **Releases** | Release list (`:rollback vN` to roll back to one) |
 | Footer | Key hints and status messages |
 
 ### 8.2 Keybindings
 
 | Key | Action |
 |---|---|
-| `↑↓` / `j k` | Select app (or release when the detail is focused) |
-| `tab` | Focus list / detail |
+| `↑↓` / `j k` | Select app |
 | `1 2 3` / `← →` | Overview · Logs · Releases |
 | `l` | Live logs |
-| `r` | Roll back (to the selected release in Releases, otherwise the previous one) — asks `y` |
-| `p` | Promote staging → production (pipeline apps) — asks `y` |
-| `R` | Restart the app's containers — asks `y` |
-| `o` | Open the site in the browser |
-| `:` | Command bar: run any `dokwalt` command (§8.4) |
+| `:` | Command bar: run any `dokwalt` command (§8.4), e.g. `:rollback`, `:promote`, `:restart` |
+| `o` | Open the site in the browser (no command does this) |
 | `?` | Help |
 | `q` / `ctrl+c` | Quit |
 
@@ -1108,10 +1104,10 @@ Deploys run from the command bar only, and like any `dokwalt deploy`: from the f
 │                               ││                                                    │
 │                               ││ https://blog.example.com → web:3000                │
 ╰───────────────────────────────╯╰──────────────────────────────────────────────────╯
- ↑↓ select · 1/2/3 tabs · : command · r rollback · p promote · R restart · o open · ? help · q quit
+ ↑↓ select · 1/2/3 tabs · : command · o open · ? help · q quit
 ```
 
-During a rollback or promote started from the dashboard, the footer shows the engine's step events live.
+Actions have no keys of their own: a key would only repeat a command the bar already runs.
 
 ### 8.4 Command bar
 
@@ -1849,7 +1845,7 @@ The end-user guide is the embedded topic **`internal/docs/topics/server.md`** (`
 6. **Export encryption.** `apps:export` writes config in clear text. *Proposal:* optional passphrase encryption.
 7. **Alert webhook URLs at rest.** They're bearer secrets but stored unencrypted. *Proposal:* seal them with the same key as config.
 8. **Certificate expiry alert.** v0.1 alerts on issuance errors reported by Caddy; there's no alert based on the served certificate's expiry date.
-9. **Rollback/promote confirmation in the CLI.** The dashboard asks; the CLI commands run immediately. Confirm that this is wanted.
+9. **Rollback/promote confirmation.** The commands run immediately, from the CLI and from the dashboard's command bar. Confirm that this is wanted.
 10. **CLI/daemon compatibility policy.** `doctor` warns on version mismatch; there's no hard API-version gate yet. *Proposal:* refuse on a major API mismatch.
 11. **Install script / Homebrew tap.** *Install script resolved in v0.1* (`install.sh`); a Homebrew tap is still planned.
 12. **`alerts:set … = 0`.** *Resolved in v0.1:* `0` disables any threshold rule.

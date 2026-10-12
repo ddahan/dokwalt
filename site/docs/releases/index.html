@@ -247,7 +247,7 @@ With a pipeline: <code>dokwalt releases -s staging</code>.</p>
 <span class="t-cmd">dokwalt</span> rollback v12      <span class="t-com"># to a specific release</span></code></pre></div>
 <p>Without an argument, the target is the most recent <code>succeeded</code> or
 <code>superseded</code> release older than the current one. The CLI asks <strong>no
-confirmation</strong> (the dashboard's <code>r</code> key asks with <code>y</code>).</p>
+confirmation</strong>, from the dashboard (<code>:rollback</code>) too.</p>
 <div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> rollback v12
 <span class="t-cmd">◆</span> Rolling back blog
 <span class="t-ok">✓</span> Services — db: keeps its data (named volume pgdata), web: zero-downtime swap

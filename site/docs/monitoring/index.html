@@ -190,11 +190,7 @@ seconds. Keys:</p>
 <tbody>
 <tr>
 <td><code>↑↓</code> / <code>j k</code></td>
-<td>select an app (or a release when that list is focused)</td>
-</tr>
-<tr>
-<td><code>tab</code></td>
-<td>switch focus between the list and the detail pane</td>
+<td>select an app</td>
 </tr>
 <tr>
 <td><code>1 2 3</code> / <code>← →</code></td>
@@ -205,24 +201,12 @@ seconds. Keys:</p>
 <td>live logs</td>
 </tr>
 <tr>
-<td><code>r</code></td>
-<td>roll back (to the selected release in Releases, else the previous one)</td>
-</tr>
-<tr>
-<td><code>p</code></td>
-<td>promote staging to production</td>
-</tr>
-<tr>
-<td><code>R</code></td>
-<td>restart</td>
+<td><code>:</code></td>
+<td>run any <code>dokwalt</code> command (see below)</td>
 </tr>
 <tr>
 <td><code>o</code></td>
 <td>open the site in the browser</td>
-</tr>
-<tr>
-<td><code>:</code></td>
-<td>run any <code>dokwalt</code> command (see below)</td>
 </tr>
 <tr>
 <td><code>?</code> / <code>q</code></td>
@@ -230,7 +214,8 @@ seconds. Keys:</p>
 </tr>
 </tbody>
 </table>
-<p>Rollback, promote and restart ask for confirmation with <code>y</code>.</p>
+<p>Everything else goes through <code>:</code>: <code>:rollback</code> (or <code>:rollback v12</code>, a version
+from the Releases tab), <code>:promote</code>, <code>:restart</code>, <code>:db:connect</code>…</p>
 <h3 id="running-commands-from-the-dashboard">Running commands from the dashboard</h3>
 <p>Press <code>:</code> and type a command without <code>dokwalt</code> in front: <code>config</code>,
 <code>config:set FOO=bar</code>, <code>exec -- sh</code>, <code>db:connect</code>, <code>top</code>… It applies to the
