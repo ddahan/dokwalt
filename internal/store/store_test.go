@@ -163,3 +163,70 @@ func TestSecretSettingsAndCopy(t *testing.T) {
 		t.Fatal("settings not deleted")
 	}
 }
+
+// RenameApp keeps the app's id, stages and releases, moves its image refs to
+// the new name and leaves other apps alone (even one whose name starts with it).
+func TestRenameApp(t *testing.T) {
+	s := open(t)
+	shop, _ := s.CreateApp("shop")
+	s.CreateApp("shop-admin")
+	s.CreateApp("blog")
+	st, _ := s.GetStage("shop", api.DefaultStage)
+	r := &Release{StageID: st.ID, Status: StatusSucceeded, Compose: map[string]any{"services": map[string]any{}},
+		Images: map[string]api.Image{"web": {Ref: "dokwalt/shop-web:abc123"}, "db": {Ref: "postgres:17"}}}
+	if err := s.CreateRelease(r); err != nil {
+		t.Fatal(err)
+	}
+	for _, k := range []string{"deploy:shop/production", "restarts:shop/production/web", "deploy:shop-admin/production"} {
+		s.SetAlertState(k, AlertState{Firing: true, LastSent: time.Now()})
+	}
+
+	if err := s.RenameApp(shop.ID, "shop", "blog"); err == nil || !strings.Contains(err.Error(), "already exists") {
+		t.Fatalf("renaming onto an existing app: %v", err)
+	}
+	if err := s.RenameApp(shop.ID, "shop", "store"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.GetApp("shop"); err == nil {
+		t.Error("the old name still resolves")
+	}
+	a, err := s.GetApp("store")
+	if err != nil || a.ID != shop.ID {
+		t.Fatalf("GetApp(store) = %+v, %v", a, err)
+	}
+	nst, err := s.GetStage("store", api.DefaultStage)
+	if err != nil || nst.ID != st.ID {
+		t.Fatalf("stage not kept: %+v, %v", nst, err)
+	}
+	rels, _ := s.Releases(st.ID, 10)
+	if got := rels[0].Images["web"].Ref; got != "dokwalt/store-web:abc123" {
+		t.Errorf("web image = %s", got)
+	}
+	if got := rels[0].Images["db"].Ref; got != "postgres:17" {
+		t.Errorf("a registry image changed: %s", got)
+	}
+	alerts, _ := s.AlertStates()
+	if _, ok := alerts["deploy:shop/production"]; ok {
+		t.Error("alert state of the old name kept")
+	}
+	if _, ok := alerts["restarts:shop/production/web"]; ok {
+		t.Error("service alert state of the old name kept")
+	}
+	if _, ok := alerts["deploy:shop-admin/production"]; !ok {
+		t.Error("another app's alert state removed")
+	}
+
+	// Old names in older records (backups) lead to the app, through renames.
+	if err := s.RenameApp(shop.ID, "store", "market"); err != nil {
+		t.Fatal(err)
+	}
+	for in, want := range map[string]string{"shop": "market", "store": "market", "market": "market", "blog": "blog", "nope": "nope"} {
+		if got := s.CurrentAppName(in); got != want {
+			t.Errorf("CurrentAppName(%s) = %s, want %s", in, got, want)
+		}
+	}
+	s.CreateApp("shop") // a new app taking the old name keeps it
+	if got := s.CurrentAppName("shop"); got != "shop" {
+		t.Errorf("CurrentAppName(shop) = %s once a new shop exists", got)
+	}
+}

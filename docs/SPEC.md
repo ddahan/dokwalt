@@ -779,6 +779,7 @@ Uploads this CLI's version for the server's arch and re-runs the idempotent boot
 | `dokwalt apps` | List apps (and stages of pipeline apps) with status, release, domains |
 | `dokwalt apps:create <name> [--no-link]` | Create an app with its `production` stage; links the current folder unless `--no-link` |
 | `dokwalt apps:info` | Stages, services, domains, recent releases |
+| `dokwalt apps:rename <name> <new-name> [--confirm <name>]` | Rename the app and every Docker resource named after it; stops it while its volumes are copied (§9.8a) |
 | `dokwalt apps:destroy <name> [--confirm <name>]` | Delete all containers, **volumes**, network, images, config, domains, releases |
 | `dokwalt apps:export [file]` | Print or write (0600) the export document (§6.6) |
 | `dokwalt apps:import <file>` | Create an app from an export |
@@ -1113,8 +1114,8 @@ Actions have no keys of their own: a key would only repeat a command the bar alr
 
 `:` opens a prompt in the footer (`internal/cli/cmdbar.go`). It knows the commands from the cobra tree the dashboard was started from; no command is listed by hand.
 
-- **Completion.** While the prompt is open, a panel above it lists what can be typed at the cursor: matching commands with their short help (a grid when they don't fit), app names after `-a`/`--app` or as the first argument of commands annotated `dokwalt/app-arg` (`link`, `apps:destroy`), flags after `-`, values from a command's `ValidArgsFunction` (`docs` topics), otherwise the command's usage line. `tab` extends the word to the candidates' common prefix, plus a space when one is left.
-- **Arguments.** The line is split like a shell does (quotes, `\`), without a shell. A leading `dokwalt` is dropped. `-a <selected app>` (and `-s <stage>` off production) is inserted right after the command name, so `exec -- cmd` keeps it out of the container command, unless the line has its own, the command is in the `server` group, or it is annotated `dokwalt/no-app` (`deploy`, `apps`, `apps:create`, `apps:import`, `apps:destroy`, `link`, `unlink`, `top`, `docs`). `--server` is added when the dashboard was started with one. An unknown command is reported without running anything.
+- **Completion.** While the prompt is open, a panel above it lists what can be typed at the cursor: matching commands with their short help (a grid when they don't fit), app names after `-a`/`--app` or as the first argument of commands annotated `dokwalt/app-arg` (`link`, `apps:rename`, `apps:destroy`), flags after `-`, values from a command's `ValidArgsFunction` (`docs` topics), otherwise the command's usage line. `tab` extends the word to the candidates' common prefix, plus a space when one is left.
+- **Arguments.** The line is split like a shell does (quotes, `\`), without a shell. A leading `dokwalt` is dropped. `-a <selected app>` (and `-s <stage>` off production) is inserted right after the command name, so `exec -- cmd` keeps it out of the container command, unless the line has its own, the command is in the `server` group, or it is annotated `dokwalt/no-app` (`deploy`, `apps`, `apps:create`, `apps:import`, `apps:rename`, `apps:destroy`, `link`, `unlink`, `top`, `docs`). `--server` is added when the dashboard was started with one. An unknown command is reported without running anything.
 - **Running.** The CLI runs its own executable through `tea.Exec`: bubbletea releases the terminal, the command gets the real stdin/stdout (a TTY, so colors, prompts and full-screen programs work), then `press any key` keeps its output on screen. Commands annotated `dokwalt/fullscreen` (`top`) skip that pause. The dashboard's context is detached from the CLI's SIGINT handler, so `ctrl+c` stops the command and not the dashboard. When it returns, the apps, metrics and detail reload.
 - **History.** Lines run in this session, browsed with `↑↓`.
 
@@ -1238,6 +1239,16 @@ Then, for each **public stateless** service (it has a non-redirect domain), each
 4. delete the rendered files and the `stopped/` flag.
 
 Then it deletes the app rows (cascade), removes `dokwalt/<app>-*` images and re-applies routes. The CLI removes local links to the app.
+
+### 9.8a Rename app
+
+`POST /v1/apps/{app}/rename {"name": "<new>"}`. **D** checks first, with plain HTTP errors: a valid new name, different and unused (409), and no consumers (`x-dokwalt.uses`, like destroy). Then, streamed, under the operation lock:
+
+1. For each stage: `down` the data, blue and green projects (named volumes are external, so they stay). For each volume labelled with the app and named `dw-<old>-<stage>-<vol>`, create `dw-<new>-<stage>-<vol>` (new labels) and copy it with `docker run --rm --network none --entrypoint sh -v old:/from:ro -v new:/to caddy:2-alpine -c 'cp -a /from/. /to/'` (the proxy image is always present). This is the downtime.
+2. Tag every `dokwalt/<old>-*` image the app's releases use as `dokwalt/<new>-*` and untag the old refs, so pruning keeps working.
+3. One transaction: `apps.name`, the image refs in the app's releases, its `alert_state` rows deleted, and `settings` `renamed/<old>` = `<new>`. `backup:restore` follows those (`CurrentAppName`) for backups taken before the rename, unless an app has the old name again.
+
+Any failure before step 3 removes the new volumes and starts the stages again under the old name. Then, for each deployed stage: ensure the new network (proxy attached), bring the projects up from the current release like the reconciler (created then stopped for a stopped stage), wait up to 2 minutes for it to run, and remove the old network. Shared links and routes are re-applied. The old volumes are removed only if every stage runs again; otherwise they are kept and reported. The CLI asks first (`--confirm <name>` skips it) and updates local folder links.
 
 ### 9.9 Enable pipeline
 

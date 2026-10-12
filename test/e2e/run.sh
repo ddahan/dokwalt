@@ -2,7 +2,7 @@
 # End-to-end test: installs DokWalt on a throwaway Linux server (a privileged
 # Debian container running systemd + Docker + sshd) and exercises the real
 # workflows: deploy, zero downtime under load, config, rollback, pipeline,
-# failed deploy, db:connect, shared Postgres, off-site backups (S3), reboot
+# failed deploy, db:connect, apps:rename, shared Postgres, off-site backups (S3), reboot
 # and power-cut recovery.
 #
 #   make e2e            # build + run
@@ -122,6 +122,23 @@ out=$(echo PING | $D db:connect 2>&1) || fail "db:connect failed: $out"
 grep -q PONG <<<"$out" || fail "redis didn't answer through db:connect: $out"
 pass "redis-cli in the cache container answered PONG"
 
+step "apps:rename (copies the volumes of both stages, then back)"
+srv() { docker exec $SERVER "$@"; }
+printf 'SET marker kept\nSAVE\n' | $D db:connect >/dev/null || fail "couldn't write the marker"
+$D apps:rename shop store --confirm shop >/dev/null || fail "apps:rename failed"
+get shop.localhost | grep -q "^v3 .*greeting=bonjour | cache=ok" || fail "site not back after rename: $(get shop.localhost)"
+get staging.shop.localhost | grep -q "greeting=staging" || fail "staging not back after rename"
+[[ $(echo "GET marker" | $D db:connect) == kept ]] || fail "cache data lost (or folder link not updated)"
+vols=$(srv docker volume ls -q)
+grep -q "^dw-store-production-cachedata$" <<<"$vols" && grep -q "^dw-store-staging-cachedata$" <<<"$vols" || fail "new volumes missing: $vols"
+grep -q "^dw-shop-" <<<"$vols" && fail "old volumes left: $vols"
+srv docker ps --format '{{.Names}}' | grep -q "^dw-shop-" && fail "containers under the old name left"
+srv docker images --format '{{.Repository}}' | grep -q "^dokwalt/shop-" && fail "images under the old name left"
+$D releases | grep -q "v3" || fail "releases lost"
+$D apps:rename store shop --confirm store >/dev/null || fail "renaming back failed"
+get shop.localhost | grep -q "^v3 " || fail "site not back after renaming back"
+pass "store served the same site, config, releases and cache data; renamed back"
+
 step "Shared Postgres (x-dokwalt.uses) and db:backup"
 srv() { docker exec $SERVER "$@"; }
 webof() { srv docker ps -q --filter "label=dokwalt.app=$1" --filter label=dokwalt.service=web --filter label=dokwalt.role=app | head -1; }
@@ -167,6 +184,9 @@ srv docker exec "$(webof blog)" nc -z -w 3 cache 6379 2>/dev/null && fail "consu
 srv docker exec "$(webof shop)" python -c "import socket; socket.create_connection(('pg', 5432), 3)" 2>/dev/null \
   && fail "non-consumer reaches the shared postgres"
 pass "blog reaches pg:5432; other apps stay isolated"
+out=$($D apps:rename pg pg2 --confirm pg 2>&1) && fail "renamed a provider still in use"
+grep -q "used by blog/production" <<<"$out" || fail "unclear rename refusal: $out"
+pass "a provider still in use can't be renamed"
 
 (cd "$WORK/blog" && $D db:backup -o "$WORK/blog.dump" >/dev/null) || fail "db:backup failed"
 docker run --rm -v "$WORK/blog.dump:/d.dump:ro" postgres:18-alpine pg_restore -l /d.dump | grep -q "TABLE DATA public posts" \

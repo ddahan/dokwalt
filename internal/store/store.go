@@ -899,3 +899,80 @@ func SortedKeys[M ~map[string]V, V any](m M) []string {
 	sort.Strings(keys)
 	return keys
 }
+
+// RenameApp renames an app, with the image refs its releases use (the engine
+// retags the images) and without its alert states, keyed by the old name.
+func (s *Store) RenameApp(id int64, old, name string) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err := tx.Exec(`UPDATE apps SET name = ? WHERE id = ?`, name, id); err != nil {
+		if strings.Contains(err.Error(), "UNIQUE") {
+			return fmt.Errorf("app %q already exists", name)
+		}
+		return err
+	}
+	rows, err := tx.Query(`SELECT r.id, r.images FROM releases r JOIN stages s ON s.id = r.stage_id WHERE s.app_id = ?`, id)
+	if err != nil {
+		return err
+	}
+	type rel struct {
+		id     int64
+		images string
+	}
+	var rels []rel
+	for rows.Next() {
+		var r rel
+		if err := rows.Scan(&r.id, &r.images); err != nil {
+			rows.Close()
+			return err
+		}
+		rels = append(rels, r)
+	}
+	rows.Close()
+	from, to := "dokwalt/"+old+"-", "dokwalt/"+name+"-"
+	for _, r := range rels {
+		var images map[string]api.Image
+		if err := json.Unmarshal([]byte(r.images), &images); err != nil {
+			continue
+		}
+		for svc, img := range images {
+			if rest, ok := strings.CutPrefix(img.Ref, from); ok {
+				img.Ref = to + rest
+				images[svc] = img
+			}
+		}
+		b, _ := json.Marshal(images)
+		if _, err := tx.Exec(`UPDATE releases SET images = ? WHERE id = ?`, string(b), r.id); err != nil {
+			return err
+		}
+	}
+	// Alert keys look like "deploy:<app>/<stage>" or "restarts:<app>/<stage>/<svc>".
+	if _, err := tx.Exec(`DELETE FROM alert_state WHERE key GLOB ?`, "*:"+old+"/*"); err != nil {
+		return err
+	}
+	// Backups taken before the rename name the old app (CurrentAppName).
+	if _, err := tx.Exec(`INSERT OR REPLACE INTO settings(key, value) VALUES(?, ?)`, "renamed/"+old, name); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+// CurrentAppName follows an app's renames: the name it has now, for a name
+// found in an older record (a backup). A name that exists is kept, even if an
+// app had it before a rename.
+func (s *Store) CurrentAppName(name string) string {
+	for range 20 { // a chain of renames, never a loop
+		if _, err := s.GetApp(name); err == nil {
+			return name
+		}
+		next := s.Setting("renamed/"+name, "")
+		if next == "" {
+			return name
+		}
+		name = next
+	}
+	return name
+}

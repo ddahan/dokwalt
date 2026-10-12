@@ -81,6 +81,9 @@ dokwalt apps:create blog
 dokwalt apps:create blog --no-link        # don't link the folder
 # Stages, services, domains, releases of an app
 dokwalt apps:info
+# Rename an app; it stops while its volumes are copied (asks first)
+dokwalt apps:rename blog journal
+dokwalt apps:rename blog journal --confirm blog  # no prompt, for scripts
 # Delete an app with its containers, volumes and data (type the name)
 dokwalt apps:destroy blog
 dokwalt apps:destroy blog --confirm blog  # no prompt, for scripts
@@ -95,6 +98,21 @@ dokwalt unlink
 ```
 
 `apps:export <file>` writes mode 0600. Images and volume data aren't included.
+
+`apps:rename` renames everything named after the app on the server:
+containers, network, images, and volumes. Docker can't rename volumes, so
+each stage stops while its volumes are copied to new ones: **the site is
+down meanwhile**, a few seconds without volumes, longer with more data. The
+stage then starts under the new name, and the old volumes are removed once
+it runs (kept, with a warning, if it doesn't). If the copy fails, the app is
+put back as it was.
+
+- Domains, config, releases (rollback keeps working), metrics history and
+  this computer's folder links follow. On other computers, run
+  `dokwalt link <new-name>` in the project folder.
+- `backup:restore` finds the app from backups taken before the rename.
+- An app other apps use (`x-dokwalt.uses`) can't be renamed: they reach it
+  by its name. Databases and roles inside a shared Postgres keep their names.
 
 ## Deploy & releases
 

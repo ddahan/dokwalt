@@ -19,7 +19,7 @@ import (
 
 func appsCommands() []*cobra.Command {
 	return []*cobra.Command{
-		appsListCmd(), appsCreateCmd(), appsInfoCmd(), appsDestroyCmd(), appsExportCmd(), appsImportCmd(),
+		appsListCmd(), appsCreateCmd(), appsInfoCmd(), appsRenameCmd(), appsDestroyCmd(), appsExportCmd(), appsImportCmd(),
 		linkCmd(), unlinkCmd(), psCmd(), restartCmd(), stopCmd(), startCmd(),
 	}
 }
@@ -194,6 +194,49 @@ func printServices(svcs []api.Service) {
 		rows = append(rows, []string{ui.ServiceColor(sv.Name).Render(sv.Name), state, kind, cpu, mem, ui.MutedS.Render(sv.Image)})
 	}
 	fmt.Println(ui.Table([]string{"SERVICE", "STATE", "ON DEPLOY", "CPU", "MEM", "IMAGE"}, rows))
+}
+
+func appsRenameCmd() *cobra.Command {
+	var confirm string
+	cmd := &cobra.Command{
+		Use: "apps:rename <name> <new-name>", Short: "Rename an app, with its containers, volumes and images (stops it meanwhile)",
+		Long: "Give an app a new name, and every Docker resource named after it. Docker can't rename volumes, " +
+			"so the app stops while their data is copied to new ones: the site is down meanwhile, longer with " +
+			"more data. The old volumes are removed once the app runs again. Domains, config, releases and " +
+			"this machine's folder links follow. An app other apps use (x-dokwalt.uses) can't be renamed.",
+		Example:     "  dokwalt apps:rename shop store\n  dokwalt apps:rename shop store --confirm shop",
+		Annotations: map[string]string{annNoApp: "1", annAppArg: "1"},
+		Args:        cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			s, err := connect(cmd.Context())
+			if err != nil {
+				return err
+			}
+			defer s.Close()
+			old, name := args[0], args[1]
+			if confirm != old {
+				ui.Warn("Renaming stops %s on %s while its volumes (databases, uploads…) are copied: the site is down meanwhile, longer with more data.", old, s.name)
+				if !ui.Confirm(fmt.Sprintf("Rename %s to %s?", old, name)) {
+					return errors.New("aborted — pass --confirm " + old + " to rename without this question")
+				}
+			}
+			if _, err := runOp(cmd.Context(), s, "POST", "/v1/apps/"+url.PathEscape(old)+"/rename", api.RenameRequest{Name: name}); err != nil {
+				return err
+			}
+			for dir, l := range s.cfg.Links {
+				if l.App == old && l.Server == s.name {
+					l.App = name
+					s.cfg.Links[dir] = l
+				}
+			}
+			_ = s.cfg.Save()
+			ui.Success("Renamed %s to %s", old, name)
+			ui.Hint("Folders linked to %s on other computers: run `dokwalt link %s` there.", old, name)
+			return nil
+		},
+	}
+	cmd.Flags().StringVar(&confirm, "confirm", "", "current app name, to skip the interactive confirmation")
+	return cmd
 }
 
 func appsDestroyCmd() *cobra.Command {

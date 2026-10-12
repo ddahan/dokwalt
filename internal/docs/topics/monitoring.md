@@ -93,7 +93,7 @@ pass your own.
   typed, then the apps after `-a`, the flags after `-`, or how to use the
   command once it is chosen.
 - `tab` completes as far as all matches agree: command names, app names
-  (after `-a`, and for `link` and `apps:destroy`), docs topics.
+  (after `-a`, and for `link`, `apps:rename` and `apps:destroy`), docs topics.
 - `↑↓` go through the commands already run, `ctrl+w` erases a word,
   `ctrl+u` the line, `esc` closes the prompt.
 - `enter` hands the whole terminal to the command. When it ends, press any

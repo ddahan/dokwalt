@@ -147,6 +147,10 @@ type DeployRequest struct {
 	GitSHA      string           `json:"git_sha,omitempty"`
 }
 
+type RenameRequest struct {
+	Name string `json:"name"`
+}
+
 type RollbackRequest struct {
 	Version    int  `json:"version"` // 0 = previous succeeded release
 	WithConfig bool `json:"with_config"`

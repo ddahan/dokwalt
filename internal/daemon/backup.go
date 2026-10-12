@@ -722,7 +722,7 @@ func (d *Daemon) postBackupRestore(w http.ResponseWriter, r *http.Request) error
 	if f.Kind == backup.KindDokWalt {
 		return badRequest("dokwalt.db isn't restored from here: download it with `dokwalt backup:download %s dokwalt.db` and follow `dokwalt docs backups`", m.ID)
 	}
-	st, err := d.store.GetStage(f.App, f.Stage)
+	st, err := d.store.GetStage(d.store.CurrentAppName(f.App), f.Stage)
 	if err != nil {
 		return badRequest("%s/%s doesn't exist on this server: deploy it first", f.App, f.Stage)
 	}

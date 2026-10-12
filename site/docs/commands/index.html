@@ -202,6 +202,9 @@ same way.</p>
 <span class="t-cmd">dokwalt</span> apps:create blog <span class="t-flag">--no-link</span>        <span class="t-com"># don&#39;t link the folder</span>
 <span class="t-com"># Stages, services, domains, releases of an app</span>
 <span class="t-cmd">dokwalt</span> apps:info
+<span class="t-com"># Rename an app; it stops while its volumes are copied (asks first)</span>
+<span class="t-cmd">dokwalt</span> apps:rename blog journal
+<span class="t-cmd">dokwalt</span> apps:rename blog journal <span class="t-flag">--confirm</span> blog  <span class="t-com"># no prompt, for scripts</span>
 <span class="t-com"># Delete an app with its containers, volumes and data (type the name)</span>
 <span class="t-cmd">dokwalt</span> apps:destroy blog
 <span class="t-cmd">dokwalt</span> apps:destroy blog <span class="t-flag">--confirm</span> blog  <span class="t-com"># no prompt, for scripts</span>
@@ -214,6 +217,21 @@ same way.</p>
 <span class="t-com"># Remove this folder&#39;s link</span>
 <span class="t-cmd">dokwalt</span> unlink</code></pre></div>
 <p><code>apps:export &lt;file&gt;</code> writes mode 0600. Images and volume data aren't included.</p>
+<p><code>apps:rename</code> renames everything named after the app on the server:
+containers, network, images, and volumes. Docker can't rename volumes, so
+each stage stops while its volumes are copied to new ones: <strong>the site is
+down meanwhile</strong>, a few seconds without volumes, longer with more data. The
+stage then starts under the new name, and the old volumes are removed once
+it runs (kept, with a warning, if it doesn't). If the copy fails, the app is
+put back as it was.</p>
+<ul>
+<li>Domains, config, releases (rollback keeps working), metrics history and
+this computer's folder links follow. On other computers, run
+<code>dokwalt link &lt;new-name&gt;</code> in the project folder.</li>
+<li><code>backup:restore</code> finds the app from backups taken before the rename.</li>
+<li>An app other apps use (<code>x-dokwalt.uses</code>) can't be renamed: they reach it
+by its name. Databases and roles inside a shared Postgres keep their names.</li>
+</ul>
 <h2 id="deploy--releases">Deploy &amp; releases</h2>
 <div class="code" data-lang="shell"><div class="code-bar"><span>shell</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com"># Build on your computer, upload changed images, roll out with zero downtime</span>
 <span class="t-cmd">dokwalt</span> deploy <span class="t-flag">-m</span> <span class="t-str">&#34;fix feed&#34;</span>

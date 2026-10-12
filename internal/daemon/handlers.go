@@ -60,6 +60,7 @@ func (d *Daemon) routes() http.Handler {
 	h("POST /v1/apps/import", d.importApp)
 	h("GET /v1/apps/{app}", d.getApp)
 	h("DELETE /v1/apps/{app}", d.destroyApp)
+	h("POST /v1/apps/{app}/rename", d.renameApp)
 	h("GET /v1/apps/{app}/export", d.exportApp)
 	h("POST /v1/apps/{app}/pipeline", d.setPipeline)
 	h("POST /v1/apps/{app}/promote", d.promote)
@@ -370,6 +371,37 @@ func (d *Daemon) destroyApp(w http.ResponseWriter, r *http.Request) error {
 	err := d.engine.DestroyApp(ctx, r.PathValue("app"), s.emit)
 	d.refreshHosts()
 	return s.finish(err, "destroyed", 0)
+}
+
+// renameApp checks the new name up front (plain errors), then streams the
+// rename: it stops the app while its volumes are copied.
+func (d *Daemon) renameApp(w http.ResponseWriter, r *http.Request) error {
+	var in api.RenameRequest
+	if err := readJSON(r, &in); err != nil {
+		return err
+	}
+	a, err := d.store.GetApp(r.PathValue("app"))
+	if err != nil {
+		return err
+	}
+	if err := compose.ValidName(in.Name); err != nil {
+		return badRequest("%s", err.Error())
+	}
+	if in.Name == a.Name {
+		return badRequest("%s is already called %s", a.Name, in.Name)
+	}
+	if _, err := d.store.GetApp(in.Name); err == nil {
+		return &httpError{status: http.StatusConflict, msg: fmt.Sprintf("app %q already exists", in.Name)}
+	}
+	if users := d.engine.Consumers(a.Name); len(users) > 0 {
+		return badRequest("%s is used by %s (x-dokwalt.uses), which reach it by its name — remove it from their compose files and redeploy them first", a.Name, strings.Join(users, ", "))
+	}
+	s := newStreamer(w)
+	ctx, cancel := opCtx()
+	defer cancel()
+	err = d.engine.RenameApp(ctx, a.Name, in.Name, s.emit)
+	d.refreshHosts()
+	return s.finish(err, "renamed", 0)
 }
 
 func (d *Daemon) setPipeline(w http.ResponseWriter, r *http.Request) error {

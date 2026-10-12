@@ -259,8 +259,8 @@ services:
 - **Self-healing.** When the provider's container is recreated (an image
   change, a reboot), the reconciler attaches it again within seconds. Removing
   `uses` and redeploying detaches it.
-- **Safety.** `apps:destroy` refuses to delete a provider that other apps
-  still use.
+- **Safety.** `apps:destroy` and `apps:rename` refuse a provider that other
+  apps still use.
 - **One role and database per app.** DokWalt doesn't create them; do it once
   per app with `dokwalt db:connect -a postgres`:
   `CREATE ROLE blog LOGIN PASSWORD '…'; CREATE DATABASE blog OWNER blog;`
