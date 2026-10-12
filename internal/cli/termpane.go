@@ -33,9 +33,11 @@ type termPane struct {
 	start   time.Time
 	running bool
 	focus   bool // keys go to the command
-	err     error
-	took    time.Duration
-	dirty   atomic.Bool // a redraw is already queued
+	// collapsed shows a finished command's last lines in the compact console.
+	collapsed bool
+	err       error
+	took      time.Duration
+	dirty     atomic.Bool // a redraw is already queued
 }
 
 type (
@@ -166,6 +168,19 @@ func keyBytes(k tea.KeyMsg) string {
 	return s
 }
 
+// summary is the compact form of a finished command: its title line, then
+// the last n lines it printed.
+func (p *termPane) summary(w, n int) (string, []string) {
+	title := strings.SplitN(p.view(w), "\n", 2)[0]
+	var lines []string
+	for _, l := range strings.Split(p.emu.Render(), "\n") {
+		if strings.TrimSpace(ansi.Strip(l)) != "" {
+			lines = append(lines, ansi.Truncate(l, w, ""))
+		}
+	}
+	return title, lines[max(0, len(lines)-n):]
+}
+
 // view draws the pane: a title line with the command and its state, then its
 // screen, with the cursor while it has the keys.
 func (p *termPane) view(w int) string {
@@ -174,9 +189,9 @@ func (p *termPane) view(w int) string {
 	case p.running && !p.focus:
 		state = ui.AccentS.Render("● running") + ui.FaintS.Render("  "+paneEscape+" back to it")
 	case !p.running && p.err == nil:
-		state = ui.GreenS.Render("✓ done") + ui.FaintS.Render(" "+ui.Duration(p.took)+"  esc close")
+		state = ui.GreenS.Render("✓ done") + ui.FaintS.Render(" "+ui.Duration(p.took))
 	case !p.running:
-		state = ui.RedS.Render("✗ "+exitText(p.err)) + ui.FaintS.Render(" "+ui.Duration(p.took)+"  esc close")
+		state = ui.RedS.Render("✗ "+exitText(p.err)) + ui.FaintS.Render(" "+ui.Duration(p.took))
 	}
 	title := ui.AccentS.Render("$ ") + p.title
 	if gap := w - lipgloss.Width(title) - lipgloss.Width(state); gap > 0 {

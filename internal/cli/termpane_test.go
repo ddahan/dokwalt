@@ -109,8 +109,31 @@ func TestDashboardWithPane(t *testing.T) {
 			}
 		}
 		m.Update(tea.KeyMsg{Type: tea.KeyEsc})
-		if m.pane != nil {
-			t.Error("esc must close a finished command's pane")
+		if m.pane == nil || !m.pane.collapsed {
+			t.Fatal("esc must shrink a finished command's output")
 		}
+		// Compact: the title and the last lines it printed, and the overview
+		// gets the room back.
+		out = stripANSI(m.View())
+		if !strings.Contains(out, "$ dokwalt releases") || !strings.Contains(out, "100") || strings.Contains(out, "\n│ 50 ") {
+			t.Errorf("%v: compact console:\n%s", size, out)
+		}
+		if n := len(strings.Split(out, "\n")); n > size[1] {
+			t.Errorf("%v: %d lines once compact", size, n)
+		}
+		m.pane = nil
+	}
+	// Before any command: the console says how to run one.
+	if out := stripANSI(m.View()); !strings.Contains(out, ": run a command · tab completes") {
+		t.Errorf("idle console hint missing:\n%s", out)
+	}
+	// Numbers aren't shortcuts; ← → switch tabs.
+	m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("2")})
+	if m.tab != tabOverview {
+		t.Error("2 switched tabs")
+	}
+	m.Update(tea.KeyMsg{Type: tea.KeyRight})
+	if m.tab != tabLogs {
+		t.Error("→ didn't switch to the logs tab")
 	}
 }

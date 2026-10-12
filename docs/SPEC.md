@@ -1082,7 +1082,7 @@ $ dokwalt doctor
 | Key | Action |
 |---|---|
 | `↑↓` / `j k` | Select app |
-| `1 2 3` / `← →` | Overview · Logs · Releases |
+| `← →` | Overview · Logs · Releases (no number shortcuts) |
 | `l` | Live logs |
 | `:` | Command bar: run any `dokwalt` command (§8.4), e.g. `:rollback`, `:promote`, `:restart` |
 | `o` | Open the site in the browser (no command does this) |
@@ -1105,7 +1105,7 @@ Deploys run from the command bar only, and like any `dokwalt deploy`: from the f
 │                               ││                                                    │
 │                               ││ https://blog.example.com → web:3000                │
 ╰───────────────────────────────╯╰──────────────────────────────────────────────────╯
- ↑↓ select · 1/2/3 tabs · : command · o open · ? help · q quit
+ ↑↓ app · ← → tabs · : command · o open · ? help · q quit
 ```
 
 Actions have no keys of their own: a key would only repeat a command the bar already runs.
@@ -1116,7 +1116,7 @@ Actions have no keys of their own: a key would only repeat a command the bar alr
 
 - **Completion.** While the prompt is open, a panel above it lists what can be typed at the cursor: matching commands with their short help (a grid when they don't fit), app names after `-a`/`--app` or as the first argument of commands annotated `dokwalt/app-arg` (`link`, `apps:rename`, `apps:destroy`), flags after `-`, values from a command's `ValidArgsFunction` (`docs` topics), otherwise the command's usage line. `tab` extends the word to the candidates' common prefix, plus a space when one is left.
 - **Arguments.** The line is split like a shell does (quotes, `\`), without a shell. A leading `dokwalt` is dropped. `-a <selected app>` (and `-s <stage>` off production) is inserted right after the command name, so `exec -- cmd` keeps it out of the container command, unless the line has its own, the command is in the `server` group, or it is annotated `dokwalt/no-app` (`deploy`, `apps`, `apps:create`, `apps:import`, `apps:rename`, `apps:destroy`, `link`, `unlink`, `top`, `docs`). `--server` is added when the dashboard was started with one. An unknown command is reported without running anything.
-- **Running, in a pane** (`internal/cli/termpane.go`). The CLI runs its own executable in a PTY (`creack/pty`, sized to the pane) whose output feeds a terminal emulator (`charmbracelet/x/vt`); the pane draws the emulator's screen with its colors, plus a block cursor while it has the keys. So prompts, colors, live progress and alternate-screen programs (`top`) work, while the header, app list and overview stay above (the pane takes 55% of the height). The emulator answers the command's terminal queries (OSC 11 background color: the dashboard's own, so the command picks the same palette). Keys go to the command, encoded as a terminal does (`ctrl+c` reaches it through the PTY, never the dashboard); `ctrl+]` switches them between the command and the dashboard. When it exits, its screen stays with `✓ done`/`✗ exit N` and its duration, the apps, metrics and detail reload, and `esc` closes it. One command at a time: `:` is refused while one runs. Quitting the dashboard kills a running command.
+- **Running, in a pane** (`internal/cli/termpane.go`). The CLI runs its own executable in a PTY (`creack/pty`, sized to the pane) whose output feeds a terminal emulator (`charmbracelet/x/vt`); the pane draws the emulator's screen with its colors, plus a block cursor while it has the keys. So prompts, colors, live progress and alternate-screen programs (`top`) work, while the header, app list and overview stay above. The pane is the console, always at the bottom: compact when idle (4 lines: `: run a command · tab completes`, or a finished command's title and last lines), 55% of the height while a command runs and after it until `esc`. The emulator answers the command's terminal queries (OSC 11 background color: the dashboard's own, so the command picks the same palette). Keys go to the command, encoded as a terminal does (`ctrl+c` reaches it through the PTY, never the dashboard); `ctrl+]` switches them between the command and the dashboard. When it exits, its screen stays with `✓ done`/`✗ exit N` and its duration, the apps, metrics and detail reload, and `esc` shrinks it. One command at a time: `:` is refused while one runs. Quitting the dashboard kills a running command.
 - **History.** Lines run in this session, browsed with `↑↓`.
 
 ---

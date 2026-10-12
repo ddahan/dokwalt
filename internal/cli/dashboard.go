@@ -324,12 +324,7 @@ func (m *dash) key(k tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.barOn, m.bar, m.histAt, m.status = true, "", len(m.history), ""
 	case "esc":
 		if m.pane != nil && !m.pane.running {
-			m.pane = nil
-		}
-	case "1", "2", "3":
-		m.tab = dashTab(k.String()[0] - '1')
-		if m.tab == tabLogs {
-			m.startLogs()
+			m.pane.collapsed = true
 		}
 	case "l":
 		m.tab = tabLogs
@@ -492,11 +487,11 @@ func (m *dash) View() string {
 	header := m.header()
 	footer := m.footer()
 	panel := ""
-	switch {
-	case m.barOn:
+	if m.barOn {
 		panel = m.barPanel()
-	case m.pane != nil:
-		panel = m.panePanel()
+	}
+	if panel == "" {
+		panel = m.console()
 	}
 	bodyH := m.h - lipgloss.Height(header) - lipgloss.Height(footer)
 	if panel != "" {
@@ -542,11 +537,11 @@ func (m *dash) overlay(content string) string {
 
 func helpText() string {
 	keys := [][2]string{
-		{"↑↓ / j k", "select an app"}, {"1 2 3 / ← →", "overview · logs · releases"}, {"l", "live logs"},
+		{"↑↓ / j k", "select an app"}, {"← →", "overview · logs · releases"}, {"l", "live logs"},
 		{":", "run any dokwalt command on the selected app (tab completes),"},
 		{"", "e.g. :rollback, :promote, :restart, :db:connect"},
 		{paneEscape, "switch the keys between a running command and the dashboard"},
-		{"esc", "close a finished command's output"},
+		{"esc", "shrink a finished command's output"},
 		{"o", "open the site in your browser"}, {"q", "quit"},
 	}
 	var b strings.Builder
@@ -590,25 +585,37 @@ func (m *dash) footer() string {
 	case m.status != "":
 		line = " " + m.status
 	case m.pane != nil && m.pane.running:
-		line = ui.FaintS.Render(" ↑↓ select · 1/2/3 tabs · " + paneEscape + " back to the command · ? help · q quit")
-	case m.pane != nil:
-		line = ui.FaintS.Render(" ↑↓ select · 1/2/3 tabs · : command · esc close the output · ? help · q quit")
+		line = ui.FaintS.Render(" ↑↓ app · ← → tabs · " + paneEscape + " back to the command · ? help · q quit")
+	case m.pane != nil && !m.pane.collapsed:
+		line = ui.FaintS.Render(" ↑↓ app · ← → tabs · : command · esc shrink the output · ? help · q quit")
 	default:
-		line = ui.FaintS.Render(" ↑↓ select · 1/2/3 tabs · : command · o open · ? help · q quit")
+		line = ui.FaintS.Render(" ↑↓ app · ← → tabs · : command · o open · ? help · q quit")
 	}
 	return lipgloss.NewStyle().MaxWidth(m.w).Render(line)
 }
 
-// panePanel frames the command's terminal under the app list and overview.
-func (m *dash) panePanel() string {
-	border := ui.Faint
-	if m.pane.focus {
-		border = ui.Accent
+// consoleLines is the console's height inside its frame while compact.
+const consoleLines = 4
+
+// console is the frame under the app list and overview where commands run.
+// Compact when idle, with how to run one or the end of the last one's
+// output; full size while a command runs, and after it until esc.
+func (m *dash) console() string {
+	frame := lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(ui.Faint).Padding(0, 1).Width(m.w - 2)
+	w := m.w - 4
+	switch p := m.pane; {
+	case p == nil:
+		return frame.Height(consoleLines).Render(ui.FaintS.Render(": run a command · tab completes"))
+	case p.collapsed:
+		title, lines := p.summary(w, consoleLines-1)
+		return frame.Height(consoleLines).Render(title + "\n" + strings.Join(lines, "\n"))
+	default:
+		if p.focus {
+			frame = frame.BorderForeground(ui.Accent)
+		}
+		_, h := m.paneSize()
+		return frame.Height(h + 1).Render(clipLines(p.view(w), w, h+1))
 	}
-	_, h := m.paneSize()
-	content := clipLines(m.pane.view(m.w-4), m.w-4, h+1)
-	return lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(border).Padding(0, 1).
-		Width(m.w - 2).Height(h + 1).Render(content)
 }
 
 // barPanel shows what the command bar can complete: every matching command,
