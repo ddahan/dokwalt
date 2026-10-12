@@ -80,7 +80,7 @@ func newRoot() *cobra.Command {
 			if !ui.IsTTY() && os.Getenv("DOKWALT_SNAPSHOT") == "" {
 				return cmd.Help()
 			}
-			return runDashboard(cmd.Context())
+			return runDashboard(cmd.Context(), cmd.Root())
 		},
 	}
 	root.PersistentFlags().StringVarP(&gf.app, "app", "a", "", "app name (default: the app linked to this folder)")

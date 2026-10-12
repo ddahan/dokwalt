@@ -80,10 +80,32 @@ seconds. Keys:
 | `p`                | promote staging to production                       |
 | `R`                | restart                                             |
 | `o`                | open the site in the browser                        |
+| `:`                | run any `dokwalt` command (see below)               |
 | `?` / `q`          | help / quit                                         |
 
-Rollback, promote and restart ask for confirmation with `y`. You can't
-deploy from the dashboard: use `dokwalt deploy`.
+Rollback, promote and restart ask for confirmation with `y`.
+
+### Running commands from the dashboard
+
+Press `:` and type a command without `dokwalt` in front: `config`,
+`config:set FOO=bar`, `exec -- sh`, `db:connect`, `top`… It applies to the
+selected app: `-a` (and `-s staging` on a staging row) is added unless you
+pass your own.
+
+- The list under the prompt shows every command that matches what you
+  typed, then the apps after `-a`, the flags after `-`, or how to use the
+  command once it is chosen.
+- `tab` completes as far as all matches agree: command names, app names
+  (after `-a`, and for `link` and `apps:destroy`), docs topics.
+- `↑↓` go through the commands already run, `ctrl+w` erases a word,
+  `ctrl+u` the line, `esc` closes the prompt.
+- `enter` hands the whole terminal to the command. When it ends, press any
+  key to come back (`top` comes back right away); the dashboard reloads.
+  `ctrl+c` stops the command, not the dashboard.
+- `deploy` and the commands that are not about one app (`apps`,
+  `apps:create`, `apps:import`, `link`, `top`, `docs`, `server …`) get no
+  `-a`: `deploy` builds the folder you opened the dashboard from and ships it
+  to the app linked to that folder, as if you typed it there.
 
 ## What is collected
 

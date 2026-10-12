@@ -1087,10 +1087,11 @@ $ dokwalt doctor
 | `p` | Promote staging → production (pipeline apps) — asks `y` |
 | `R` | Restart the app's containers — asks `y` |
 | `o` | Open the site in the browser |
+| `:` | Command bar: run any `dokwalt` command (§8.4) |
 | `?` | Help |
 | `q` / `ctrl+c` | Quit |
 
-Deploys aren't triggered from the dashboard: they need a local build from a project folder.
+Deploys run from the command bar only, and like any `dokwalt deploy`: from the folder the dashboard was started in.
 
 ### 8.3 Mockup
 
@@ -1106,10 +1107,19 @@ Deploys aren't triggered from the dashboard: they need a local build from a proj
 │                               ││                                                    │
 │                               ││ https://blog.example.com → web:3000                │
 ╰───────────────────────────────╯╰──────────────────────────────────────────────────╯
- ↑↓ select · 1/2/3 tabs · r rollback · p promote · R restart · o open · ? help · q quit
+ ↑↓ select · 1/2/3 tabs · : command · r rollback · p promote · R restart · o open · ? help · q quit
 ```
 
 During a rollback or promote started from the dashboard, the footer shows the engine's step events live.
+
+### 8.4 Command bar
+
+`:` opens a prompt in the footer (`internal/cli/cmdbar.go`). It knows the commands from the cobra tree the dashboard was started from; no command is listed by hand.
+
+- **Completion.** While the prompt is open, a panel above it lists what can be typed at the cursor: matching commands with their short help (a grid when they don't fit), app names after `-a`/`--app` or as the first argument of commands annotated `dokwalt/app-arg` (`link`, `apps:destroy`), flags after `-`, values from a command's `ValidArgsFunction` (`docs` topics), otherwise the command's usage line. `tab` extends the word to the candidates' common prefix, plus a space when one is left.
+- **Arguments.** The line is split like a shell does (quotes, `\`), without a shell. A leading `dokwalt` is dropped. `-a <selected app>` (and `-s <stage>` off production) is inserted right after the command name, so `exec -- cmd` keeps it out of the container command, unless the line has its own, the command is in the `server` group, or it is annotated `dokwalt/no-app` (`deploy`, `apps`, `apps:create`, `apps:import`, `apps:destroy`, `link`, `unlink`, `top`, `docs`). `--server` is added when the dashboard was started with one. An unknown command is reported without running anything.
+- **Running.** The CLI runs its own executable through `tea.Exec`: bubbletea releases the terminal, the command gets the real stdin/stdout (a TTY, so colors, prompts and full-screen programs work), then `press any key` keeps its output on screen. Commands annotated `dokwalt/fullscreen` (`top`) skip that pause. The dashboard's context is detached from the CLI's SIGINT handler, so `ctrl+c` stops the command and not the dashboard. When it returns, the apps, metrics and detail reload.
+- **History.** Lines run in this session, browsed with `↑↓`.
 
 ---
 

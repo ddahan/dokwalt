@@ -27,7 +27,8 @@ func appsCommands() []*cobra.Command {
 func appsListCmd() *cobra.Command {
 	return &cobra.Command{
 		Use: "apps", Short: "List apps and their status",
-		Args: cobra.NoArgs,
+		Annotations: map[string]string{annNoApp: "1"},
+		Args:        cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s, err := connect(cmd.Context())
 			if err != nil {
@@ -74,8 +75,9 @@ func appsCreateCmd() *cobra.Command {
 	var noLink bool
 	cmd := &cobra.Command{
 		Use: "apps:create <name>", Short: "Create an app (and link it to this folder)",
-		Args:    cobra.ExactArgs(1),
-		Example: "  dokwalt apps:create blog",
+		Annotations: map[string]string{annNoApp: "1"},
+		Args:        cobra.ExactArgs(1),
+		Example:     "  dokwalt apps:create blog",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s, err := connect(cmd.Context())
 			if err != nil {
@@ -198,7 +200,8 @@ func appsDestroyCmd() *cobra.Command {
 	var confirm string
 	cmd := &cobra.Command{
 		Use: "apps:destroy <name>", Short: "Delete an app with all its containers, volumes and data",
-		Args: cobra.ExactArgs(1),
+		Annotations: map[string]string{annNoApp: "1", annAppArg: "1"},
+		Args:        cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s, err := connect(cmd.Context())
 			if err != nil {
@@ -259,7 +262,8 @@ func appsExportCmd() *cobra.Command {
 func appsImportCmd() *cobra.Command {
 	return &cobra.Command{
 		Use: "apps:import <file>", Short: "Create an app from an apps:export file",
-		Args: cobra.ExactArgs(1),
+		Annotations: map[string]string{annNoApp: "1"},
+		Args:        cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			b, err := os.ReadFile(args[0])
 			if err != nil {
@@ -290,7 +294,8 @@ func appsImportCmd() *cobra.Command {
 func linkCmd() *cobra.Command {
 	return &cobra.Command{
 		Use: "link <app>", Short: "Link this folder to an app (so -a can be omitted)",
-		Args: cobra.ExactArgs(1),
+		Annotations: map[string]string{annNoApp: "1", annAppArg: "1"},
+		Args:        cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s, err := connect(cmd.Context())
 			if err != nil {
@@ -317,7 +322,8 @@ func linkCmd() *cobra.Command {
 func unlinkCmd() *cobra.Command {
 	return &cobra.Command{
 		Use: "unlink", Short: "Remove this folder's app link",
-		Args: cobra.NoArgs,
+		Annotations: map[string]string{annNoApp: "1"},
+		Args:        cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := loadConfig()
 			if err != nil {

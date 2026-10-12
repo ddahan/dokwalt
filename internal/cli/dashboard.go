@@ -15,6 +15,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
+	"github.com/spf13/cobra"
 
 	"github.com/ddahan/dokwalt/internal/api"
 	"github.com/ddahan/dokwalt/internal/client"
@@ -22,7 +23,7 @@ import (
 )
 
 // runDashboard opens the interactive full-screen dashboard.
-func runDashboard(ctx context.Context) error {
+func runDashboard(ctx context.Context, root *cobra.Command) error {
 	var s *session
 	connectFn := func() error {
 		var err error
@@ -39,7 +40,11 @@ func runDashboard(ctx context.Context) error {
 		return err
 	}
 	defer s.Close()
+	// Ctrl+C in a command run from the command bar must not end the
+	// dashboard: bubbletea handles its own keys and signals from here on.
+	ctx = context.WithoutCancel(ctx)
 	m := newDash(ctx, s)
+	m.root = root
 	if size := os.Getenv("DOKWALT_SNAPSHOT"); size != "" {
 		return m.snapshot(size)
 	}
@@ -93,6 +98,12 @@ type dash struct {
 	confirm *pending
 	help    bool
 	fatal   error
+
+	root    *cobra.Command // the command tree, for the command bar
+	barOn   bool           // the `:` command bar is open
+	bar     string         // what is typed in it
+	history []string       // command bar lines run, oldest first
+	histAt  int            // position while browsing history with ↑↓
 }
 
 type pending struct {
@@ -118,6 +129,10 @@ type (
 	}
 	progressMsg string
 	errMsg      struct{ err error }
+	barDoneMsg  struct {
+		title string
+		err   error
+	}
 )
 
 func newDash(ctx context.Context, s *session) *dash {
@@ -283,6 +298,13 @@ func (m *dash) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tea.Batch(m.loadApps(), m.loadTop(), tick())
 	case progressMsg:
 		m.status = string(msg)
+	case barDoneMsg:
+		if msg.err != nil {
+			m.status = ui.RedS.Render("✗ " + msg.title + ": " + firstLine(msg.err.Error()))
+		} else {
+			m.status = ui.GreenS.Render("✓ ") + ui.MutedS.Render(msg.title)
+		}
+		return m, tea.Batch(m.loadApps(), m.loadTop(), m.loadDetail())
 	case actionMsg:
 		m.busy = ""
 		if msg.err != nil {
@@ -305,6 +327,9 @@ func (m *dash) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *dash) key(k tea.KeyMsg) (tea.Model, tea.Cmd) {
+	if m.barOn {
+		return m, m.barKey(k)
+	}
 	if m.confirm != nil {
 		switch k.String() {
 		case "y", "Y":
@@ -326,6 +351,8 @@ func (m *dash) key(k tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 	case "?":
 		m.help = true
+	case ":":
+		m.barOn, m.bar, m.histAt, m.status = true, "", len(m.history), ""
 	case "tab":
 		m.focusR = !m.focusR
 	case "1", "2", "3":
@@ -406,6 +433,89 @@ func (m *dash) key(k tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+// barKey edits the command bar: tab completes, ↑↓ browse history, enter runs.
+func (m *dash) barKey(k tea.KeyMsg) tea.Cmd {
+	switch k.Type {
+	case tea.KeyEsc, tea.KeyCtrlC:
+		m.barOn = false
+	case tea.KeyEnter:
+		return m.runBar()
+	case tea.KeyTab:
+		cands, _ := completions(m.root, m.bar, m.appNames())
+		m.bar = completeLine(m.bar, cands)
+	case tea.KeyBackspace:
+		if m.bar == "" {
+			m.barOn = false
+		} else {
+			r := []rune(m.bar)
+			m.bar = string(r[:len(r)-1])
+		}
+	case tea.KeyCtrlW:
+		t := strings.TrimRight(m.bar, " ")
+		m.bar = t[:strings.LastIndex(t, " ")+1]
+	case tea.KeyCtrlU:
+		m.bar = ""
+	case tea.KeyUp:
+		if m.histAt > 0 {
+			m.histAt--
+			m.bar = m.history[m.histAt]
+		}
+	case tea.KeyDown:
+		if m.histAt < len(m.history)-1 {
+			m.histAt++
+			m.bar = m.history[m.histAt]
+		} else {
+			m.histAt, m.bar = len(m.history), ""
+		}
+	case tea.KeySpace:
+		m.bar += " "
+	case tea.KeyRunes:
+		m.bar += string(k.Runes)
+	}
+	return nil
+}
+
+// runBar runs the command bar's line as a dokwalt command, on the whole
+// terminal, then comes back to the dashboard.
+func (m *dash) runBar() tea.Cmd {
+	m.barOn = false
+	line := strings.TrimSpace(m.bar)
+	var sel *row
+	if r, ok := m.cur(); ok {
+		sel = &r
+	}
+	args, c, err := commandArgs(m.root, line, sel, gf.server)
+	if err != nil {
+		m.status = ui.RedS.Render("✗ " + err.Error())
+		return nil
+	}
+	if args == nil {
+		return nil
+	}
+	if n := len(m.history); n == 0 || m.history[n-1] != line {
+		m.history = append(m.history, line)
+	}
+	exe, err := os.Executable()
+	if err != nil {
+		m.status = ui.RedS.Render("✗ " + err.Error())
+		return nil
+	}
+	title := "dokwalt " + quoteArgs(args)
+	run := &barRun{cmd: exec.Command(exe, args...), title: title, pause: c.Annotations[annFullScreen] == ""}
+	return tea.Exec(run, func(err error) tea.Msg { return barDoneMsg{title: title, err: err} })
+}
+
+// appNames lists the apps once each, for completion.
+func (m *dash) appNames() []string {
+	var names []string
+	for i, r := range m.rows {
+		if i == 0 || m.rows[i-1].app != r.app {
+			names = append(names, r.app)
+		}
+	}
+	return names
+}
+
 func (m *dash) selected() tea.Cmd {
 	m.svcs, m.rels, m.doms, m.relSel = nil, nil, nil, 0
 	if m.tab == tabLogs {
@@ -452,7 +562,14 @@ func (m *dash) View() string {
 	}
 	header := m.header()
 	footer := m.footer()
+	panel := ""
+	if m.barOn {
+		panel = m.barPanel()
+	}
 	bodyH := m.h - lipgloss.Height(header) - lipgloss.Height(footer)
+	if panel != "" {
+		bodyH -= lipgloss.Height(panel)
+	}
 	leftW := 34
 	if m.w < 90 {
 		leftW = 26
@@ -464,10 +581,14 @@ func (m *dash) View() string {
 	if m.focusR {
 		lb, rb = border, focus
 	}
-	left := lb.Width(leftW - 2).Height(bodyH - 2).Render(m.appList(leftW-4, bodyH-2))
-	right := rb.Width(rightW - 2).Height(bodyH - 2).Render(m.detail(rightW-4, bodyH-2))
+	left := lb.Width(leftW - 2).Height(bodyH - 2).Render(clipLines(m.appList(leftW-4, bodyH-2), leftW-4, bodyH-2))
+	right := rb.Width(rightW - 2).Height(bodyH - 2).Render(clipLines(m.detail(rightW-4, bodyH-2), rightW-4, bodyH-2))
 	body := lipgloss.JoinHorizontal(lipgloss.Top, left, " ", right)
-	view := lipgloss.JoinVertical(lipgloss.Left, header, body, footer)
+	parts := []string{header, body}
+	if panel != "" {
+		parts = append(parts, panel)
+	}
+	view := lipgloss.JoinVertical(lipgloss.Left, append(parts, footer)...)
 	if m.help {
 		return m.overlay(helpText())
 	}
@@ -475,6 +596,15 @@ func (m *dash) View() string {
 		return m.overlay(ui.YellowS.Render("? ") + m.confirm.question + "\n\n" + ui.MutedS.Render("y confirm · any other key cancels"))
 	}
 	return view
+}
+
+// clipLines keeps the first n lines of s once wrapped to width w.
+func clipLines(s string, w, n int) string {
+	lines := strings.Split(lipgloss.NewStyle().Width(w).Render(s), "\n")
+	if len(lines) > n {
+		lines = lines[:max(0, n)]
+	}
+	return strings.Join(lines, "\n")
 }
 
 func (m *dash) overlay(content string) string {
@@ -487,7 +617,8 @@ func helpText() string {
 		{"↑↓ / j k", "select app (or release when focused)"}, {"tab", "focus list / detail"},
 		{"1 2 3 / ← →", "overview · logs · releases"}, {"l", "live logs"},
 		{"r", "roll back (selected release in Releases)"}, {"p", "promote staging → production"},
-		{"R", "restart"}, {"o", "open the site in your browser"}, {"q", "quit"},
+		{"R", "restart"}, {"o", "open the site in your browser"},
+		{":", "run any dokwalt command on the selected app (tab completes)"}, {"q", "quit"},
 	}
 	var b strings.Builder
 	b.WriteString(ui.TitleS.Render("◆ Keys") + "\n\n")
@@ -523,14 +654,65 @@ func (m *dash) header() string {
 func (m *dash) footer() string {
 	var line string
 	switch {
+	case m.barOn:
+		line = ui.AccentS.Render(" :") + m.bar + lipgloss.NewStyle().Reverse(true).Render(" ")
 	case m.busy != "":
 		line = " " + m.spin.View() + " " + m.busy + "  " + m.status
 	case m.status != "":
 		line = " " + m.status
 	default:
-		line = ui.FaintS.Render(" ↑↓ select · 1/2/3 tabs · r rollback · p promote · R restart · o open · ? help · q quit")
+		line = ui.FaintS.Render(" ↑↓ select · 1/2/3 tabs · : command · r rollback · p promote · R restart · o open · ? help · q quit")
 	}
 	return lipgloss.NewStyle().MaxWidth(m.w).Render(line)
+}
+
+// barPanel shows what the command bar can complete: every matching command,
+// app or flag, or the usage of the command being typed.
+func (m *dash) barPanel() string {
+	cands, hint := completions(m.root, m.bar, m.appNames())
+	if len(cands) == 0 && hint == "" {
+		return ""
+	}
+	w := m.w - 4
+	maxRows := max(3, m.h-10) // the list matters more than the panes while typing
+	clip := lipgloss.NewStyle().MaxWidth(w)
+	var lines []string
+	nameW, desc := 0, false
+	for _, c := range cands {
+		nameW = max(nameW, lipgloss.Width(c.value))
+		desc = desc || c.desc != ""
+	}
+	switch {
+	case len(cands) == 0:
+		lines = append(lines, clip.Render(ui.MutedS.Render(hint)))
+	case desc && len(cands) <= maxRows:
+		for _, c := range cands {
+			lines = append(lines, clip.Render(ui.AccentS.Render(fmt.Sprintf("%-*s", nameW, c.value))+"  "+ui.MutedS.Render(c.desc)))
+		}
+	default: // a grid of names, column by column
+		colW := nameW + 2
+		cols := max(1, w/colW)
+		rows := (len(cands) + cols - 1) / cols
+		more := 0
+		if rows > maxRows {
+			rows = maxRows - 1
+			more = len(cands) - rows*cols
+		}
+		for r := 0; r < rows; r++ {
+			var b strings.Builder
+			for c := 0; c < cols; c++ {
+				if i := c*rows + r; i < len(cands) && i < rows*cols {
+					b.WriteString(ui.AccentS.Render(fmt.Sprintf("%-*s", colW, cands[i].value)))
+				}
+			}
+			lines = append(lines, clip.Render(strings.TrimRight(b.String(), " ")))
+		}
+		if more > 0 {
+			lines = append(lines, ui.MutedS.Render(fmt.Sprintf("… %d more: keep typing", more)))
+		}
+	}
+	return lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(ui.Faint).Padding(0, 1).
+		Width(m.w - 2).Render(strings.Join(lines, "\n"))
 }
 
 func (m *dash) appList(w, h int) string {
@@ -541,10 +723,19 @@ func (m *dash) appList(w, h int) string {
 		return b.String()
 	}
 	for i, r := range m.rows {
-		dot := statusDot(r.st.Status)
-		name := r.app
+		// Every segment of the selected row carries the highlight: an outer
+		// style would be cancelled by each segment's own reset.
+		seg := func(st lipgloss.Style, s string) string {
+			if i == m.sel {
+				st = st.Background(ui.Surface).Bold(true)
+			}
+			return st.Render(s)
+		}
+		plain := lipgloss.NewStyle()
+		dotS, dot := statusDot(r.st.Status)
+		left := seg(dotS, dot) + seg(plain, " "+r.app)
 		if r.pipeline {
-			name += ui.MutedS.Render(" " + r.stage)
+			left += seg(ui.MutedS, " "+r.stage)
 		}
 		right := ""
 		if r.st.CurrentRelease > 0 {
@@ -554,17 +745,10 @@ func (m *dash) appList(w, h int) string {
 					cpu += sv.Metrics.CPUPct
 				}
 			}
-			right = ui.MutedS.Render(fmt.Sprintf("v%d", r.st.CurrentRelease)) + " " + fmt.Sprintf("%5.1f%%", cpu)
+			right = seg(ui.MutedS, fmt.Sprintf("v%d", r.st.CurrentRelease)) + seg(plain, fmt.Sprintf(" %5.1f%%", cpu))
 		}
-		line := fmt.Sprintf("%s %s", dot, name)
-		pad := w - lipgloss.Width(line) - lipgloss.Width(right)
-		if pad < 1 {
-			pad = 1
-		}
-		line += strings.Repeat(" ", pad) + right
-		if i == m.sel {
-			line = lipgloss.NewStyle().Background(ui.Surface).Bold(true).Width(w).Render(line)
-		}
+		pad := max(1, w-lipgloss.Width(left)-lipgloss.Width(right))
+		line := left + seg(plain, strings.Repeat(" ", pad)) + right
 		b.WriteString(line + "\n")
 		if i > h-3 {
 			break
@@ -573,18 +757,18 @@ func (m *dash) appList(w, h int) string {
 	return b.String()
 }
 
-func statusDot(s string) string {
+func statusDot(s string) (lipgloss.Style, string) {
 	switch s {
 	case "running":
-		return ui.GreenS.Render("●")
+		return ui.GreenS, "●"
 	case "deploying":
-		return ui.BlueS.Render("◌")
+		return ui.BlueS, "◌"
 	case "degraded", "stopped":
-		return ui.YellowS.Render("●")
+		return ui.YellowS, "●"
 	case "not deployed":
-		return ui.MutedS.Render("○")
+		return ui.MutedS, "○"
 	}
-	return ui.RedS.Render("●")
+	return ui.RedS, "●"
 }
 
 func (m *dash) detail(w, h int) string {

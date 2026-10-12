@@ -7,6 +7,8 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/termenv"
 
 	"github.com/ddahan/dokwalt/internal/api"
 )
@@ -60,6 +62,29 @@ func TestDashboardRenders(t *testing.T) {
 			t.Log("\n" + out)
 		}
 	}
+	// The command bar's panel never pushes the frame past the terminal.
+	m.root, m.tab = newRoot(), tabOverview
+	for _, size := range [][2]int{{120, 32}, {80, 24}} {
+		m.Update(tea.WindowSizeMsg{Width: size[0], Height: size[1]})
+		for _, bar := range []string{"", "con", "logs -a ", "config:set ", "nope"} {
+			m.barOn, m.bar = true, bar
+			out := m.View()
+			lines := strings.Split(out, "\n")
+			if len(lines) > size[1] {
+				t.Errorf("bar %q at %v: %d lines", bar, size, len(lines))
+			}
+			for i, l := range lines {
+				if w := len([]rune(stripANSI(l))); w > size[0] {
+					t.Errorf("bar %q at %v: line %d is %d wide", bar, size, i, w)
+				}
+			}
+			if os.Getenv("DOKWALT_SHOW") != "" {
+				t.Log("\n" + out)
+			}
+		}
+	}
+	m.barOn = false
+	m.Update(tea.WindowSizeMsg{Width: 120, Height: 32})
 	m.help = true
 	if !strings.Contains(m.View(), "Keys") {
 		t.Error("help overlay missing")
@@ -80,4 +105,29 @@ func stripANSI(s string) string {
 		}
 	}
 	return b.String()
+}
+
+// The selected app row is highlighted across its whole width: no segment's
+// own reset may drop the background before the row ends.
+func TestDashboardSelectedRowHighlight(t *testing.T) {
+	prev := lipgloss.ColorProfile()
+	lipgloss.SetColorProfile(termenv.TrueColor)
+	defer lipgloss.SetColorProfile(prev)
+	m := newDash(t.Context(), &session{name: "prod"})
+	m.Update(appsMsg{
+		{Name: "blog", Stages: []api.Stage{{Name: "production", Status: "running", CurrentRelease: 3}}},
+		{Name: "shop", Pipeline: true, Stages: []api.Stage{{Name: "staging", Status: "degraded", CurrentRelease: 7}}},
+	})
+	for sel := range m.rows {
+		m.sel = sel
+		row := strings.Split(m.appList(30, 10), "\n")[1+sel]
+		if !strings.Contains(row, "\x1b[1") {
+			t.Errorf("row %d is not bold: %q", sel, row)
+		}
+		for _, chunk := range strings.Split(row, "\x1b[0m") {
+			if stripANSI(chunk) != "" && !strings.Contains(chunk, ";48;2;") && !strings.Contains(chunk, "[48;2;") {
+				t.Errorf("row %d: %q has no highlight", sel, stripANSI(chunk))
+			}
+		}
+	}
 }

@@ -56,7 +56,7 @@ a container crash-loops, a certificate can't be issued, or the disk, memory or C
 temperature crosses your threshold — and another one when it's resolved.
 
 🖥️ **Gorgeous CLI & dashboard** — live progress, colors, and a full-screen dashboard
-(just type `dokwalt`). Built-in docs with `dokwalt docs`, also
+(just type `dokwalt`, then `:` to run any command from it). Built-in docs with `dokwalt docs`, also
 [online](https://dokwalt.w3lt.org/docs/getting-started/).
 
 🪶 **Small & private** — no web UI, no Swarm/Kubernetes, no Redis. SQLite for state,

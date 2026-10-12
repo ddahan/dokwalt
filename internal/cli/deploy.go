@@ -36,6 +36,9 @@ func deployCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "deploy",
 		Short: "Build on this machine, upload and roll out with zero downtime",
+		// From the dashboard's command bar, deploy the folder's linked app, never
+		// the selected one: the build comes from this folder.
+		Annotations: map[string]string{annNoApp: "1"},
 		Long: `Build the compose project in this folder on this machine for the server's
 architecture, upload only the images that changed, and roll out a new release:
 the new version starts next to the old one, must pass its health checks, then

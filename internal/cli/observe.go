@@ -407,7 +407,8 @@ func dbClient(t api.DBTarget, port int) (string, []string, []string) {
 func topCmd() *cobra.Command {
 	return &cobra.Command{
 		Use: "top", Short: "Live CPU, memory, network and traffic of every app",
-		Args: cobra.NoArgs,
+		Annotations: map[string]string{annNoApp: "1", annFullScreen: "1"},
+		Args:        cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s, err := connect(cmd.Context())
 			if err != nil {

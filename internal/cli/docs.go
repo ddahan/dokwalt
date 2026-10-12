@@ -18,10 +18,11 @@ func docsCmd() *cobra.Command {
 	var search string
 	var noPager bool
 	cmd := &cobra.Command{
-		Use:     "docs [topic]",
-		Short:   "Read the built-in documentation",
-		Example: "  dokwalt docs\n  dokwalt docs server\n  dokwalt docs --search rollback",
-		Args:    cobra.MaximumNArgs(1),
+		Use:         "docs [topic]",
+		Short:       "Read the built-in documentation",
+		Example:     "  dokwalt docs\n  dokwalt docs server\n  dokwalt docs --search rollback",
+		Args:        cobra.MaximumNArgs(1),
+		Annotations: map[string]string{annNoApp: "1"},
 		ValidArgsFunction: func(*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
 			var names []string
 			for _, t := range docs.Topics() {

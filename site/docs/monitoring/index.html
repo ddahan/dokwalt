@@ -221,13 +221,37 @@ seconds. Keys:</p>
 <td>open the site in the browser</td>
 </tr>
 <tr>
+<td><code>:</code></td>
+<td>run any <code>dokwalt</code> command (see below)</td>
+</tr>
+<tr>
 <td><code>?</code> / <code>q</code></td>
 <td>help / quit</td>
 </tr>
 </tbody>
 </table>
-<p>Rollback, promote and restart ask for confirmation with <code>y</code>. You can't
-deploy from the dashboard: use <code>dokwalt deploy</code>.</p>
+<p>Rollback, promote and restart ask for confirmation with <code>y</code>.</p>
+<h3 id="running-commands-from-the-dashboard">Running commands from the dashboard</h3>
+<p>Press <code>:</code> and type a command without <code>dokwalt</code> in front: <code>config</code>,
+<code>config:set FOO=bar</code>, <code>exec -- sh</code>, <code>db:connect</code>, <code>top</code>… It applies to the
+selected app: <code>-a</code> (and <code>-s staging</code> on a staging row) is added unless you
+pass your own.</p>
+<ul>
+<li>The list under the prompt shows every command that matches what you
+typed, then the apps after <code>-a</code>, the flags after <code>-</code>, or how to use the
+command once it is chosen.</li>
+<li><code>tab</code> completes as far as all matches agree: command names, app names
+(after <code>-a</code>, and for <code>link</code> and <code>apps:destroy</code>), docs topics.</li>
+<li><code>↑↓</code> go through the commands already run, <code>ctrl+w</code> erases a word,
+<code>ctrl+u</code> the line, <code>esc</code> closes the prompt.</li>
+<li><code>enter</code> hands the whole terminal to the command. When it ends, press any
+key to come back (<code>top</code> comes back right away); the dashboard reloads.
+<code>ctrl+c</code> stops the command, not the dashboard.</li>
+<li><code>deploy</code> and the commands that are not about one app (<code>apps</code>,
+<code>apps:create</code>, <code>apps:import</code>, <code>link</code>, <code>top</code>, <code>docs</code>, <code>server …</code>) get no
+<code>-a</code>: <code>deploy</code> builds the folder you opened the dashboard from and ships it
+to the app linked to that folder, as if you typed it there.</li>
+</ul>
 <h2 id="what-is-collected">What is collected</h2>
 <p><strong>Containers, every 10 seconds</strong>, read directly from cgroup v2 files. That
 is cheaper than the Docker stats API, which is only a fallback:</p>
@@ -330,7 +354,7 @@ self-healing failed and Pi throttling are always on:</p>
       
         <p>On this page</p>
         <ul>
-          <li class="toc-2"><a href="#live-dokwalt-top">Live: dokwalt top</a></li><li class="toc-2"><a href="#history-dokwalt-metrics">History: dokwalt metrics</a></li><li class="toc-2"><a href="#the-dashboard">The dashboard</a></li><li class="toc-2"><a href="#what-is-collected">What is collected</a></li><li class="toc-2"><a href="#storage-and-retention">Storage and retention</a></li><li class="toc-2"><a href="#overhead">Overhead</a></li><li class="toc-2"><a href="#turning-metrics-into-alerts">Turning metrics into alerts</a></li><li class="toc-2"><a href="#quick-recipes">Quick recipes</a></li>
+          <li class="toc-2"><a href="#live-dokwalt-top">Live: dokwalt top</a></li><li class="toc-2"><a href="#history-dokwalt-metrics">History: dokwalt metrics</a></li><li class="toc-2"><a href="#the-dashboard">The dashboard</a></li><li class="toc-3"><a href="#running-commands-from-the-dashboard">Running commands from the dashboard</a></li><li class="toc-2"><a href="#what-is-collected">What is collected</a></li><li class="toc-2"><a href="#storage-and-retention">Storage and retention</a></li><li class="toc-2"><a href="#overhead">Overhead</a></li><li class="toc-2"><a href="#turning-metrics-into-alerts">Turning metrics into alerts</a></li><li class="toc-2"><a href="#quick-recipes">Quick recipes</a></li>
         </ul>
       
     </aside>
