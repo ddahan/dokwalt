@@ -147,6 +147,13 @@ type DeployRequest struct {
 	GitSHA      string           `json:"git_sha,omitempty"`
 }
 
+// AppVolume is a named volume of an app's stage (GET /v1/apps/{app}/volumes).
+type AppVolume struct {
+	Stage  string `json:"stage"`
+	Name   string `json:"name"`   // as in the compose file
+	Volume string `json:"volume"` // on the server
+}
+
 type RenameRequest struct {
 	Name string `json:"name"`
 }

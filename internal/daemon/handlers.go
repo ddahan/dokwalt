@@ -61,6 +61,7 @@ func (d *Daemon) routes() http.Handler {
 	h("GET /v1/apps/{app}", d.getApp)
 	h("DELETE /v1/apps/{app}", d.destroyApp)
 	h("POST /v1/apps/{app}/rename", d.renameApp)
+	h("GET /v1/apps/{app}/volumes", d.appVolumes)
 	h("GET /v1/apps/{app}/export", d.exportApp)
 	h("POST /v1/apps/{app}/pipeline", d.setPipeline)
 	h("POST /v1/apps/{app}/promote", d.promote)
@@ -371,6 +372,14 @@ func (d *Daemon) destroyApp(w http.ResponseWriter, r *http.Request) error {
 	err := d.engine.DestroyApp(ctx, r.PathValue("app"), s.emit)
 	d.refreshHosts()
 	return s.finish(err, "destroyed", 0)
+}
+
+func (d *Daemon) appVolumes(w http.ResponseWriter, r *http.Request) error {
+	vols, err := d.engine.AppVolumes(r.Context(), r.PathValue("app"))
+	if err != nil {
+		return err
+	}
+	return writeJSON(w, vols)
 }
 
 // renameApp checks the new name up front (plain errors), then streams the

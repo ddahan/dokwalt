@@ -107,6 +107,22 @@ stage then starts under the new name, and the old volumes are removed once
 it runs (kept, with a warning, if it doesn't). If the copy fails, the app is
 put back as it was.
 
+Before asking, it says which volumes it will copy, or that the app has none
+and only restarts. Each step stays on screen with its duration, and the
+downtime of each stage is shown at the end:
+
+```text
+$ dokwalt apps:rename shop store
+! Renaming stops shop on prod while its volumes are copied: cachedata. The site is down meanwhile, longer with more data.
+? Rename shop to store? [y/N] y
+✓ Stopped shop/production  1.4s
+✓ Copied volume dw-shop-production-cachedata to dw-store-production-cachedata  0.8s
+✓ New name saved: releases, config, domains (2 images retagged)
+✓ store/production is running — down for 5.1s  2.9s
+✓ Removed the 1 old volume(s)
+✓ Renamed shop to store
+```
+
 - Domains, config, releases (rollback keeps working), metrics history and
   this computer's folder links follow. On other computers, run
   `dokwalt link <new-name>` in the project folder.

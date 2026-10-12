@@ -224,6 +224,18 @@ down meanwhile</strong>, a few seconds without volumes, longer with more data. T
 stage then starts under the new name, and the old volumes are removed once
 it runs (kept, with a warning, if it doesn't). If the copy fails, the app is
 put back as it was.</p>
+<p>Before asking, it says which volumes it will copy, or that the app has none
+and only restarts. Each step stays on screen with its duration, and the
+downtime of each stage is shown at the end:</p>
+<div class="code" data-lang="output"><div class="code-bar"><span>output</span><button class="copy" type="button" aria-label="Copy"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><svg class="i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div><pre><code><span class="t-com">$</span> <span class="t-cmd">dokwalt</span> apps:rename shop store
+! Renaming stops shop on prod while its volumes are copied: cachedata. The site is down meanwhile, longer with more data.
+? Rename shop to store? [y/N] y
+<span class="t-ok">✓</span> Stopped shop/production  1.4s
+<span class="t-ok">✓</span> Copied volume dw-shop-production-cachedata to dw-store-production-cachedata  0.8s
+<span class="t-ok">✓</span> New name saved: releases, config, domains (2 images retagged)
+<span class="t-ok">✓</span> store/production is running — down for 5.1s  2.9s
+<span class="t-ok">✓</span> Removed the 1 old volume(s)
+<span class="t-ok">✓</span> Renamed shop to store</code></pre></div>
 <ul>
 <li>Domains, config, releases (rollback keeps working), metrics history and
 this computer's folder links follow. On other computers, run

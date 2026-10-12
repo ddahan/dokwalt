@@ -125,7 +125,11 @@ pass "redis-cli in the cache container answered PONG"
 step "apps:rename (copies the volumes of both stages, then back)"
 srv() { docker exec $SERVER "$@"; }
 printf 'SET marker kept\nSAVE\n' | $D db:connect >/dev/null || fail "couldn't write the marker"
-$D apps:rename shop store --confirm shop >/dev/null || fail "apps:rename failed"
+out=$($D apps:rename shop store --confirm shop 2>&1) || fail "apps:rename failed: $out"
+for want in "Copied volume dw-shop-production-cachedata to dw-store-production-cachedata" \
+  "store/production is running — down for" "store/staging is running — down for" "Removed the 2 old volume(s)"; do
+  grep -qF "$want" <<<"$out" || fail "rename output lacks \"$want\": $out"
+done
 get shop.localhost | grep -q "^v3 .*greeting=bonjour | cache=ok" || fail "site not back after rename: $(get shop.localhost)"
 get staging.shop.localhost | grep -q "greeting=staging" || fail "staging not back after rename"
 [[ $(echo "GET marker" | $D db:connect) == kept ]] || fail "cache data lost (or folder link not updated)"

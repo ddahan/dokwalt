@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -215,7 +216,11 @@ func appsRenameCmd() *cobra.Command {
 			defer s.Close()
 			old, name := args[0], args[1]
 			if confirm != old {
-				ui.Warn("Renaming stops %s on %s while its volumes (databases, uploads…) are copied: the site is down meanwhile, longer with more data.", old, s.name)
+				warning, err := renameWarning(cmd.Context(), s, old)
+				if err != nil {
+					return err
+				}
+				ui.Warn("%s", warning)
 				if !ui.Confirm(fmt.Sprintf("Rename %s to %s?", old, name)) {
 					return errors.New("aborted — pass --confirm " + old + " to rename without this question")
 				}
@@ -223,20 +228,51 @@ func appsRenameCmd() *cobra.Command {
 			if _, err := runOp(cmd.Context(), s, "POST", "/v1/apps/"+url.PathEscape(old)+"/rename", api.RenameRequest{Name: name}); err != nil {
 				return err
 			}
+			var linked []string
 			for dir, l := range s.cfg.Links {
 				if l.App == old && l.Server == s.name {
 					l.App = name
 					s.cfg.Links[dir] = l
+					linked = append(linked, dir)
 				}
 			}
 			_ = s.cfg.Save()
 			ui.Success("Renamed %s to %s", old, name)
-			ui.Hint("Folders linked to %s on other computers: run `dokwalt link %s` there.", old, name)
+			if len(linked) > 0 {
+				sort.Strings(linked)
+				ui.Info("Folder link updated: %s", strings.Join(linked, ", "))
+				ui.Hint("The same folder on other computers: run `dokwalt link %s` there.", name)
+			}
 			return nil
 		},
 	}
 	cmd.Flags().StringVar(&confirm, "confirm", "", "current app name, to skip the interactive confirmation")
 	return cmd
+}
+
+// renameWarning says what a rename stops, from the app's volumes: the more
+// data they hold, the longer the downtime.
+func renameWarning(ctx context.Context, s *session, app string) (string, error) {
+	var vols []api.AppVolume
+	if err := s.c.Get(ctx, "/v1/apps/"+url.PathEscape(app)+"/volumes", &vols); err != nil {
+		var ae *client.APIError
+		if errors.As(err, &ae) && strings.Contains(ae.Error(), "app \""+app+"\"") {
+			return "", err // no such app
+		}
+		// A server older than this CLI: no volume list.
+		return fmt.Sprintf("Renaming stops %s on %s while its volumes (if any) are copied: the site is down meanwhile, longer with more data.", app, s.name), nil
+	}
+	if len(vols) == 0 {
+		return fmt.Sprintf("Renaming restarts %s on %s under its new name: its site is down for a few seconds (no volumes to copy).", app, s.name), nil
+	}
+	names := make([]string, len(vols))
+	for i, v := range vols {
+		names[i] = v.Name
+		if v.Stage != api.DefaultStage {
+			names[i] += " (" + v.Stage + ")"
+		}
+	}
+	return fmt.Sprintf("Renaming stops %s on %s while its volumes are copied: %s. The site is down meanwhile, longer with more data.", app, s.name, strings.Join(names, ", ")), nil
 }
 
 func appsDestroyCmd() *cobra.Command {
