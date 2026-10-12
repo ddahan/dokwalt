@@ -1,8 +1,16 @@
 /* DokWalt landing page — no framework, no build step. */
 
+/* Arrows (← ↑ → ↓) from one system monospace font: Geist Mono (Google Fonts) has ↑ ↓ but not
+   ← →, so key hints like "↑↓ app · ← → tabs" mixed two fonts. */
+@font-face {
+  font-family: "DokWalt Arrows";
+  src: local("Menlo-Regular"), local("Menlo"), local("SF Mono"), local("Consolas"), local("DejaVu Sans Mono");
+  unicode-range: U+2190-2193;
+}
+
 :root {
   --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --mono: "DokWalt Arrows", "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
   --radius: 18px;
   --ease: cubic-bezier(.22, 1, .36, 1);
 }
